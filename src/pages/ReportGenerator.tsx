@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { US_STATES, TOP_CITIES } from "@/data/mockData";
 import { 
   FileText,
-  FilePdf,
+  File,
   Save,
   Calendar,
   Share,
@@ -21,7 +20,7 @@ import {
   BarChart3,
   Map,
   Home,
-  BuildingEstate,
+  Building,
   User,
   Briefcase,
   ChevronRight
@@ -51,7 +50,7 @@ const REPORT_TYPES = [
     id: "assets",
     name: "Asset Distribution",
     description: "High-value asset distribution patterns and insights",
-    icon: BuildingEstate,
+    icon: Building,
   },
 ];
 
@@ -88,7 +87,6 @@ const SCHEDULE_OPTIONS = [
   { id: "quarterly", name: "Quarterly" },
 ];
 
-// Sample report templates
 const reportTemplates = [
   {
     id: "template-1",
@@ -131,7 +129,6 @@ const ReportGenerator = () => {
   const [generateInProgress, setGenerateInProgress] = useState<boolean>(false);
   const [reportGenerated, setReportGenerated] = useState<boolean>(false);
   
-  // Filter cities based on selected state
   const availableCities = selectedState !== "All States" && TOP_CITIES[selectedState] 
     ? ["All Cities", ...TOP_CITIES[selectedState]] 
     : ["All Cities"];
@@ -159,7 +156,6 @@ const ReportGenerator = () => {
   const handleGenerateReport = () => {
     setGenerateInProgress(true);
     
-    // Simulate report generation process
     setTimeout(() => {
       setGenerateInProgress(false);
       setReportGenerated(true);
@@ -208,7 +204,6 @@ const ReportGenerator = () => {
         
         <TabsContent value="create">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* Report Configuration Panel */}
             <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Report Configuration</CardTitle>
@@ -217,7 +212,6 @@ const ReportGenerator = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Report Type */}
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Report Type</h3>
                   <RadioGroup value={reportType} onValueChange={setReportType} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -245,7 +239,6 @@ const ReportGenerator = () => {
 
                 <Separator />
 
-                {/* Location */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Location</h3>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -281,7 +274,6 @@ const ReportGenerator = () => {
 
                 <Separator />
 
-                {/* Time Period */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Time Period</h3>
                   <RadioGroup value={timePeriod} onValueChange={setTimePeriod} className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -327,7 +319,6 @@ const ReportGenerator = () => {
 
                 <Separator />
 
-                {/* Metrics */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Metrics to Include</h3>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
@@ -351,7 +342,6 @@ const ReportGenerator = () => {
 
                 <Separator />
 
-                {/* Target Audience */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Target Audience</h3>
                   <RadioGroup value={audience} onValueChange={setAudience} className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -389,7 +379,6 @@ const ReportGenerator = () => {
               </CardFooter>
             </Card>
 
-            {/* Preview and Actions */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -401,14 +390,14 @@ const ReportGenerator = () => {
                 <CardContent>
                   {reportGenerated ? (
                     <div className="flex flex-col items-center space-y-4">
-                      <FilePdf className="h-16 w-16 text-primary" />
+                      <File className="h-16 w-16 text-primary" />
                       <div className="text-center">
                         <p className="font-medium">Report Ready</p>
                         <p className="text-xs text-muted-foreground">Your report has been generated successfully</p>
                       </div>
                       <Button variant="outline" className="w-full">
                         <span className="mr-2">Download PDF</span>
-                        <FilePdf className="h-4 w-4" />
+                        <File className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
@@ -481,7 +470,7 @@ const ReportGenerator = () => {
                     </div>
                     {template.type === "location" && <Map className="h-5 w-5 text-muted-foreground" />}
                     {template.type === "overview" && <BarChart3 className="h-5 w-5 text-muted-foreground" />}
-                    {template.type === "assets" && <BuildingEstate className="h-5 w-5 text-muted-foreground" />}
+                    {template.type === "assets" && <Building className="h-5 w-5 text-muted-foreground" />}
                   </div>
                 </CardHeader>
                 <CardContent>
