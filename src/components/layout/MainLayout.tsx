@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate, Link, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -178,7 +176,6 @@ const MainLayout = () => {
             </Button>
 
             <div className="flex items-center space-x-4 ml-auto">
-              <ThemeToggle />
             </div>
           </div>
         </header>

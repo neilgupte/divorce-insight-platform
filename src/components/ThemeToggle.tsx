@@ -3,9 +3,28 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-export function ThemeToggle() {
-  const { setTheme } = useTheme();
+export function ThemeToggle({ variant = "dropdown" }: { variant?: "dropdown" | "toggle" }) {
+  const { theme, setTheme } = useTheme();
+
+  if (variant === "toggle") {
+    return (
+      <ToggleGroup type="single" value={theme} onValueChange={(value) => value && setTheme(value as "light" | "dark" | "system")}>
+        <ToggleGroupItem value="light" aria-label="Light mode">
+          <Sun className="h-4 w-4" />
+          <span className="ml-2">Light</span>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="dark" aria-label="Dark mode">
+          <Moon className="h-4 w-4" />
+          <span className="ml-2">Dark</span>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="system" aria-label="System theme">
+          <span>System</span>
+        </ToggleGroupItem>
+      </ToggleGroup>
+    );
+  }
 
   return (
     <DropdownMenu>

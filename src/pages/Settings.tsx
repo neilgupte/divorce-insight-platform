@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Save, Server, ShieldCheck, Mail, BellRing, Globe, Clock, Database, Lock, RefreshCcw } from "lucide-react";
 
 const Settings = () => {
@@ -146,20 +146,11 @@ const Settings = () => {
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Globe className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="appearance-theme" className="text-sm font-medium">
+                      <Label className="text-sm font-medium">
                         Theme Mode
                       </Label>
                     </div>
-                    <Select defaultValue="system">
-                      <SelectTrigger id="appearance-theme" className="w-40">
-                        <SelectValue placeholder="Select Theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <ThemeToggle />
                   </div>
                   
                   <div className="flex items-center justify-between">
