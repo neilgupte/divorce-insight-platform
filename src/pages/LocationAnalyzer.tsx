@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +23,7 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
+import AdvancedMapOverlay from "@/components/map/AdvancedMapOverlay";
 import LocationMap from "@/components/location-analyzer/LocationMap";
 import AmenityForm from "@/components/location-analyzer/AmenityForm";
 import { 
@@ -38,7 +38,6 @@ import {
 import { US_STATES, TOP_CITIES } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the amenity type
 interface Amenity {
   id: number;
   name: string;
@@ -47,7 +46,6 @@ interface Amenity {
   notes: string;
 }
 
-// Mockup data
 const divorceRateData = [
   { year: "2014", rate: 3.8 },
   { year: "2015", rate: 4.2 },
@@ -89,8 +87,8 @@ const LocationAnalyzer = () => {
   const { toast } = useToast();
   const [state, setState] = useState<string>("All States");
   const [city, setCity] = useState<string>("All Cities");
-  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isAmenityModalOpen, setIsAmenityModalOpen] = useState(false);
+  const [isAdvancedMapOpen, setIsAdvancedMapOpen] = useState(false);
   const [amenities, setAmenities] = useState<Amenity[]>(initialAmenities);
   const [newAmenity, setNewAmenity] = useState<Partial<Amenity>>({});
   const [scoringWeights, setScoringWeights] = useState({
@@ -102,7 +100,6 @@ const LocationAnalyzer = () => {
   });
   const [view, setView] = useState<"standard" | "comparison">("standard");
   
-  // Filter cities based on selected state
   const availableCities = state !== "All States" && TOP_CITIES[state] 
     ? ["All Cities", ...TOP_CITIES[state]] 
     : ["All Cities"];
@@ -117,10 +114,9 @@ const LocationAnalyzer = () => {
       return;
     }
     
-    // Create a fully formed amenity from the partial one with required fields
     const amenityToAdd: Amenity = {
       id: Date.now(),
-      name: newAmenity.name || "",  // TS will be happy with this now
+      name: newAmenity.name || "",
       type: newAmenity.type || "",
       region: newAmenity.region || "",
       notes: newAmenity.notes || "",
@@ -172,7 +168,6 @@ const LocationAnalyzer = () => {
         </p>
       </div>
       
-      {/* Filters and View Controls */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <Select value={state} onValueChange={setState}>
@@ -210,7 +205,7 @@ const LocationAnalyzer = () => {
           
           <Button 
             variant="secondary" 
-            onClick={() => setIsMapModalOpen(true)}
+            onClick={() => setIsAdvancedMapOpen(true)}
           >
             <Map className="mr-2 h-4 w-4" />
             View on Map
@@ -218,9 +213,7 @@ const LocationAnalyzer = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* KPI Summary Card */}
         <Card>
           <CardHeader>
             <div className="flex items-center">
@@ -264,7 +257,6 @@ const LocationAnalyzer = () => {
           </CardContent>
         </Card>
 
-        {/* Divorce Rate Chart */}
         <Card>
           <CardHeader>
             <div className="flex items-center">
@@ -297,7 +289,6 @@ const LocationAnalyzer = () => {
           </CardContent>
         </Card>
 
-        {/* Luxury Real Estate Chart */}
         <Card>
           <CardHeader>
             <div className="flex items-center">
@@ -323,7 +314,6 @@ const LocationAnalyzer = () => {
           </CardContent>
         </Card>
 
-        {/* Multi-Property Households */}
         <Card>
           <CardHeader>
             <div className="flex items-center">
@@ -360,7 +350,6 @@ const LocationAnalyzer = () => {
           </CardContent>
         </Card>
 
-        {/* Exclusive Amenities */}
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -399,7 +388,6 @@ const LocationAnalyzer = () => {
           </CardContent>
         </Card>
 
-        {/* Weighted Scoring System */}
         <Card>
           <CardHeader>
             <CardTitle>Weighted Scoring System</CardTitle>
@@ -493,22 +481,13 @@ const LocationAnalyzer = () => {
         </Card>
       </div>
 
-      {/* Map Modal */}
-      <Dialog open={isMapModalOpen} onOpenChange={setIsMapModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Location Heatmap</DialogTitle>
-            <DialogDescription>
-              Interactive map showing divorce rates and luxury property density
-            </DialogDescription>
-          </DialogHeader>
-          <div className="h-[500px]">
-            <LocationMap />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AdvancedMapOverlay
+        open={isAdvancedMapOpen}
+        onClose={() => setIsAdvancedMapOpen(false)}
+        initialState={state !== "All States" ? state : null}
+        initialCity={city !== "All Cities" ? city : null}
+      />
 
-      {/* Add Amenity Modal */}
       <Dialog open={isAmenityModalOpen} onOpenChange={setIsAmenityModalOpen}>
         <DialogContent>
           <DialogHeader>
