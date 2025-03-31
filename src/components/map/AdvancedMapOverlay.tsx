@@ -148,7 +148,9 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       },
     };
 
-    setSavedViews([...savedViews, newView]);
+    // Create a new array with the new view added
+    const updatedViews = [...savedViews, newView];
+    setSavedViews(updatedViews);
     setIsSaveDialogOpen(false);
     setViewName("");
 
@@ -161,7 +163,26 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
   const handleLoadView = (viewId: string) => {
     const view = savedViews.find((v) => v.id === viewId);
     if (view) {
-      setFilters(view.filters);
+      setFilters({
+        state: view.filters.state,
+        divorceRate: {
+          enabled: view.filters.divorceRate.enabled,
+          min: view.filters.divorceRate.min,
+        },
+        netWorth: {
+          enabled: view.filters.netWorth.enabled,
+          min: view.filters.netWorth.min,
+          max: view.filters.netWorth.max,
+        },
+        luxuryDensity: {
+          enabled: view.filters.luxuryDensity.enabled,
+          min: view.filters.luxuryDensity.min,
+        },
+        multiProperty: {
+          enabled: view.filters.multiProperty.enabled,
+          min: view.filters.multiProperty.min,
+        },
+      });
       setSelectedState(view.filters.state);
       setSelectedView(viewId);
 
