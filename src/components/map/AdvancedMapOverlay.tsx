@@ -73,7 +73,7 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       return;
     }
 
-    // Create a new view object with manually copied filter values
+    // Create a new view object with manually copied filter values - without spread operator
     const newView: SavedView = {
       id: Date.now().toString(),
       name: viewName,
@@ -99,7 +99,7 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       },
     };
 
-    // Create a new array with the new view added
+    // Create a new array with the new view added - without using spread on the filters
     const updatedViews = [...savedViews, newView];
     setSavedViews(updatedViews);
     setIsSaveDialogOpen(false);
@@ -171,8 +171,20 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     value: MapFilters[K][S]
   ) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
-      newFilters[category] = { ...prev[category], [setting]: value };
+      // Fixed: Don't use spread here, create a new object properly
+      const newFilters: MapFilters = {
+        state: prev.state,
+        divorceRate: {...prev.divorceRate},
+        netWorth: {...prev.netWorth},
+        luxuryDensity: {...prev.luxuryDensity},
+        multiProperty: {...prev.multiProperty}
+      };
+      
+      // Now update the specific property
+      if (newFilters[category]) {
+        newFilters[category] = {...prev[category], [setting]: value};
+      }
+      
       return newFilters;
     });
   };
@@ -180,9 +192,14 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
   const handleStateChange = (state: string | null) => {
     setSelectedState(state);
     setFilters(prev => {
-      const newFilters = { ...prev };
-      newFilters.state = state;
-      return newFilters;
+      // Fixed: Create a new object without using spread on potentially non-object types
+      return {
+        state: state,
+        divorceRate: prev.divorceRate,
+        netWorth: prev.netWorth,
+        luxuryDensity: prev.luxuryDensity,
+        multiProperty: prev.multiProperty
+      };
     });
   };
 

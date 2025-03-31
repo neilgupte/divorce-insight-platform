@@ -7,4 +7,5 @@ export interface SavedView {
   filters: MapFilters;
 }
 
-export { MapFilters };
+// Change from export { MapFilters } to export type { MapFilters }
+export type { MapFilters };
