@@ -133,14 +133,14 @@ const LuxuryLocations = () => {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 relative">
           <Input
             placeholder="Search locations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-            icon={<Search className="h-4 w-4" />}
+            className="w-full pl-9"
           />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         </div>
         <Select value={selectedState} onValueChange={setSelectedState}>
           <SelectTrigger>

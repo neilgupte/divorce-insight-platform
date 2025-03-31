@@ -5,6 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin } from 'lucide-react';
 
+// Add type declaration for window.initMap
+declare global {
+  interface Window {
+    initMap: () => void;
+    google: any;
+  }
+}
+
 interface MapViewProps {
   state: string | null;
   city: string | null;
