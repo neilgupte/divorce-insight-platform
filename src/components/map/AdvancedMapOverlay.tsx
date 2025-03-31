@@ -171,34 +171,39 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     value: MapFilters[K][S]
   ) => {
     setFilters((prev) => {
-      // Fixed: Create proper objects for each filter category instead of using spread
+      // Fixed: Create proper objects for each filter category without using spread operator
       const newFilters: MapFilters = {
         state: prev.state,
         divorceRate: {
-          enabled: prev.divorceRate ? prev.divorceRate.enabled : false,
-          min: prev.divorceRate ? prev.divorceRate.min : 0,
+          enabled: prev.divorceRate?.enabled || false,
+          min: prev.divorceRate?.min || 0,
         },
         netWorth: {
-          enabled: prev.netWorth ? prev.netWorth.enabled : false,
-          min: prev.netWorth ? prev.netWorth.min : 0,
-          max: prev.netWorth ? prev.netWorth.max : 0,
+          enabled: prev.netWorth?.enabled || false,
+          min: prev.netWorth?.min || 0,
+          max: prev.netWorth?.max || 0,
         },
         luxuryDensity: {
-          enabled: prev.luxuryDensity ? prev.luxuryDensity.enabled : false,
-          min: prev.luxuryDensity ? prev.luxuryDensity.min : 0,
+          enabled: prev.luxuryDensity?.enabled || false,
+          min: prev.luxuryDensity?.min || 0,
         },
         multiProperty: {
-          enabled: prev.multiProperty ? prev.multiProperty.enabled : false,
-          min: prev.multiProperty ? prev.multiProperty.min : 0,
+          enabled: prev.multiProperty?.enabled || false,
+          min: prev.multiProperty?.min || 0,
         },
       };
       
       // Now update the specific property
-      if (category in newFilters && newFilters[category]) {
-        // Create a new object for the category and set the new value
-        const categoryObj = { ...newFilters[category] } as any;
-        categoryObj[setting] = value;
-        (newFilters[category] as any) = categoryObj;
+      if (category === 'divorceRate' && setting) {
+        (newFilters.divorceRate as any)[setting] = value;
+      } else if (category === 'netWorth' && setting) {
+        (newFilters.netWorth as any)[setting] = value;
+      } else if (category === 'luxuryDensity' && setting) {
+        (newFilters.luxuryDensity as any)[setting] = value;
+      } else if (category === 'multiProperty' && setting) {
+        (newFilters.multiProperty as any)[setting] = value;
+      } else if (category === 'state') {
+        newFilters.state = value as any;
       }
       
       return newFilters;
@@ -212,21 +217,21 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       return {
         state: state,
         divorceRate: {
-          enabled: prev.divorceRate.enabled,
-          min: prev.divorceRate.min,
+          enabled: prev.divorceRate?.enabled || false,
+          min: prev.divorceRate?.min || 0,
         },
         netWorth: {
-          enabled: prev.netWorth.enabled,
-          min: prev.netWorth.min,
-          max: prev.netWorth.max,
+          enabled: prev.netWorth?.enabled || false,
+          min: prev.netWorth?.min || 0,
+          max: prev.netWorth?.max || 0,
         },
         luxuryDensity: {
-          enabled: prev.luxuryDensity.enabled,
-          min: prev.luxuryDensity.min,
+          enabled: prev.luxuryDensity?.enabled || false,
+          min: prev.luxuryDensity?.min || 0,
         },
         multiProperty: {
-          enabled: prev.multiProperty.enabled,
-          min: prev.multiProperty.min,
+          enabled: prev.multiProperty?.enabled || false,
+          min: prev.multiProperty?.min || 0,
         }
       };
     });

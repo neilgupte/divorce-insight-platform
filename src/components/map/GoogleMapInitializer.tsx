@@ -32,6 +32,7 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
   const scriptRef = useRef<HTMLScriptElement | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
+  const callbackName = useRef<string>(`initMap${Date.now()}`);
 
   // Initialize map with filters
   const initializeMap = () => {
@@ -219,15 +220,20 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
         return;
       }
 
-      // Clean up any existing script to prevent duplicate loads
-      if (scriptRef.current && document.head.contains(scriptRef.current)) {
-        document.head.removeChild(scriptRef.current);
-        scriptRef.current = null;
-      }
+      // Use a unique callback name to prevent conflicts
+      const uniqueCallbackName = callbackName.current;
+      
+      // Define callback before creating script
+      window[uniqueCallbackName] = () => {
+        console.log("Google Maps script loaded successfully");
+        setScriptLoaded(true);
+        onMapLoaded(true);
+        initializeMap();
+      };
 
       // Create script element
       const googleMapsScript = document.createElement('script');
-      googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=visualization,geometry&callback=initMap`;
+      googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=visualization,geometry&callback=${uniqueCallbackName}`;
       googleMapsScript.async = true;
       googleMapsScript.defer = true;
       
@@ -236,18 +242,15 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
         console.error("Failed to load Google Maps script");
         setScriptError("Failed to load Google Maps API");
         if (onError) onError("Failed to load Google Maps API. Check your API key.");
+        
+        // Clean up the callback to prevent memory leaks
+        if (window[uniqueCallbackName]) {
+          delete window[uniqueCallbackName];
+        }
       };
       
       scriptRef.current = googleMapsScript;
-
-      // Define callback
-      window.initMap = () => {
-        console.log("Google Maps script loaded successfully");
-        setScriptLoaded(true);
-        onMapLoaded(true);
-        initializeMap();
-      };
-
+      
       // Append script to document
       document.head.appendChild(googleMapsScript);
     } catch (error) {
@@ -266,23 +269,23 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
     // Cleanup function to prevent memory leaks and DOM errors
     return () => {
       // Clean up Google Maps API script if component unmounts
-      if (scriptRef.current && document.head.contains(scriptRef.current)) {
-        try {
-          document.head.removeChild(scriptRef.current);
-        } catch (error) {
-          console.error("Error removing script element:", error);
+      if (scriptRef.current) {
+        // Check if the script is still in the document before trying to remove it
+        const script = document.querySelector(`script[src*="${apiKey}"]`);
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
         }
       }
       
       // Remove the global callback
-      if (window.initMap) {
-        delete window.initMap;
+      if (window[callbackName.current]) {
+        delete window[callbackName.current];
       }
       
       // Clean up map instance
       if (map) {
         // Remove event listeners if any were added directly to the map
-        // google.maps.event.clearInstanceListeners(map);
+        google.maps.event.clearInstanceListeners(map);
         setMap(null);
       }
       

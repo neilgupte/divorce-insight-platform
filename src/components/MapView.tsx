@@ -22,6 +22,7 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [regionSummary, setRegionSummary] = useState<RegionSummary | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [apiKeyLoaded, setApiKeyLoaded] = useState(false);
 
   // Try to load API key from localStorage on component mount
   useEffect(() => {
@@ -30,9 +31,13 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       if (savedApiKey) {
         setApiKey(savedApiKey);
         setApiKeySubmitted(true);
+        setApiKeyLoaded(true);
+      } else {
+        setApiKeyLoaded(true); // Even if there's no key, we've finished trying to load
       }
     } catch (error) {
       console.error("Error loading API key from localStorage:", error);
+      setApiKeyLoaded(true); // Mark as loaded even on error
     }
   }, []);
 
@@ -84,6 +89,15 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       setMapError("Failed to save API key");
     }
   };
+
+  // Show loading state while checking for saved API key
+  if (!apiKeyLoaded) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">Loading map configuration...</p>
+      </div>
+    );
+  }
 
   // If API key hasn't been submitted, show the input form
   if (!apiKeySubmitted) {
