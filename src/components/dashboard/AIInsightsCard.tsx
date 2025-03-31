@@ -18,7 +18,7 @@ interface AIInsightsCardProps {
 
 const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ insights }) => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>AI Insights</CardTitle>
         <CardDescription>
@@ -26,7 +26,7 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ insights }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
           {insights.map((insight) => (
             <div key={insight.id} className="rounded-lg border bg-card p-4">
               <div className="mb-2 flex items-center">

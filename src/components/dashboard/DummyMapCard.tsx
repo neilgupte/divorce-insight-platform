@@ -49,7 +49,7 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
   }, [selectedState]);
 
   return (
-    <Card className="md:col-span-1 lg:col-span-1">
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center"><Map className="mr-2 h-5 w-5" /> Divorce Rate Heatmap</CardTitle>
         <CardDescription>
@@ -126,7 +126,7 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
         </div>
         
         {/* Map Image with Pin */}
-        <div className="relative h-[300px] rounded-md overflow-hidden">
+        <div className="relative h-[350px] rounded-md overflow-hidden">
           <img 
             src="/lovable-uploads/1a11e5a3-8087-4ab5-87f9-33d2cab5d813.png" 
             alt="USA Map" 

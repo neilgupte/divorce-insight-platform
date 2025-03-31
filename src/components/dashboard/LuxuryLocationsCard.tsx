@@ -30,7 +30,7 @@ const LuxuryLocationsCard: React.FC<LuxuryLocationsCardProps> = ({
   }));
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Top Luxury Locations</CardTitle>
@@ -49,14 +49,14 @@ const LuxuryLocationsCard: React.FC<LuxuryLocationsCardProps> = ({
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={pieData}
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
+                outerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}

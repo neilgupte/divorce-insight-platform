@@ -25,7 +25,7 @@ interface RegionalMetricsChartProps {
 
 const RegionalMetricsChart: React.FC<RegionalMetricsChartProps> = ({ regionData }) => {
   return (
-    <Card className="col-span-1 lg:col-span-2">
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Regional Metrics</CardTitle>
         <CardDescription>
@@ -40,7 +40,7 @@ const RegionalMetricsChart: React.FC<RegionalMetricsChartProps> = ({ regionData 
             <TabsTrigger value="luxuryDensity">Luxury Density</TabsTrigger>
           </TabsList>
           <TabsContent value="netWorth">
-            <div className="h-80">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={regionData}
@@ -56,7 +56,7 @@ const RegionalMetricsChart: React.FC<RegionalMetricsChartProps> = ({ regionData 
             </div>
           </TabsContent>
           <TabsContent value="divorceRate">
-            <div className="h-80">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={regionData}
@@ -72,7 +72,7 @@ const RegionalMetricsChart: React.FC<RegionalMetricsChartProps> = ({ regionData 
             </div>
           </TabsContent>
           <TabsContent value="luxuryDensity">
-            <div className="h-80">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={regionData}
