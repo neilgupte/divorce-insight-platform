@@ -1,11 +1,18 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { useState, useMemo } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   US_STATES, 
   TOP_CITIES, 
@@ -23,7 +30,10 @@ import {
   Plane, 
   ShoppingBag,
   Hotel,
-  ArrowRightLeft 
+  ArrowRightLeft,
+  PlusCircle,
+  Save,
+  Map as MapIcon
 } from "lucide-react";
 import {
   AreaChart,
@@ -50,6 +60,8 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
 } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { toast } from "sonner";
 
 // For the comparison feature
 interface LocationData {
@@ -61,6 +73,7 @@ interface LocationData {
   exclusiveClubs: number;
   privateTransport: number;
   luxuryRetail: number;
+  retailPresence: "Low" | "Medium" | "High";
 }
 
 // Sample location data for selected locations
@@ -74,6 +87,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 24,
     privateTransport: 8,
     luxuryRetail: 87,
+    retailPresence: "High",
   },
   "Los Angeles": {
     name: "Los Angeles",
@@ -84,6 +98,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 18,
     privateTransport: 12,
     luxuryRetail: 76,
+    retailPresence: "High",
   },
   "Miami": {
     name: "Miami",
@@ -94,6 +109,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 15,
     privateTransport: 10,
     luxuryRetail: 65,
+    retailPresence: "Medium",
   },
   "San Francisco": {
     name: "San Francisco",
@@ -104,6 +120,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 16,
     privateTransport: 9,
     luxuryRetail: 72,
+    retailPresence: "High",
   },
   "Chicago": {
     name: "Chicago",
@@ -114,6 +131,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 13,
     privateTransport: 7,
     luxuryRetail: 58,
+    retailPresence: "Medium",
   },
   "Palm Beach": {
     name: "Palm Beach",
@@ -124,6 +142,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 21,
     privateTransport: 14,
     luxuryRetail: 68,
+    retailPresence: "High",
   },
   "Austin": {
     name: "Austin",
@@ -134,6 +153,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 10,
     privateTransport: 6,
     luxuryRetail: 48,
+    retailPresence: "Medium",
   },
   "Boston": {
     name: "Boston",
@@ -144,6 +164,7 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 14,
     privateTransport: 8,
     luxuryRetail: 61,
+    retailPresence: "Medium",
   },
   "Seattle": {
     name: "Seattle",
@@ -154,11 +175,47 @@ const locationData: Record<string, LocationData> = {
     exclusiveClubs: 11,
     privateTransport: 5,
     luxuryRetail: 54,
+    retailPresence: "Low",
   },
 };
 
 // Color array for charts
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+
+// Amenity types
+const AMENITY_TYPES = [
+  "Private Club",
+  "Private Aviation",
+  "Luxury Retail",
+  "5-Star Hotel",
+  "Golf Course",
+  "Marina",
+  "Spa & Wellness",
+  "Fine Dining",
+  "Art Gallery",
+  "Exclusive School"
+];
+
+// Define zod schema for amenity form
+const amenitySchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  type: z.string().min(1, { message: "Please select an amenity type" }),
+  region: z.string().min(2, { message: "Region must be at least 2 characters" }),
+  notes: z.string().optional(),
+});
+
+// Define zod schema for scoring profile
+const scoringProfileSchema = z.object({
+  profileName: z.string().min(2, { message: "Profile name must be at least 2 characters" }),
+});
+
+// Sample amenities data
+const initialAmenities = [
+  { id: 1, name: "The Metropolitan Club", type: "Private Club", region: "Upper East Side", notes: "Founded in 1891, exclusive membership" },
+  { id: 2, name: "Teterboro Airport", type: "Private Aviation", region: "New Jersey", notes: "Major private jet hub for NYC" },
+  { id: 3, name: "Fifth Avenue Shops", type: "Luxury Retail", region: "Midtown", notes: "High concentration of luxury brands" },
+  { id: 4, name: "The Plaza Hotel", type: "5-Star Hotel", region: "Central Park South", notes: "Historic luxury accommodation" },
+];
 
 const LocationAnalyzer = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
@@ -170,6 +227,13 @@ const LocationAnalyzer = () => {
   const [location1, setLocation1] = useState<string>("New York City");
   const [location2, setLocation2] = useState<string>("Miami");
   
+  // For map dialog
+  const [isMapOpen, setIsMapOpen] = useState<boolean>(false);
+  
+  // For amenities
+  const [amenities, setAmenities] = useState(initialAmenities);
+  const [isAmenityDialogOpen, setIsAmenityDialogOpen] = useState<boolean>(false);
+  
   // For weighted scoring
   const [weights, setWeights] = useState({
     netWorth: 30,
@@ -179,6 +243,27 @@ const LocationAnalyzer = () => {
     exclusiveClubs: 5,
     privateTransport: 5,
     luxuryRetail: 5,
+  });
+  
+  // For scoring profiles
+  const [isSaveProfileOpen, setIsSaveProfileOpen] = useState<boolean>(false);
+
+  // Forms setup
+  const amenityForm = useForm<z.infer<typeof amenitySchema>>({
+    resolver: zodResolver(amenitySchema),
+    defaultValues: {
+      name: "",
+      type: "",
+      region: "",
+      notes: "",
+    },
+  });
+  
+  const profileForm = useForm<z.infer<typeof scoringProfileSchema>>({
+    resolver: zodResolver(scoringProfileSchema),
+    defaultValues: {
+      profileName: "",
+    },
   });
 
   // Filter cities based on selected state
@@ -222,6 +307,22 @@ const LocationAnalyzer = () => {
     return score.toFixed(2);
   };
 
+  // Calculate individual scores for each metric
+  const getIndividualScores = (location: string) => {
+    const data = locationData[location];
+    if (!data) return {};
+    
+    return {
+      netWorth: ((data.avgNetWorth / 5000000) * 10).toFixed(1),
+      divorceRate: (data.divorceRate).toFixed(1),
+      luxuryDensity: (data.luxuryDensity).toFixed(1),
+      multiProperty: ((data.multiPropertyRate / 10)).toFixed(1),
+      exclusiveClubs: ((data.exclusiveClubs / 3) * 10).toFixed(1),
+      privateTransport: ((data.privateTransport / 2) * 10).toFixed(1),
+      luxuryRetail: ((data.luxuryRetail / 10) * 10).toFixed(1),
+    };
+  };
+
   // Generate side-by-side comparison data
   const comparisonData = [
     {
@@ -260,24 +361,72 @@ const LocationAnalyzer = () => {
       [location2]: locationData[location2]?.luxuryRetail,
     },
   ];
+  
+  // Function to handle amenity submission
+  const onAmenitySubmit = (values: z.infer<typeof amenitySchema>) => {
+    const newAmenity = {
+      id: amenities.length + 1,
+      ...values,
+    };
+    
+    setAmenities([...amenities, newAmenity]);
+    setIsAmenityDialogOpen(false);
+    amenityForm.reset();
+    
+    toast.success("New amenity added successfully");
+  };
+  
+  // Function to handle profile save
+  const onProfileSave = (values: z.infer<typeof scoringProfileSchema>) => {
+    toast.success(`Scoring profile "${values.profileName}" saved successfully`);
+    setIsSaveProfileOpen(false);
+    profileForm.reset();
+  };
+  
+  // Get the selected location data
+  const selectedLocationData = useMemo(() => {
+    if (selectedCity !== "All Cities") {
+      return locationData[selectedCity] || null;
+    }
+    return null;
+  }, [selectedCity]);
+  
+  // Calculate individual scores for the selected location
+  const individualScores = useMemo(() => {
+    if (selectedCity !== "All Cities") {
+      return getIndividualScores(selectedCity);
+    }
+    return null;
+  }, [selectedCity]);
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Location Analyzer</h1>
           <p className="text-muted-foreground">
             Analyze high-net-worth divorce patterns by location
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={() => setIsComparisonView(!isComparisonView)}
-          className="flex items-center"
-        >
-          <ArrowRightLeft className="mr-2 h-4 w-4" />
-          {isComparisonView ? "Single Location View" : "Comparison View"}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsComparisonView(!isComparisonView)}
+            className="flex items-center"
+          >
+            <ArrowRightLeft className="mr-2 h-4 w-4" />
+            {isComparisonView ? "Single Location View" : "Comparison View"}
+          </Button>
+          
+          <Button 
+            variant="default" 
+            onClick={() => setIsMapOpen(true)}
+            className="flex items-center"
+          >
+            <MapIcon className="mr-2 h-4 w-4" />
+            View on Map
+          </Button>
+        </div>
       </div>
 
       {!isComparisonView ? (
@@ -336,31 +485,47 @@ const LocationAnalyzer = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Divorce Rate:</span>
-                    <span className="font-medium">6.2%</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? `${selectedLocationData.divorceRate}%` : "6.2%"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Avg. Net Worth:</span>
-                    <span className="font-medium">$18.5M</span>
+                    <span className="font-medium">
+                      ${selectedLocationData 
+                        ? (selectedLocationData.avgNetWorth / 1000000).toFixed(1) + "M" 
+                        : "18.5M"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Luxury Property Density:</span>
-                    <span className="font-medium">7.3/km²</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? `${selectedLocationData.luxuryDensity}/km²` : "7.3/km²"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Multi-Property Households:</span>
-                    <span className="font-medium">2,245</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? `${selectedLocationData.multiPropertyRate}%` : "36%"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Exclusive Clubs:</span>
-                    <span className="font-medium">12</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? selectedLocationData.exclusiveClubs : 12}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-sm text-muted-foreground">Private Transport Hubs:</span>
-                    <span className="font-medium">7</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? selectedLocationData.privateTransport : 7}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between pb-2">
                     <span className="text-sm text-muted-foreground">High-End Retail Presence:</span>
-                    <span className="font-medium">High</span>
+                    <span className="font-medium">
+                      {selectedLocationData ? selectedLocationData.retailPresence : "Medium"}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -457,60 +622,188 @@ const LocationAnalyzer = () => {
 
             {/* Amenities and Services */}
             <Card className="md:col-span-3">
-              <CardHeader>
-                <CardTitle>Exclusive Amenities</CardTitle>
-                <CardDescription>
-                  High-end services and venues in the area
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Exclusive Amenities</CardTitle>
+                  <CardDescription>
+                    High-end services and venues in the area
+                  </CardDescription>
+                </div>
+                <Dialog open={isAmenityDialogOpen} onOpenChange={setIsAmenityDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Add Amenity
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Amenity</DialogTitle>
+                      <DialogDescription>
+                        Enter details about the exclusive amenity in this location.
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <Form {...amenityForm}>
+                      <form onSubmit={amenityForm.handleSubmit(onAmenitySubmit)} className="space-y-4">
+                        <FormField
+                          control={amenityForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="The Ritz-Carlton" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={amenityForm.control}
+                          name="type"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Type</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {AMENITY_TYPES.map(type => (
+                                    <SelectItem key={type} value={type}>
+                                      {type}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={amenityForm.control}
+                          name="region"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Region</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Downtown" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={amenityForm.control}
+                          name="notes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Notes</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Additional details about this amenity..."
+                                  className="resize-none"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <DialogFooter>
+                          <Button type="submit">Add Amenity</Button>
+                        </DialogFooter>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <Building className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">Private Clubs</p>
-                      <p className="text-xs text-muted-foreground">12 exclusive clubs</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {amenities.map((amenity) => (
+                    <div key={amenity.id} className="flex items-start space-x-3 rounded-md border p-3">
+                      {amenity.type === "Private Club" && <Building className="h-5 w-5 text-primary mt-0.5" />}
+                      {amenity.type === "Private Aviation" && <Plane className="h-5 w-5 text-primary mt-0.5" />}
+                      {amenity.type === "Luxury Retail" && <ShoppingBag className="h-5 w-5 text-primary mt-0.5" />}
+                      {amenity.type === "5-Star Hotel" && <Hotel className="h-5 w-5 text-primary mt-0.5" />}
+                      <div>
+                        <p className="text-sm font-medium">{amenity.name}</p>
+                        <p className="text-xs text-muted-foreground">{amenity.type} • {amenity.region}</p>
+                        {amenity.notes && <p className="text-xs mt-1">{amenity.notes}</p>}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <Plane className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">Private Aviation</p>
-                      <p className="text-xs text-muted-foreground">4 airports, 3 helipads</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <ShoppingBag className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">Luxury Retail</p>
-                      <p className="text-xs text-muted-foreground">58 high-end boutiques</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <Hotel className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">5-Star Hotels</p>
-                      <p className="text-xs text-muted-foreground">14 luxury properties</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
             {/* Weighted Score System */}
             <Card className="md:col-span-3">
-              <CardHeader>
-                <CardTitle>Weighted Scoring System</CardTitle>
-                <CardDescription>
-                  Customize weights to prioritize different factors
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Weighted Scoring System</CardTitle>
+                  <CardDescription>
+                    Customize weights to prioritize different factors
+                  </CardDescription>
+                </div>
+                <Dialog open={isSaveProfileOpen} onOpenChange={setIsSaveProfileOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Save Scoring Profile</DialogTitle>
+                      <DialogDescription>
+                        Save your current weight configuration for future use.
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <Form {...profileForm}>
+                      <form onSubmit={profileForm.handleSubmit(onProfileSave)} className="space-y-4">
+                        <FormField
+                          control={profileForm.control}
+                          name="profileName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Profile Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Attorney View" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Give your scoring profile a meaningful name
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <DialogFooter>
+                          <Button type="submit">Save Profile</Button>
+                        </DialogFooter>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-1">
+                <div className="space-y-5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Net Worth ({weights.netWorth}%)</Label>
-                      <span className="text-xs text-muted-foreground">{weights.netWorth}%</span>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.netWorth}/10</span>}
                     </div>
                     <Slider
                       value={[weights.netWorth]}
@@ -520,10 +813,10 @@ const LocationAnalyzer = () => {
                       onValueChange={(value) => setWeights({...weights, netWorth: value[0]})}
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Divorce Rate ({weights.divorceRate}%)</Label>
-                      <span className="text-xs text-muted-foreground">{weights.divorceRate}%</span>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.divorceRate}/10</span>}
                     </div>
                     <Slider
                       value={[weights.divorceRate]}
@@ -533,10 +826,10 @@ const LocationAnalyzer = () => {
                       onValueChange={(value) => setWeights({...weights, divorceRate: value[0]})}
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Luxury Property Density ({weights.luxuryDensity}%)</Label>
-                      <span className="text-xs text-muted-foreground">{weights.luxuryDensity}%</span>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.luxuryDensity}/10</span>}
                     </div>
                     <Slider
                       value={[weights.luxuryDensity]}
@@ -546,10 +839,10 @@ const LocationAnalyzer = () => {
                       onValueChange={(value) => setWeights({...weights, luxuryDensity: value[0]})}
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Multi-Property Households ({weights.multiProperty}%)</Label>
-                      <span className="text-xs text-muted-foreground">{weights.multiProperty}%</span>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.multiProperty}/10</span>}
                     </div>
                     <Slider
                       value={[weights.multiProperty]}
@@ -559,12 +852,52 @@ const LocationAnalyzer = () => {
                       onValueChange={(value) => setWeights({...weights, multiProperty: value[0]})}
                     />
                   </div>
-                  {/* Other sliders omitted for brevity */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Exclusive Clubs ({weights.exclusiveClubs}%)</Label>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.exclusiveClubs}/10</span>}
+                    </div>
+                    <Slider
+                      value={[weights.exclusiveClubs]}
+                      min={0}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setWeights({...weights, exclusiveClubs: value[0]})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Private Transport ({weights.privateTransport}%)</Label>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.privateTransport}/10</span>}
+                    </div>
+                    <Slider
+                      value={[weights.privateTransport]}
+                      min={0}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setWeights({...weights, privateTransport: value[0]})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Luxury Retail ({weights.luxuryRetail}%)</Label>
+                      {individualScores && <span className="text-sm font-medium">Score: {individualScores.luxuryRetail}/10</span>}
+                    </div>
+                    <Slider
+                      value={[weights.luxuryRetail]}
+                      min={0}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setWeights({...weights, luxuryRetail: value[0]})}
+                    />
+                  </div>
                   
-                  <div className="mt-4 rounded-md bg-muted p-4">
+                  <div className="mt-6 rounded-md bg-muted p-4">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Weighted Score:</span>
-                      <span className="text-lg font-bold">7.8 / 10</span>
+                      <span className="text-lg font-bold">
+                        {selectedCity !== "All Cities" ? `${calculateScore(selectedCity)}/10` : "7.8/10"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -712,6 +1045,65 @@ const LocationAnalyzer = () => {
           </div>
         </>
       )}
+      
+      {/* Map Dialog */}
+      <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
+        <DialogContent className="max-w-5xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Location Heatmap</DialogTitle>
+            <DialogDescription>
+              Interactive map showing key metrics across the United States
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col h-full">
+            <div className="bg-muted mb-4 p-4 rounded-md flex justify-between items-center">
+              <div className="flex gap-4">
+                <Select defaultValue="divorceRate">
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Metric" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="divorceRate">Divorce Rate</SelectItem>
+                    <SelectItem value="netWorth">Avg. Net Worth</SelectItem>
+                    <SelectItem value="luxuryDensity">Luxury Density</SelectItem>
+                    <SelectItem value="multiProperty">Multi-Property</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select defaultValue="All States">
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All States">All States</SelectItem>
+                    {US_STATES.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Low</span>
+                <div className="w-32 h-3 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 rounded-full"></div>
+                <span className="text-sm">High</span>
+              </div>
+            </div>
+            
+            {/* Map Placeholder - In a real implementation, this would be an actual interactive map */}
+            <div className="flex-1 bg-muted rounded-md flex items-center justify-center relative">
+              <div className="absolute inset-0 p-4 text-white opacity-80 flex items-center justify-center">
+                <div className="p-8 rounded-xl bg-background border text-center">
+                  <MapIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-medium text-foreground mb-2">Interactive Map</h3>
+                  <p className="text-muted-foreground">This is where the interactive map would be displayed, showing heatmap data for the selected metric across U.S. states.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
