@@ -10,12 +10,11 @@ import {
   NET_WORTH_BRACKETS 
 } from "@/data/mockData";
 
-// Import our newly created components
+// Import our components
 import KPICards from "@/components/dashboard/KPICards";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
 import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
-import MapCard from "@/components/dashboard/MapCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 
 const Dashboard = () => {
@@ -92,12 +91,6 @@ const Dashboard = () => {
         <LuxuryLocationsCard 
           luxuryLocations={filteredLuxuryLocations} 
           onViewAll={handleViewAllLocations} 
-        />
-
-        {/* US Map with Google Maps integration */}
-        <MapCard 
-          selectedState={selectedState} 
-          selectedCity={selectedCity} 
         />
 
         {/* AI Insights */}
