@@ -1,9 +1,12 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDown, ArrowUp, Minus, DollarSign, BarChart3, Home, AlertTriangle, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowUp, Minus, DollarSign, BarChart3, Home, AlertTriangle, Info, MapPin, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { 
   REGIONAL_METRICS, 
   TOP_LUXURY_LOCATIONS, 
@@ -27,16 +30,29 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import MapView from "@/components/MapView";
 
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
   const [selectedCity, setSelectedCity] = useState<string>("All Cities");
   const [selectedNetWorth, setSelectedNetWorth] = useState<string>("All");
+  const navigate = useNavigate();
 
   // Filter cities based on selected state
   const availableCities = selectedState !== "All States" && TOP_CITIES[selectedState] 
     ? ["All Cities", ...TOP_CITIES[selectedState]] 
     : ["All Cities"];
+
+  // Filter data based on selections
+  const filteredLuxuryLocations = TOP_LUXURY_LOCATIONS.filter(location => {
+    if (selectedState !== "All States" && !location.city.includes(selectedState)) {
+      return false;
+    }
+    if (selectedCity !== "All Cities" && !location.city.includes(selectedCity)) {
+      return false;
+    }
+    return true;
+  });
 
   // Sample heatmap data - in a real app, this would come from your backend
   const mapData = [
@@ -60,10 +76,14 @@ const Dashboard = () => {
   }));
 
   // Transform data for pie chart
-  const pieData = TOP_LUXURY_LOCATIONS.map(location => ({
+  const pieData = filteredLuxuryLocations.slice(0, 5).map(location => ({
     name: location.city.split(',')[0],
     value: location.density
   }));
+
+  const handleViewAllLocations = () => {
+    navigate("/location", { state: { fromDashboard: true } });
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -104,6 +124,7 @@ const Dashboard = () => {
             <SelectValue placeholder="Net Worth Bracket" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="All">All Brackets</SelectItem>
             {NET_WORTH_BRACKETS.map(bracket => (
               <SelectItem key={bracket} value={bracket}>{bracket}</SelectItem>
             ))}
@@ -253,11 +274,22 @@ const Dashboard = () => {
 
         {/* Top Luxury Locations */}
         <Card>
-          <CardHeader>
-            <CardTitle>Top Luxury Locations</CardTitle>
-            <CardDescription>
-              Areas with highest luxury property density
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Top Luxury Locations</CardTitle>
+              <CardDescription>
+                Areas with highest luxury property density
+              </CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleViewAllLocations}
+            >
+              <span>View All</span>
+              <ExternalLink className="h-4 w-4" />
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -291,7 +323,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {TOP_LUXURY_LOCATIONS.map((location, index) => (
+                  {filteredLuxuryLocations.slice(0, 5).map((location, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-2">{location.city}</td>
                       <td className="py-2 text-right">{location.density}</td>
@@ -304,7 +336,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* US Map - Placeholder */}
+        {/* US Map - Now with Google Maps integration */}
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>U.S. High-Net-Worth Divorce Heatmap</CardTitle>
@@ -313,11 +345,11 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex h-80 items-center justify-center bg-muted/20 rounded-md">
-              <div className="text-center">
-                <p className="mb-2 text-sm text-muted-foreground">Mapbox integration would go here</p>
-                <p className="text-xs text-muted-foreground">Shows interactive heatmap of divorce rates across the US</p>
-              </div>
+            <div className="h-[400px] rounded-md overflow-hidden">
+              <MapView 
+                state={selectedState === "All States" ? null : selectedState} 
+                city={selectedCity === "All Cities" ? null : selectedCity}
+              />
             </div>
           </CardContent>
         </Card>

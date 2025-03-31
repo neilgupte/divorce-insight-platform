@@ -16,6 +16,8 @@ import AIAssistant from "@/pages/AIAssistant";
 import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import LuxuryLocations from "@/pages/LuxuryLocations";
+import Index from "@/pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -44,13 +46,14 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Index />} />
               
               <Route path="/" element={
                 <ProtectedRoute>
                   <MainLayout />
                 </ProtectedRoute>
               }>
-                <Route index element={
+                <Route path="dashboard" element={
                   <ProtectedRoute requiredPermission="dashboard:view">
                     <Dashboard />
                   </ProtectedRoute>
@@ -58,6 +61,11 @@ const App = () => (
                 <Route path="location" element={
                   <ProtectedRoute requiredPermission="location:view">
                     <LocationAnalyzer />
+                  </ProtectedRoute>
+                } />
+                <Route path="luxury-locations" element={
+                  <ProtectedRoute requiredPermission="location:view">
+                    <LuxuryLocations />
                   </ProtectedRoute>
                 } />
                 <Route path="reports" element={
