@@ -21,7 +21,7 @@ import { SAMPLE_DOCUMENTS, US_STATES } from "@/data/mockData";
 import {
   File,
   FileText,
-  FilePdf,
+  FileType,
   FileSpreadsheet,
   Download,
   Upload,
@@ -174,7 +174,7 @@ const DocumentVault = () => {
   const getDocumentIcon = (type: string) => {
     switch (type) {
       case "PDF":
-        return <FilePdf className="h-5 w-5 text-red-500" />;
+        return <FileType className="h-5 w-5 text-red-500" />;
       case "Document":
         return <FileText className="h-5 w-5 text-blue-500" />;
       case "Spreadsheet":

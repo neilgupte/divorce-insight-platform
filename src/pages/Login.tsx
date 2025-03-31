@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,7 +36,6 @@ const Login = () => {
         variant: "destructive",
         title: "Authentication failed",
         description: "Please check your credentials and try again.",
-        icon: <AlertCircle className="h-5 w-5" />,
       });
     } finally {
       setLoading(false);

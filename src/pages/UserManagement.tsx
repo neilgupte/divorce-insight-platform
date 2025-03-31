@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ import {
   ShieldAlert,
   KeyRound,
   Mail,
+  Upload,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
@@ -67,7 +67,6 @@ const UserManagement = () => {
   const [showEditUserDialog, setShowEditUserDialog] = useState<boolean>(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
-  // New user form state
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -75,14 +74,12 @@ const UserManagement = () => {
     permissions: [] as string[],
   });
 
-  // Filter users based on search term
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle adding a new user
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email) {
       toast({
@@ -109,7 +106,6 @@ const UserManagement = () => {
     
     setUsers([...users, user]);
     
-    // Add activity log for user creation
     const newActivity: ActivityLog = {
       id: `log-${Date.now()}`,
       userId: currentUser?.id || "",
@@ -142,7 +138,6 @@ const UserManagement = () => {
     });
   };
 
-  // Handle editing a user
   const openEditUserDialog = (user: User) => {
     setEditingUser(user);
     setShowEditUserDialog(true);
@@ -157,7 +152,6 @@ const UserManagement = () => {
     
     setUsers(updatedUsers);
     
-    // Add activity log for user update
     const newActivity: ActivityLog = {
       id: `log-${Date.now()}`,
       userId: currentUser?.id || "",
@@ -185,14 +179,12 @@ const UserManagement = () => {
     });
   };
 
-  // Handle deleting a user
   const handleDeleteUser = (userId: string) => {
     const userToDelete = users.find(user => user.id === userId);
     if (!userToDelete) return;
     
     setUsers(users.filter(user => user.id !== userId));
     
-    // Add activity log for user deletion
     const newActivity: ActivityLog = {
       id: `log-${Date.now()}`,
       userId: currentUser?.id || "",
@@ -217,13 +209,11 @@ const UserManagement = () => {
     });
   };
 
-  // Toggle user status
   const toggleUserStatus = (userId: string) => {
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
         const newStatus = user.status === "active" ? "inactive" : "active";
         
-        // Add activity log for status change
         const newActivity: ActivityLog = {
           id: `log-${Date.now()}`,
           userId: currentUser?.id || "",
@@ -258,7 +248,6 @@ const UserManagement = () => {
     });
   };
 
-  // Handle permission toggle
   const togglePermission = (permission: string) => {
     if (editingUser) {
       if (editingUser.permissions.includes(permission)) {
@@ -287,7 +276,6 @@ const UserManagement = () => {
     }
   };
 
-  // Available permissions
   const permissions = [
     { id: "dashboard:view", label: "View Dashboard" },
     { id: "location:view", label: "Access Location Analyzer" },
@@ -491,7 +479,6 @@ const UserManagement = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -621,7 +608,6 @@ const UserManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit User Dialog */}
       <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
