@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle } from "lucide-react";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
+import MessagingCenter from "@/components/messaging/MessagingCenter";
 
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
@@ -100,7 +103,7 @@ const MainLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-4 py-6">
+          <div className="flex items-center justify-between px-4 py-4">
             <h1 className="text-2xl font-bold text-white">DivorceIQ</h1>
             <Button
               variant="ghost"
@@ -112,7 +115,7 @@ const MainLayout = () => {
             </Button>
           </div>
 
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-1 px-2 py-2">
             {filteredMenuItems.map((item) => (
               <Link
                 key={item.name}
@@ -126,7 +129,7 @@ const MainLayout = () => {
 
             {filteredAdminMenuItems.length > 0 && (
               <>
-                <div className="my-4 border-t border-sidebar-border"></div>
+                <div className="my-2 border-t border-sidebar-border"></div>
                 <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
                   Administration
                 </div>
@@ -144,7 +147,7 @@ const MainLayout = () => {
               </>
             )}
             
-            <div className="my-4 border-t border-sidebar-border"></div>
+            <div className="my-2 border-t border-sidebar-border"></div>
             <Link
               to={supportMenuItem.path}
               className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -185,7 +188,7 @@ const MainLayout = () => {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="border-b bg-card/80 backdrop-blur-sm">
-          <div className="flex h-16 items-center justify-between px-4">
+          <div className="flex h-14 items-center justify-between px-4">
             <Button
               variant="ghost"
               size="icon"
@@ -195,7 +198,9 @@ const MainLayout = () => {
               <Menu className="h-6 w-6" />
             </Button>
 
-            <div className="flex items-center space-x-4 ml-auto">
+            <div className="flex items-center space-x-2 ml-auto">
+              <NotificationCenter />
+              <MessagingCenter />
             </div>
           </div>
         </header>

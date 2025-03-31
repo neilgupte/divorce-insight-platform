@@ -1,174 +1,170 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Save, Server, ShieldCheck, Mail, BellRing, Globe, Clock, Database, Lock, RefreshCcw } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Settings as SettingsIcon, User, Bell, Lock, Shield, Mail } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import NotificationSettings from "@/components/settings/NotificationSettings";
 
 const Settings = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  
-  // General settings
-  const [companyName, setCompanyName] = useState<string>("Law Firm Intelligence");
-  const [timezone, setTimezone] = useState<string>("America/New_York");
-  const [dateFormat, setDateFormat] = useState<string>("MM/DD/YYYY");
-  
-  // Security settings
-  const [mfaRequired, setMfaRequired] = useState<boolean>(true);
-  const [passwordExpiry, setPasswordExpiry] = useState<string>("90");
-  const [sessionTimeout, setSessionTimeout] = useState<string>("30");
-  
-  // Email settings
-  const [emailSender, setEmailSender] = useState<string>("notifications@lawfirm.com");
-  const [emailSignature, setEmailSignature] = useState<string>("Law Firm Intelligence Team");
-  
-  // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState<boolean>(true);
-  const [reportNotifications, setReportNotifications] = useState<boolean>(true);
-  const [userNotifications, setUserNotifications] = useState<boolean>(true);
-  
-  // Data settings
-  const [dataRetention, setDataRetention] = useState<string>("365");
-  const [backupFrequency, setBackupFrequency] = useState<string>("daily");
-  
-  // API settings
-  const [apiKeys, setApiKeys] = useState<{name: string, key: string, created: string}[]>([
-    { name: "Production API Key", key: "sk_prod_••••••••••••••••", created: "2023-10-15" },
-    { name: "Development API Key", key: "sk_dev_••••••••••••••••", created: "2023-11-01" },
-  ]);
-  
-  const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your settings have been updated successfully",
-    });
-  };
-  
-  const regenerateApiKey = (name: string) => {
-    const newKey = `sk_${name.includes("Production") ? "prod" : "dev"}_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = () => {
+    setLoading(true);
     
-    setApiKeys(apiKeys.map(key => 
-      key.name === name 
-        ? { ...key, key: `sk_${name.includes("Production") ? "prod" : "dev"}_••••••••••••••••`, created: new Date().toISOString().split("T")[0] } 
-        : key
-    ));
-    
-    toast({
-      title: "API key regenerated",
-      description: `New key: ${newKey.substring(0, 12)}... (copied to clipboard)`,
-    });
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      toast({
+        title: "Settings updated",
+        description: "Your settings have been saved successfully."
+      });
+    }, 1000);
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-8">
+      <div className="mb-6 flex items-center">
+        <SettingsIcon className="mr-2 h-6 w-6" />
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Configure platform settings and preferences
-        </p>
       </div>
-
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="data">Data Management</TabsTrigger>
-          <TabsTrigger value="api">API</TabsTrigger>
+      
+      <Tabs defaultValue="account" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="account" className="gap-2">
+            <User className="h-4 w-4" />
+            <span>Account</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Bell className="h-4 w-4" />
+            <span>Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="gap-2">
+            <Lock className="h-4 w-4" />
+            <span>Security</span>
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-2">
+            <Shield className="h-4 w-4" />
+            <span>Permissions</span>
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general">
+        <TabsContent value="account" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
+              <CardTitle>Account Information</CardTitle>
               <CardDescription>
-                Configure basic platform settings
+                Update your account details and preferences.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="company-name">Platform Name</Label>
-                <Input 
-                  id="company-name" 
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  This name will be displayed throughout the platform
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="timezone">Default Timezone</Label>
-                  <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger id="timezone">
-                      <SelectValue placeholder="Select Timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                      <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                      <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                      <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                      <SelectItem value="America/Anchorage">Alaska Time (AKT)</SelectItem>
-                      <SelectItem value="Pacific/Honolulu">Hawaii Time (HT)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input id="name" defaultValue={user?.name} />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="date-format">Date Format</Label>
-                  <Select value={dateFormat} onValueChange={setDateFormat}>
-                    <SelectTrigger id="date-format">
-                      <SelectValue placeholder="Select Date Format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                      <SelectItem value="MMMM D, YYYY">MMMM D, YYYY</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" defaultValue={user?.email} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Input id="role" defaultValue={user?.role} disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="joined">Joined</Label>
+                  <Input id="joined" defaultValue="Jan 12, 2023" disabled />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label>Platform Appearance</Label>
-                <div className="rounded-md border p-4">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <Label className="text-sm font-medium">
-                        Theme Mode
-                      </Label>
-                    </div>
-                    <ThemeToggle />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="appearance-animations" className="text-sm font-medium">
-                        Interface Animations
-                      </Label>
-                    </div>
-                    <Switch id="appearance-animations" defaultChecked />
-                  </div>
+              <div className="mt-6">
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Preferences</CardTitle>
+              <CardDescription>
+                Manage your email notification settings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="marketing-emails">Marketing Emails</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive emails about new features and improvements
+                  </p>
                 </div>
+                <Switch id="marketing-emails" defaultChecked={false} />
               </div>
               
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="report-emails">Report Summaries</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive weekly summaries of generated reports
+                  </p>
+                </div>
+                <Switch id="report-emails" defaultChecked={true} />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="notifications" className="space-y-4">
+          <NotificationSettings />
+          
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                <CardTitle>Email Reports</CardTitle>
+              </div>
+              <CardDescription>
+                Configure options for emailing reports and documents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="auto-email">Automatic Report Emails</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically email reports to team members when generated
+                  </p>
+                </div>
+                <Switch id="auto-email" defaultChecked={true} />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="document-email">Document Sharing</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow emailing of documents from Document Vault
+                  </p>
+                </div>
+                <Switch id="document-email" defaultChecked={true} />
+              </div>
+              
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="email-template">Default Email Template</Label>
+                <Input id="email-template" defaultValue="Standard Firm Template" />
+              </div>
+              
+              <div className="mt-6">
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </CardContent>
@@ -180,445 +176,104 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Security Settings</CardTitle>
               <CardDescription>
-                Configure security and access controls
+                Manage your account security and authentication methods.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Authentication</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="mfa-required" className="text-sm font-medium">
-                        Require Multi-Factor Authentication
-                      </Label>
-                    </div>
-                    <Switch 
-                      id="mfa-required"
-                      checked={mfaRequired}
-                      onCheckedChange={setMfaRequired}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="password-expiry">Password Expiry (days)</Label>
-                      <Select value={passwordExpiry} onValueChange={setPasswordExpiry}>
-                        <SelectTrigger id="password-expiry">
-                          <SelectValue placeholder="Select Expiry Period" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="30">30 days</SelectItem>
-                          <SelectItem value="60">60 days</SelectItem>
-                          <SelectItem value="90">90 days</SelectItem>
-                          <SelectItem value="180">180 days</SelectItem>
-                          <SelectItem value="never">Never</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
-                      <Select value={sessionTimeout} onValueChange={setSessionTimeout}>
-                        <SelectTrigger id="session-timeout">
-                          <SelectValue placeholder="Select Timeout Period" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="60">60 minutes</SelectItem>
-                          <SelectItem value="120">2 hours</SelectItem>
-                          <SelectItem value="240">4 hours</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Access Control</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">IP Restriction</p>
-                        <p className="text-xs text-muted-foreground">Limit access to specific IP addresses</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">SSO Integration</p>
-                        <p className="text-xs text-muted-foreground">Single sign-on with your identity provider</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline">Not Configured</Badge>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="email">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Settings</CardTitle>
-              <CardDescription>
-                Configure email notifications and templates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email-sender">Sender Email Address</Label>
-                <Input 
-                  id="email-sender" 
-                  value={emailSender}
-                  onChange={(e) => setEmailSender(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email address used for sending notifications
-                </p>
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input id="current-password" type="password" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email-signature">Email Signature</Label>
-                <Input 
-                  id="email-signature" 
-                  value={emailSignature}
-                  onChange={(e) => setEmailSignature(e.target.value)}
-                />
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" type="password" />
               </div>
               
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Email Templates</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">User Invitation</p>
-                        <p className="text-xs text-muted-foreground">Template for new user invitations</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Edit Template</Button>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Password Reset</p>
-                        <p className="text-xs text-muted-foreground">Template for password reset requests</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Edit Template</Button>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Report Delivery</p>
-                        <p className="text-xs text-muted-foreground">Template for scheduled report delivery</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Edit Template</Button>
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input id="confirm-password" type="password" />
+              </div>
+              
+              <div className="flex items-center justify-between mt-4">
+                <div>
+                  <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Add an extra layer of security to your account
+                  </p>
                 </div>
+                <Switch id="two-factor" defaultChecked={true} />
               </div>
               
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+              <div className="mt-6">
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? "Updating..." : "Update Password"}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="notifications">
+        <TabsContent value="permissions">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
+              <CardTitle>Permissions</CardTitle>
               <CardDescription>
-                Configure when and how notifications are sent
+                View your account permissions and access levels.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Email Notifications</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BellRing className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="email-notifications" className="text-sm font-medium">
-                        Enable Email Notifications
-                      </Label>
-                    </div>
-                    <Switch 
-                      id="email-notifications"
-                      checked={emailNotifications}
-                      onCheckedChange={setEmailNotifications}
-                    />
-                  </div>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium">Your Role</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.role === "superuser" ? "Superuser (Full Access)" : user?.role}
+                  </p>
                 </div>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Notification Types</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BellRing className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Report Notifications</p>
-                        <p className="text-xs text-muted-foreground">Notifications for report generation and scheduling</p>
-                      </div>
-                    </div>
-                    <Switch 
-                      checked={reportNotifications}
-                      onCheckedChange={setReportNotifications}
-                    />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BellRing className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">User Management Notifications</p>
-                        <p className="text-xs text-muted-foreground">Notifications for user creation, updates, and deletions</p>
-                      </div>
-                    </div>
-                    <Switch 
-                      checked={userNotifications}
-                      onCheckedChange={setUserNotifications}
-                    />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BellRing className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Document Notifications</p>
-                        <p className="text-xs text-muted-foreground">Notifications for document uploads and sharing</p>
-                      </div>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Access Permissions</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Dashboard: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Location Analyzer: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Reports: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Documents: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      AI Assistant: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      User Management: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Settings: Full Access
+                    </li>
+                    <li className="flex items-center text-sm">
+                      <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                      Audit Logs: Full Access
+                    </li>
+                  </ul>
                 </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="data">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Management</CardTitle>
-              <CardDescription>
-                Configure data retention, backups, and privacy settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Data Retention</h3>
-                <div className="space-y-4">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="data-retention">Data Retention Period (days)</Label>
-                    <Select value={dataRetention} onValueChange={setDataRetention}>
-                      <SelectTrigger id="data-retention">
-                        <SelectValue placeholder="Select Retention Period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="90">90 days</SelectItem>
-                        <SelectItem value="180">180 days</SelectItem>
-                        <SelectItem value="365">1 year</SelectItem>
-                        <SelectItem value="730">2 years</SelectItem>
-                        <SelectItem value="1095">3 years</SelectItem>
-                        <SelectItem value="forever">Forever</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Data older than this will be automatically archived
-                    </p>
-                  </div>
+                
+                <div className="mt-6">
+                  <p className="text-sm text-muted-foreground">
+                    To request changes to your permissions, please contact your administrator.
+                  </p>
                 </div>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Database className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-sm font-medium">Backup Settings</h3>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="backup-frequency">Backup Frequency</Label>
-                    <Select value={backupFrequency} onValueChange={setBackupFrequency}>
-                      <SelectTrigger id="backup-frequency">
-                        <SelectValue placeholder="Select Backup Frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Last Backup</p>
-                      <p className="text-xs text-muted-foreground">2023-12-02 03:15 AM</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Run Backup Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Data Export</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Export All Platform Data</p>
-                      <p className="text-xs text-muted-foreground">Download a complete export of all data</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Export Data
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="api">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Settings</CardTitle>
-              <CardDescription>
-                Manage API keys and integrations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">API Keys</h3>
-                <div className="space-y-4">
-                  {apiKeys.map((apiKey, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{apiKey.name}</p>
-                        <div className="flex items-center space-x-2">
-                          <p className="font-mono text-xs text-muted-foreground">{apiKey.key}</p>
-                          <p className="text-xs text-muted-foreground">Created: {apiKey.created}</p>
-                        </div>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => regenerateApiKey(apiKey.name)}
-                      >
-                        <RefreshCcw className="mr-2 h-4 w-4" />
-                        Regenerate
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <h3 className="mb-4 text-sm font-medium">Third-Party Integrations</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Server className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Mapbox API</p>
-                        <p className="text-xs text-muted-foreground">For map visualizations</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Connected</Badge>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Server className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">OpenAI API</p>
-                        <p className="text-xs text-muted-foreground">For AI assistant functionality</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Connected</Badge>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Server className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Document OCR API</p>
-                        <p className="text-xs text-muted-foreground">For document processing</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Connect</Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
               </div>
             </CardContent>
           </Card>
