@@ -1,11 +1,5 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, Minus, DollarSign, BarChart3, Home, AlertTriangle, Info, MapPin, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { 
   REGIONAL_METRICS, 
@@ -15,22 +9,14 @@ import {
   TOP_CITIES, 
   NET_WORTH_BRACKETS 
 } from "@/data/mockData";
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import MapView from "@/components/MapView";
+
+// Import our newly created components
+import KPICards from "@/components/dashboard/KPICards";
+import DashboardFilters from "@/components/dashboard/DashboardFilters";
+import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
+import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
+import MapCard from "@/components/dashboard/MapCard";
+import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
@@ -54,31 +40,12 @@ const Dashboard = () => {
     return true;
   });
 
-  // Sample heatmap data - in a real app, this would come from your backend
-  const mapData = [
-    { id: "CA", value: 8.7 },
-    { id: "NY", value: 9.2 },
-    { id: "FL", value: 7.8 },
-    { id: "TX", value: 6.5 },
-    { id: "IL", value: 5.9 },
-    // ... other states
-  ];
-
-  // Colors for the pie chart
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
-
-  // Sample chart data
+  // Transform data for regional metrics chart
   const regionData = REGIONAL_METRICS.map(item => ({
     name: item.region,
     netWorth: item.avgNetWorth / 1000000, // Convert to millions
     divorceRate: item.divorceRate,
     luxuryDensity: item.luxuryDensity
-  }));
-
-  // Transform data for pie chart
-  const pieData = filteredLuxuryLocations.slice(0, 5).map(location => ({
-    name: location.city.split(',')[0],
-    value: location.density
   }));
 
   const handleViewAllLocations = () => {
@@ -95,303 +62,40 @@ const Dashboard = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Select value={selectedState} onValueChange={setSelectedState}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select State" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All States">All States</SelectItem>
-            {US_STATES.map(state => (
-              <SelectItem key={state} value={state}>{state}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedCity} onValueChange={setSelectedCity}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select City" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableCities.map(city => (
-              <SelectItem key={city} value={city}>{city}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedNetWorth} onValueChange={setSelectedNetWorth}>
-          <SelectTrigger>
-            <SelectValue placeholder="Net Worth Bracket" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All Brackets</SelectItem>
-            {NET_WORTH_BRACKETS.map(bracket => (
-              <SelectItem key={bracket} value={bracket}>{bracket}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <DashboardFilters 
+        selectedState={selectedState}
+        selectedCity={selectedCity}
+        selectedNetWorth={selectedNetWorth}
+        onStateChange={setSelectedState}
+        onCityChange={setSelectedCity}
+        onNetWorthChange={setSelectedNetWorth}
+        availableCities={availableCities}
+        usStates={US_STATES}
+        netWorthBrackets={NET_WORTH_BRACKETS}
+      />
 
       {/* KPI Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Net Worth</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$14.2M</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="flex items-center text-green-500">
-                <ArrowUp className="mr-1 h-4 w-4" />
-                12%
-              </span>{" "}
-              increase from last year
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">HNW Divorce Rate</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">5.8%</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="flex items-center text-red-500">
-                <ArrowUp className="mr-1 h-4 w-4" />
-                4%
-              </span>{" "}
-              increase from last year
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Luxury Property Density</CardTitle>
-            <Home className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">6.2/km²</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="flex items-center text-green-500">
-                <ArrowUp className="mr-1 h-4 w-4" />
-                8%
-              </span>{" "}
-              increase from last year
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Asset Protection Rate</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">38%</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="flex items-center text-amber-500">
-                <Minus className="mr-1 h-4 w-4" />
-                1%
-              </span>{" "}
-              similar to last year
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <KPICards />
 
       {/* Main content area */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Regional Metrics */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Regional Metrics</CardTitle>
-            <CardDescription>
-              High-net-worth divorce metrics by region
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="netWorth">
-              <TabsList className="mb-4">
-                <TabsTrigger value="netWorth">Net Worth</TabsTrigger>
-                <TabsTrigger value="divorceRate">Divorce Rate</TabsTrigger>
-                <TabsTrigger value="luxuryDensity">Luxury Density</TabsTrigger>
-              </TabsList>
-              <TabsContent value="netWorth">
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={regionData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis label={{ value: "Millions $", angle: -90, position: 'insideLeft' }} />
-                      <Tooltip formatter={(value) => `$${value}M`} />
-                      <Bar dataKey="netWorth" fill="#3B82F6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </TabsContent>
-              <TabsContent value="divorceRate">
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={regionData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis label={{ value: "Rate %", angle: -90, position: 'insideLeft' }} />
-                      <Tooltip formatter={(value) => `${value}%`} />
-                      <Area type="monotone" dataKey="divorceRate" fill="#F87171" stroke="#EF4444" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </TabsContent>
-              <TabsContent value="luxuryDensity">
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={regionData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis label={{ value: "Density", angle: -90, position: 'insideLeft' }} />
-                      <Tooltip />
-                      <Bar dataKey="luxuryDensity" fill="#10B981" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <RegionalMetricsChart regionData={regionData} />
 
         {/* Top Luxury Locations */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Top Luxury Locations</CardTitle>
-              <CardDescription>
-                Areas with highest luxury property density
-              </CardDescription>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1"
-              onClick={handleViewAllLocations}
-            >
-              <span>View All</span>
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="pb-2 text-left">Location</th>
-                    <th className="pb-2 text-right">Density</th>
-                    <th className="pb-2 text-right">Avg Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLuxuryLocations.slice(0, 5).map((location, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="py-2">{location.city}</td>
-                      <td className="py-2 text-right">{location.density}</td>
-                      <td className="py-2 text-right">{location.avgValue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        <LuxuryLocationsCard 
+          luxuryLocations={filteredLuxuryLocations} 
+          onViewAll={handleViewAllLocations} 
+        />
 
-        {/* US Map - Now with Google Maps integration */}
-        <Card className="col-span-2">
-          <CardHeader>
-            <CardTitle>U.S. High-Net-Worth Divorce Heatmap</CardTitle>
-            <CardDescription>
-              Interactive map showing divorce rates by state
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px] rounded-md overflow-hidden">
-              <MapView 
-                state={selectedState === "All States" ? null : selectedState} 
-                city={selectedCity === "All Cities" ? null : selectedCity}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* US Map with Google Maps integration */}
+        <MapCard 
+          selectedState={selectedState} 
+          selectedCity={selectedCity} 
+        />
 
         {/* AI Insights */}
-        <Card>
-          <CardHeader>
-            <CardTitle>AI Insights</CardTitle>
-            <CardDescription>
-              Machine learning detected patterns and anomalies
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {AI_INSIGHTS.map((insight) => (
-                <div key={insight.id} className="rounded-lg border bg-card p-4">
-                  <div className="mb-2 flex items-center">
-                    <div className="mr-2">
-                      {insight.severity === "high" ? (
-                        <AlertTriangle className="h-5 w-5 text-amber-500" />
-                      ) : (
-                        <Info className="h-5 w-5 text-blue-500" />
-                      )}
-                    </div>
-                    <h3 className="font-semibold">{insight.title}</h3>
-                    <div className="ml-auto">
-                      <Badge variant={insight.trend === "increasing" ? "destructive" : "outline"}>
-                        {insight.trend === "increasing" 
-                          ? <ArrowUp className="mr-1 h-3 w-3 inline" /> 
-                          : insight.trend === "decreasing" 
-                            ? <ArrowDown className="mr-1 h-3 w-3 inline" /> 
-                            : <Minus className="mr-1 h-3 w-3 inline" />}
-                        {insight.trend}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{insight.description}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <AIInsightsCard insights={AI_INSIGHTS} />
       </div>
     </div>
   );
