@@ -83,28 +83,36 @@ const Dashboard = () => {
       {/* KPI Cards */}
       <KPICards />
 
-      {/* Main content area - first row */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 mb-6">
-        {/* Regional Metrics */}
-        <RegionalMetricsChart regionData={regionData} />
+      {/* Main content area - first row (66/33 split) */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mb-6">
+        {/* Regional Metrics (66%) */}
+        <div className="md:col-span-2">
+          <RegionalMetricsChart regionData={regionData} />
+        </div>
 
-        {/* Top Luxury Locations */}
-        <LuxuryLocationsCard 
-          luxuryLocations={filteredLuxuryLocations} 
-          onViewAll={handleViewAllLocations} 
-        />
+        {/* Top Luxury Locations (33%) */}
+        <div className="md:col-span-1">
+          <LuxuryLocationsCard 
+            luxuryLocations={filteredLuxuryLocations} 
+            onViewAll={handleViewAllLocations} 
+          />
+        </div>
       </div>
 
-      {/* Second row - Map and AI Insights */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {/* Map Card */}
-        <DummyMapCard 
-          selectedState={selectedState} 
-          selectedCity={selectedCity} 
-        />
+      {/* Second row - AI Insights and Map (33/66 split) */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* AI Insights (33%) */}
+        <div className="md:col-span-1">
+          <AIInsightsCard insights={formattedInsights} />
+        </div>
         
-        {/* AI Insights */}
-        <AIInsightsCard insights={formattedInsights} />
+        {/* Map Card (66%) */}
+        <div className="md:col-span-2">
+          <DummyMapCard 
+            selectedState={selectedState} 
+            selectedCity={selectedCity} 
+          />
+        </div>
       </div>
     </div>
   );
