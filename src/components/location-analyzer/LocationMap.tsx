@@ -17,12 +17,24 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
   const [region, setRegion] = useState<string>("All States");
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for component to be mounted to prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Monitor LocalStorage for API key changes
   useEffect(() => {
+    if (!mounted) return;
+
     const checkApiKey = () => {
-      const hasApiKey = !!localStorage.getItem('googleMapsApiKey');
-      setShowSaveButton(hasApiKey); // Only show save button if we have a working map
+      try {
+        const hasApiKey = !!localStorage.getItem('googleMapsApiKey');
+        setShowSaveButton(hasApiKey); // Only show save button if we have a working map
+      } catch (error) {
+        console.error("Error checking for API key:", error);
+      }
     };
 
     // Check initially
@@ -38,10 +50,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [mounted]);
 
   // Create filter object for MapView based on selected metric
-  const getFilters = () => {
+  const getFilters = (): MapFilters => {
     const filters: MapFilters = {
       state: region !== "All States" ? region : null,
       divorceRate: {
@@ -75,6 +87,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
     setRegion(value);
     setMapError(null); // Clear any previous errors
   };
+
+  if (!mounted) {
+    return <div className="flex items-center justify-center h-full p-8">Loading map interface...</div>;
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -143,6 +159,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
           state={region !== "All States" ? region : null} 
           city={null}
           filters={getFilters()}
+          fullscreen={true}
         />
       </div>
     </div>

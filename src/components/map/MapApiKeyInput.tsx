@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,11 @@ const MapApiKeyInput: React.FC<MapApiKeyInputProps> = ({
 }) => {
   // Local state for the input value to prevent re-renders of parent component while typing
   const [localApiKey, setLocalApiKey] = useState(apiKey);
+
+  // Update local state if parent apiKey changes
+  useEffect(() => {
+    setLocalApiKey(apiKey);
+  }, [apiKey]);
 
   // Handle local changes without triggering parent re-render
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {

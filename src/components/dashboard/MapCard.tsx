@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import MapView from "@/components/MapView";
+import { Map } from "lucide-react";
 
 interface MapCardProps {
   selectedState: string | null;
@@ -10,9 +11,12 @@ interface MapCardProps {
 
 const MapCard: React.FC<MapCardProps> = ({ selectedState, selectedCity }) => {
   return (
-    <Card className="col-span-2">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle>U.S. High-Net-Worth Divorce Heatmap</CardTitle>
+        <CardTitle className="flex items-center">
+          <Map className="mr-2 h-5 w-5" /> 
+          U.S. High-Net-Worth Divorce Heatmap
+        </CardTitle>
         <CardDescription>
           Interactive map showing divorce rates by state
         </CardDescription>

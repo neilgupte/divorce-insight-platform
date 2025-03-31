@@ -31,7 +31,7 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       const savedApiKey = localStorage.getItem('googleMapsApiKey');
       if (savedApiKey && isMounted.current) {
         setApiKey(savedApiKey);
-        setApiKeySubmitted(true);
+        setApiKeySubmitted(!!savedApiKey); // Only set to true if there's actually a key
         setApiKeyLoaded(true);
       } else {
         setApiKeyLoaded(true); // Even if there's no key, we've finished trying to load
@@ -40,6 +40,7 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       console.error("Error loading API key from localStorage:", error);
       if (isMounted.current) {
         setApiKeyLoaded(true); // Mark as loaded even on error
+        setMapError("Failed to load saved API key");
       }
     }
 
@@ -82,22 +83,31 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
   };
 
   const handleApiKeyChange = (key: string) => {
-    setApiKey(key);
+    if (isMounted.current) {
+      setApiKey(key);
+    }
   };
 
   const handleApiKeySubmit = () => {
     try {
+      if (!isMounted.current) return;
+      
       // Save API key to localStorage
       if (apiKey.trim()) {
         localStorage.setItem('googleMapsApiKey', apiKey);
         setApiKeySubmitted(true);
         setMapError(null);
+        
+        // Dispatch a storage event to update other components
+        window.dispatchEvent(new Event('storage'));
       } else {
         setMapError("API key cannot be empty");
       }
     } catch (error) {
       console.error("Error saving API key:", error);
-      setMapError("Failed to save API key");
+      if (isMounted.current) {
+        setMapError("Failed to save API key");
+      }
     }
   };
 
