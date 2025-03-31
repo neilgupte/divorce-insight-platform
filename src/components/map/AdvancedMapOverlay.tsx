@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { X, Save, FileDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,7 +77,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
   const [savedViews, setSavedViews] = useState<SavedView[]>([]);
   const [selectedView, setSelectedView] = useState<string | null>(null);
   
-  // Map filter states
   const [filters, setFilters] = useState<MapFilters>({
     state: initialState,
     divorceRate: {
@@ -100,7 +98,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     },
   });
 
-  // Load saved views from localStorage on mount
   useEffect(() => {
     const storedViews = localStorage.getItem("mapSavedViews");
     if (storedViews) {
@@ -108,7 +105,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     }
   }, []);
 
-  // Save views to localStorage when they change
   useEffect(() => {
     if (savedViews.length > 0) {
       localStorage.setItem("mapSavedViews", JSON.stringify(savedViews));
@@ -128,7 +124,26 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     const newView: SavedView = {
       id: Date.now().toString(),
       name: viewName,
-      filters: { ...filters },
+      filters: {
+        state: filters.state,
+        divorceRate: {
+          enabled: filters.divorceRate.enabled,
+          min: filters.divorceRate.min,
+        },
+        netWorth: {
+          enabled: filters.netWorth.enabled,
+          min: filters.netWorth.min,
+          max: filters.netWorth.max,
+        },
+        luxuryDensity: {
+          enabled: filters.luxuryDensity.enabled,
+          min: filters.luxuryDensity.min,
+        },
+        multiProperty: {
+          enabled: filters.multiProperty.enabled,
+          min: filters.multiProperty.min,
+        },
+      },
     };
 
     setSavedViews([...savedViews, newView]);
@@ -236,7 +251,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
         </div>
         
         <div className="flex h-full">
-          {/* Filters sidebar */}
           <div className="w-64 border-r p-4 overflow-y-auto">
             <div className="space-y-6">
               <div>
@@ -264,7 +278,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
               <div className="space-y-4">
                 <h3 className="font-medium">Filters</h3>
                 
-                {/* Divorce Rate Filter */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -293,7 +306,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
                   />
                 </div>
                 
-                {/* Net Worth Filter */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -323,7 +335,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
                   />
                 </div>
                 
-                {/* Luxury Density Filter */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -352,7 +363,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
                   />
                 </div>
                 
-                {/* Multi-Property Filter */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -395,7 +405,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
             </div>
           </div>
           
-          {/* Map area */}
           <div className="flex-1 p-2">
             <div className="h-full rounded-md overflow-hidden border">
               <MapView 
@@ -409,7 +418,6 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
         </div>
       </DialogContent>
       
-      {/* Save View Dialog */}
       <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
