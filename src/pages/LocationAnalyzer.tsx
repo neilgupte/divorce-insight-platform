@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { US_STATES, TOP_CITIES } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import DummyMapOverlay from "@/components/map/DummyMapOverlay";
 
 interface Amenity {
   id: number;
@@ -481,7 +482,7 @@ const LocationAnalyzer = () => {
         </Card>
       </div>
 
-      <AdvancedMapOverlay
+      <DummyMapOverlay
         open={isAdvancedMapOpen}
         onClose={() => setIsAdvancedMapOpen(false)}
         initialState={state !== "All States" ? state : null}
