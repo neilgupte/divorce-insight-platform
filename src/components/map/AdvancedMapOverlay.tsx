@@ -46,7 +46,7 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     },
     multiProperty: {
       enabled: false,
-      min: 20,
+      min: 1, // Updated to start at 1+
     },
   });
 
@@ -174,15 +174,15 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       // Fixed: Don't use spread here, create a new object properly
       const newFilters: MapFilters = {
         state: prev.state,
-        divorceRate: {...prev.divorceRate},
-        netWorth: {...prev.netWorth},
-        luxuryDensity: {...prev.luxuryDensity},
-        multiProperty: {...prev.multiProperty}
+        divorceRate: {...(prev.divorceRate || {})},
+        netWorth: {...(prev.netWorth || {})},
+        luxuryDensity: {...(prev.luxuryDensity || {})},
+        multiProperty: {...(prev.multiProperty || {})}
       };
       
       // Now update the specific property
       if (newFilters[category]) {
-        newFilters[category] = {...prev[category], [setting]: value};
+        newFilters[category] = {...(prev[category] || {}), [setting]: value};
       }
       
       return newFilters;

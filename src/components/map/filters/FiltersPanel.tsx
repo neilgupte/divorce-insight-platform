@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,11 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
   onStateChange,
   onDeleteView,
 }) => {
+  // Helper function to handle multi-property step labels
+  const getMultiPropertyLabel = (value: number) => {
+    return `${value}+`;
+  };
+
   return (
     <div className="w-64 border-r p-4 overflow-y-auto">
       <div className="space-y-6">
@@ -154,14 +160,14 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <Label htmlFor="multi-property-enabled">Multi-Property</Label>
               </div>
               <span className="text-sm font-medium">
-                {filters.multiProperty?.min}%+
+                {getMultiPropertyLabel(filters.multiProperty?.min)}
               </span>
             </div>
             <Slider 
               value={[filters.multiProperty?.min]} 
-              min={0}
-              max={100}
-              step={5}
+              min={1}
+              max={10}
+              step={1}
               disabled={!filters.multiProperty?.enabled}
               onValueChange={(value) => 
                 updateFilter("multiProperty", "min", value[0])
