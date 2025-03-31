@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Map, Info, Save } from "lucide-react";
+import { Map, Info, Save, AlertTriangle } from "lucide-react";
 import { US_STATES } from "@/data/mockData";
 import MapView from "@/components/MapView";
 import { MapFilters } from "@/components/map/utils/mapUtils";
@@ -15,6 +16,29 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
   const [metric, setMetric] = useState<string>("divorceRate");
   const [region, setRegion] = useState<string>("All States");
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  // Monitor LocalStorage for API key changes
+  useEffect(() => {
+    const checkApiKey = () => {
+      const hasApiKey = !!localStorage.getItem('googleMapsApiKey');
+      setShowSaveButton(hasApiKey); // Only show save button if we have a working map
+    };
+
+    // Check initially
+    checkApiKey();
+
+    // Set up storage event listener to detect changes
+    const handleStorageChange = () => {
+      checkApiKey();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   // Create filter object for MapView based on selected metric
   const getFilters = () => {
@@ -35,18 +59,28 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
       },
       multiProperty: {
         enabled: metric === "multiProperty",
-        min: 20,
+        min: 1,
       },
     };
     
     return filters;
   };
 
+  const handleMetricChange = (value: string) => {
+    setMetric(value);
+    setMapError(null); // Clear any previous errors
+  };
+
+  const handleRegionChange = (value: string) => {
+    setRegion(value);
+    setMapError(null); // Clear any previous errors
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="bg-muted mb-4 p-4 rounded-md flex justify-between items-center">
         <div className="flex gap-4">
-          <Select defaultValue={metric} onValueChange={setMetric}>
+          <Select value={metric} onValueChange={handleMetricChange}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Metric" />
             </SelectTrigger>
@@ -58,7 +92,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
             </SelectContent>
           </Select>
           
-          <Select defaultValue={region} onValueChange={setRegion}>
+          <Select value={region} onValueChange={handleRegionChange}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Region" />
             </SelectTrigger>
@@ -72,6 +106,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
         </div>
         
         <div className="flex items-center gap-3">
+          {mapError && (
+            <Badge variant="destructive" className="gap-1 items-center">
+              <AlertTriangle className="h-3 w-3" />
+              <span className="text-xs">{mapError}</span>
+            </Badge>
+          )}
+          
           {showSaveButton && onSaveView && (
             <Button 
               variant="outline" 

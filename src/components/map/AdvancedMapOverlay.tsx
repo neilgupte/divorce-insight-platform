@@ -171,18 +171,34 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
     value: MapFilters[K][S]
   ) => {
     setFilters((prev) => {
-      // Fixed: Don't use spread here, create a new object properly
+      // Fixed: Create proper objects for each filter category instead of using spread
       const newFilters: MapFilters = {
         state: prev.state,
-        divorceRate: {...(prev.divorceRate || {})},
-        netWorth: {...(prev.netWorth || {})},
-        luxuryDensity: {...(prev.luxuryDensity || {})},
-        multiProperty: {...(prev.multiProperty || {})}
+        divorceRate: {
+          enabled: prev.divorceRate ? prev.divorceRate.enabled : false,
+          min: prev.divorceRate ? prev.divorceRate.min : 0,
+        },
+        netWorth: {
+          enabled: prev.netWorth ? prev.netWorth.enabled : false,
+          min: prev.netWorth ? prev.netWorth.min : 0,
+          max: prev.netWorth ? prev.netWorth.max : 0,
+        },
+        luxuryDensity: {
+          enabled: prev.luxuryDensity ? prev.luxuryDensity.enabled : false,
+          min: prev.luxuryDensity ? prev.luxuryDensity.min : 0,
+        },
+        multiProperty: {
+          enabled: prev.multiProperty ? prev.multiProperty.enabled : false,
+          min: prev.multiProperty ? prev.multiProperty.min : 0,
+        },
       };
       
       // Now update the specific property
-      if (newFilters[category]) {
-        newFilters[category] = {...(prev[category] || {}), [setting]: value};
+      if (category in newFilters && newFilters[category]) {
+        // Create a new object for the category and set the new value
+        const categoryObj = { ...newFilters[category] } as any;
+        categoryObj[setting] = value;
+        (newFilters[category] as any) = categoryObj;
       }
       
       return newFilters;
@@ -195,10 +211,23 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       // Fixed: Create a new object without using spread on potentially non-object types
       return {
         state: state,
-        divorceRate: prev.divorceRate,
-        netWorth: prev.netWorth,
-        luxuryDensity: prev.luxuryDensity,
-        multiProperty: prev.multiProperty
+        divorceRate: {
+          enabled: prev.divorceRate.enabled,
+          min: prev.divorceRate.min,
+        },
+        netWorth: {
+          enabled: prev.netWorth.enabled,
+          min: prev.netWorth.min,
+          max: prev.netWorth.max,
+        },
+        luxuryDensity: {
+          enabled: prev.luxuryDensity.enabled,
+          min: prev.luxuryDensity.min,
+        },
+        multiProperty: {
+          enabled: prev.multiProperty.enabled,
+          min: prev.multiProperty.min,
+        }
       };
     });
   };
