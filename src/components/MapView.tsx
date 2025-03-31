@@ -54,6 +54,7 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
     region: string;
     metrics: {label: string; value: string}[];
   } | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   // Mock data for heatmap - in a real app, this would come from your API
   const getHeatmapData = () => {
@@ -302,11 +303,18 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       return;
     }
 
+    // Clean up any existing script to prevent duplicate loads
+    if (scriptRef.current) {
+      document.head.removeChild(scriptRef.current);
+      scriptRef.current = null;
+    }
+
     // Create script element
     const googleMapsScript = document.createElement('script');
     googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=visualization,geometry&callback=initMap`;
     googleMapsScript.async = true;
     googleMapsScript.defer = true;
+    scriptRef.current = googleMapsScript;
 
     // Define callback
     window.initMap = () => {
@@ -316,12 +324,6 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
 
     // Append script to document
     document.head.appendChild(googleMapsScript);
-
-    return () => {
-      // Cleanup
-      delete window.initMap;
-      document.head.removeChild(googleMapsScript);
-    };
   };
 
   useEffect(() => {
@@ -329,6 +331,31 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
     if (apiKey) {
       loadGoogleMapsScript(apiKey);
     }
+
+    // Cleanup function to prevent memory leaks and DOM errors
+    return () => {
+      // Clean up Google Maps API script if component unmounts
+      if (scriptRef.current && document.head.contains(scriptRef.current)) {
+        document.head.removeChild(scriptRef.current);
+      }
+      
+      // Remove the global callback
+      if (window.initMap) {
+        delete window.initMap;
+      }
+      
+      // Clean up map instance
+      if (map) {
+        // Remove event listeners if any were added directly to the map
+        // google.maps.event.clearInstanceListeners(map);
+        setMap(null);
+      }
+      
+      if (heatmap) {
+        heatmap.setMap(null);
+        setHeatmap(null);
+      }
+    };
   }, [apiKey]);
 
   useEffect(() => {

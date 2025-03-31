@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { X, Save, FileDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,7 @@ const AdvancedMapOverlay: React.FC<AdvancedMapOverlayProps> = ({
       return;
     }
 
+    // Create a new view object with manually copied filter values
     const newView: SavedView = {
       id: Date.now().toString(),
       name: viewName,
