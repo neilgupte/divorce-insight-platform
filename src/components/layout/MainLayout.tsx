@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle } from "lucide-react";
 
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
@@ -26,7 +26,7 @@ const MainLayout = () => {
     {
       name: "Dashboard",
       icon: LayoutDashboard,
-      path: "/",
+      path: "/dashboard",
       permission: "dashboard:view"
     },
     {
@@ -52,6 +52,12 @@ const MainLayout = () => {
       icon: MessageCircle,
       path: "/assistant",
       permission: "assistant:view"
+    },
+    {
+      name: "Audit Logs",
+      icon: Activity,
+      path: "/audit-logs",
+      permission: "logs:view"
     }
   ];
 
@@ -70,6 +76,13 @@ const MainLayout = () => {
     }
   ];
 
+  const supportMenuItem = {
+    name: "Help & Support",
+    icon: HelpCircle,
+    path: "/help",
+    permission: ""
+  };
+
   const filteredMenuItems = menuItems.filter(item => 
     hasPermission(item.permission) || user.role === 'superuser'
   );
@@ -80,7 +93,6 @@ const MainLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
       <div
         className={cn(
           "bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0",
@@ -131,6 +143,15 @@ const MainLayout = () => {
                 ))}
               </>
             )}
+            
+            <div className="my-4 border-t border-sidebar-border"></div>
+            <Link
+              to={supportMenuItem.path}
+              className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            >
+              <supportMenuItem.icon className="mr-3 h-5 w-5" />
+              {supportMenuItem.name}
+            </Link>
           </nav>
 
           <div className="border-t border-sidebar-border p-4">
@@ -162,7 +183,6 @@ const MainLayout = () => {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="border-b bg-card/80 backdrop-blur-sm">
           <div className="flex h-16 items-center justify-between px-4">

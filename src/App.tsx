@@ -18,6 +18,8 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import LuxuryLocations from "@/pages/LuxuryLocations";
 import Index from "@/pages/Index";
+import AuditLogs from "@/pages/AuditLogs";
+import HelpSupport from "@/pages/HelpSupport";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +93,17 @@ const App = () => (
                 <Route path="settings" element={
                   <ProtectedRoute requiredPermission="settings:manage">
                     <Settings />
+                  </ProtectedRoute>
+                } />
+                {/* Add the new pages */}
+                <Route path="audit-logs" element={
+                  <ProtectedRoute requiredPermission="logs:view">
+                    <AuditLogs />
+                  </ProtectedRoute>
+                } />
+                <Route path="help" element={
+                  <ProtectedRoute>
+                    <HelpSupport />
                   </ProtectedRoute>
                 } />
               </Route>

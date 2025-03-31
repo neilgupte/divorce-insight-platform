@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface User {
@@ -35,7 +34,7 @@ const SAMPLE_USERS: User[] = [
     name: 'Regular User',
     email: 'user@example.com',
     role: 'user',
-    permissions: ['dashboard:view', 'location:view', 'reports:view'],
+    permissions: ['dashboard:view', 'location:view', 'reports:view', 'documents:view', 'logs:view'],
     avatar: 'https://ui-avatars.com/api/?name=Regular+User&background=0D8ABC&color=fff',
   }
 ];
