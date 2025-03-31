@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Map, Info, Save } from "lucide-react";
 import { US_STATES } from "@/data/mockData";
 import MapView from "@/components/MapView";
+import { MapFilters } from "@/components/map/utils/mapUtils";
 
 interface LocationMapProps {
   onSaveView?: (name: string) => void;
@@ -18,7 +18,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ onSaveView }) => {
 
   // Create filter object for MapView based on selected metric
   const getFilters = () => {
-    const filters = {
+    const filters: MapFilters = {
       state: region !== "All States" ? region : null,
       divorceRate: {
         enabled: metric === "divorceRate",

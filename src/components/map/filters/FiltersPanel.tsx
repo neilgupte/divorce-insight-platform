@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -7,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { US_STATES } from "@/data/mockData";
-import { MapFilters } from "../types";
+import { MapFilters } from "../utils/mapUtils";
 
 interface FiltersPanelProps {
   filters: MapFilters;
@@ -62,7 +61,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="divorce-enabled" 
-                  checked={filters.divorceRate.enabled}
+                  checked={filters.divorceRate?.enabled}
                   onCheckedChange={(checked) => 
                     updateFilter("divorceRate", "enabled", !!checked)
                   }
@@ -70,15 +69,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <Label htmlFor="divorce-enabled">Divorce Rate</Label>
               </div>
               <span className="text-sm font-medium">
-                {filters.divorceRate.min}%+
+                {filters.divorceRate?.min}%+
               </span>
             </div>
             <Slider 
-              value={[filters.divorceRate.min]} 
+              value={[filters.divorceRate?.min]} 
               min={0}
               max={10}
               step={0.1}
-              disabled={!filters.divorceRate.enabled}
+              disabled={!filters.divorceRate?.enabled}
               onValueChange={(value) => 
                 updateFilter("divorceRate", "min", value[0])
               }
@@ -90,7 +89,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="networth-enabled" 
-                  checked={filters.netWorth.enabled}
+                  checked={filters.netWorth?.enabled}
                   onCheckedChange={(checked) => 
                     updateFilter("netWorth", "enabled", !!checked)
                   }
@@ -98,15 +97,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <Label htmlFor="networth-enabled">Avg. Net Worth</Label>
               </div>
               <span className="text-sm font-medium">
-                ${filters.netWorth.min}M - ${filters.netWorth.max}M
+                ${filters.netWorth?.min}M - ${filters.netWorth?.max}M
               </span>
             </div>
             <Slider 
-              value={[filters.netWorth.min, filters.netWorth.max]} 
+              value={[filters.netWorth?.min, filters.netWorth?.max]} 
               min={1}
               max={100}
               step={1}
-              disabled={!filters.netWorth.enabled}
+              disabled={!filters.netWorth?.enabled}
               onValueChange={(value) => {
                 updateFilter("netWorth", "min", value[0]);
                 updateFilter("netWorth", "max", value[1]);
@@ -119,7 +118,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="luxury-enabled" 
-                  checked={filters.luxuryDensity.enabled}
+                  checked={filters.luxuryDensity?.enabled}
                   onCheckedChange={(checked) => 
                     updateFilter("luxuryDensity", "enabled", !!checked)
                   }
@@ -127,15 +126,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <Label htmlFor="luxury-enabled">Luxury Density</Label>
               </div>
               <span className="text-sm font-medium">
-                {filters.luxuryDensity.min}+/km²
+                {filters.luxuryDensity?.min}+/km²
               </span>
             </div>
             <Slider 
-              value={[filters.luxuryDensity.min]} 
+              value={[filters.luxuryDensity?.min]} 
               min={0}
               max={20}
               step={0.5}
-              disabled={!filters.luxuryDensity.enabled}
+              disabled={!filters.luxuryDensity?.enabled}
               onValueChange={(value) => 
                 updateFilter("luxuryDensity", "min", value[0])
               }
@@ -147,7 +146,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="multi-property-enabled" 
-                  checked={filters.multiProperty.enabled}
+                  checked={filters.multiProperty?.enabled}
                   onCheckedChange={(checked) => 
                     updateFilter("multiProperty", "enabled", !!checked)
                   }
@@ -155,15 +154,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <Label htmlFor="multi-property-enabled">Multi-Property</Label>
               </div>
               <span className="text-sm font-medium">
-                {filters.multiProperty.min}%+
+                {filters.multiProperty?.min}%+
               </span>
             </div>
             <Slider 
-              value={[filters.multiProperty.min]} 
+              value={[filters.multiProperty?.min]} 
               min={0}
               max={100}
               step={5}
-              disabled={!filters.multiProperty.enabled}
+              disabled={!filters.multiProperty?.enabled}
               onValueChange={(value) => 
                 updateFilter("multiProperty", "min", value[0])
               }
