@@ -83,8 +83,8 @@ const Dashboard = () => {
       {/* KPI Cards */}
       <KPICards />
 
-      {/* Main content area */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Main content area - first row */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 mb-6">
         {/* Regional Metrics */}
         <RegionalMetricsChart regionData={regionData} />
 
@@ -93,17 +93,18 @@ const Dashboard = () => {
           luxuryLocations={filteredLuxuryLocations} 
           onViewAll={handleViewAllLocations} 
         />
-
-        {/* AI Insights */}
-        <AIInsightsCard insights={formattedInsights} />
       </div>
 
-      {/* Dummy Map Section (full width) */}
-      <div className="mt-6">
+      {/* Second row - Map and AI Insights */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+        {/* Map Card */}
         <DummyMapCard 
           selectedState={selectedState} 
           selectedCity={selectedCity} 
         />
+        
+        {/* AI Insights */}
+        <AIInsightsCard insights={formattedInsights} />
       </div>
     </div>
   );

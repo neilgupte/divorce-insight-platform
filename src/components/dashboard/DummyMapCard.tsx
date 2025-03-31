@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Toggle, ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Map, MapPin, Layers, Filter } from "lucide-react";
 
@@ -16,9 +16,40 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
   const [mapType, setMapType] = useState<string>("standard");
   const [visibleLayers, setVisibleLayers] = useState<string[]>(["wealth", "divorce"]);
   const [zoom, setZoom] = useState<string>("state");
+  const [showPin, setShowPin] = useState<boolean>(false);
+  const [pinPosition, setPinPosition] = useState({ x: 50, y: 50 });
+
+  // Update pin position based on selected state
+  useEffect(() => {
+    if (selectedState !== "All States") {
+      setShowPin(true);
+      
+      // Set pin positions based on state selection
+      // These are approximate positions on the map image
+      const positions: {[key: string]: {x: number, y: number}} = {
+        "California": { x: 15, y: 45 },
+        "New York": { x: 80, y: 33 },
+        "Texas": { x: 45, y: 65 },
+        "Florida": { x: 75, y: 75 },
+        "Illinois": { x: 60, y: 40 },
+        "Washington": { x: 15, y: 20 },
+        "Massachusetts": { x: 85, y: 28 },
+        "Arizona": { x: 30, y: 55 },
+      };
+      
+      if (positions[selectedState]) {
+        setPinPosition(positions[selectedState]);
+      } else {
+        // Default position if state isn't mapped
+        setPinPosition({ x: 50, y: 50 });
+      }
+    } else {
+      setShowPin(false);
+    }
+  }, [selectedState]);
 
   return (
-    <Card className="col-span-2">
+    <Card className="md:col-span-1 lg:col-span-1">
       <CardHeader>
         <CardTitle className="flex items-center"><Map className="mr-2 h-5 w-5" /> Divorce Rate Heatmap</CardTitle>
         <CardDescription>
@@ -28,7 +59,7 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
       <CardContent className="space-y-4">
         {/* Map Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <Tabs defaultValue="standard" onValueChange={(value) => setMapType(value)}>
+          <Tabs defaultValue="standard" value={mapType} onValueChange={(value) => setMapType(value)}>
             <TabsList className="grid w-full max-w-xs grid-cols-2">
               <TabsTrigger value="standard">Standard</TabsTrigger>
               <TabsTrigger value="satellite">Satellite</TabsTrigger>
@@ -40,8 +71,22 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
               <MapPin className="mr-1 h-4 w-4" />
               {selectedState !== "All States" ? selectedState : "USA"}
             </Button>
-            <Button size="sm" variant="outline" className="px-2">-</Button>
-            <Button size="sm" variant="outline" className="px-2">+</Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="px-2"
+              onClick={() => setZoom(prev => prev === "country" ? "state" : prev === "state" ? "county" : "country")}
+            >
+              -
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="px-2"
+              onClick={() => setZoom(prev => prev === "country" ? "state" : prev === "state" ? "city" : "county")}
+            >
+              +
+            </Button>
           </div>
         </div>
         
@@ -80,40 +125,55 @@ const DummyMapCard: React.FC<DummyMapCardProps> = ({ selectedState, selectedCity
           </div>
         </div>
         
-        {/* Dummy Map Display */}
-        <div className="relative h-[300px] rounded-md bg-slate-100 dark:bg-slate-800 overflow-hidden">
-          {/* Fake Map UI with gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-950 dark:to-slate-900">
-            <div className="absolute inset-0 grid grid-cols-5 grid-rows-5">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <div 
-                  key={i} 
-                  className="border border-blue-200/30 dark:border-blue-800/30"
-                  style={{
-                    opacity: Math.random() * 0.5 + 0.5
-                  }}
-                />
-              ))}
-            </div>
-            
-            {selectedState !== "All States" && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <MapPin className="h-8 w-8 text-red-500" />
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-background/80 px-2 py-0.5 rounded text-sm font-medium">
-                  {selectedCity !== "All Cities" ? selectedCity : selectedState}
-                </div>
+        {/* Map Image with Pin */}
+        <div className="relative h-[300px] rounded-md overflow-hidden">
+          <img 
+            src="/lovable-uploads/1a11e5a3-8087-4ab5-87f9-33d2cab5d813.png" 
+            alt="USA Map" 
+            className="w-full h-full object-cover"
+            style={{
+              filter: mapType === "satellite" ? "contrast(1.1) saturate(1.2)" : "none"
+            }}
+          />
+          
+          {/* Overlay for layers */}
+          {visibleLayers.includes("wealth") && (
+            <div className="absolute inset-0 bg-yellow-500/20 mix-blend-overlay pointer-events-none"></div>
+          )}
+          
+          {visibleLayers.includes("divorce") && (
+            <div className="absolute inset-0 bg-red-500/20 mix-blend-overlay pointer-events-none"></div>
+          )}
+          
+          {visibleLayers.includes("assets") && (
+            <div className="absolute inset-0 bg-blue-500/20 mix-blend-overlay pointer-events-none"></div>
+          )}
+          
+          {/* Pin for selected location */}
+          {showPin && (
+            <div 
+              className="absolute" 
+              style={{ 
+                left: `${pinPosition.x}%`, 
+                top: `${pinPosition.y}%`, 
+                transform: 'translate(-50%, -50%)' 
+              }}
+            >
+              <MapPin className="h-8 w-8 text-red-500 drop-shadow-md" />
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-background/90 px-2 py-0.5 rounded text-sm font-medium shadow">
+                {selectedCity !== "All Cities" ? selectedCity : selectedState}
               </div>
-            )}
-          </div>
+            </div>
+          )}
           
           {/* Map Type Indicator */}
-          <div className="absolute bottom-4 right-4 bg-background/80 px-2 py-1 rounded text-xs">
+          <div className="absolute bottom-4 right-4 bg-background/80 px-2 py-1 rounded text-xs shadow">
             {mapType === "satellite" ? "Satellite View" : "Standard View"} | Zoom: {zoom}
           </div>
         </div>
         
-        <div className="text-xs text-muted-foreground text-center italic">
-          Note: This is a placeholder map visualization. Real map data integration coming soon.
+        <div className="text-xs text-muted-foreground text-center">
+          Interactive map showing high-net-worth divorce trends
         </div>
       </CardContent>
     </Card>
