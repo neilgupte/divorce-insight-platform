@@ -23,12 +23,13 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
   const [regionSummary, setRegionSummary] = useState<RegionSummary | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [apiKeyLoaded, setApiKeyLoaded] = useState(false);
+  const isMounted = useRef(true);
 
   // Try to load API key from localStorage on component mount
   useEffect(() => {
     try {
       const savedApiKey = localStorage.getItem('googleMapsApiKey');
-      if (savedApiKey) {
+      if (savedApiKey && isMounted.current) {
         setApiKey(savedApiKey);
         setApiKeySubmitted(true);
         setApiKeyLoaded(true);
@@ -37,8 +38,14 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
       }
     } catch (error) {
       console.error("Error loading API key from localStorage:", error);
-      setApiKeyLoaded(true); // Mark as loaded even on error
+      if (isMounted.current) {
+        setApiKeyLoaded(true); // Mark as loaded even on error
+      }
     }
+
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const handleSearch = () => {
@@ -47,7 +54,7 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
     try {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ address: searchQuery + ', USA' }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
+        if (status === 'OK' && results && results[0] && isMounted.current) {
           const map = new google.maps.Map(mapRef.current!);
           map.setCenter(results[0].geometry.location);
           map.setZoom(10);
@@ -61,12 +68,16 @@ const MapView = ({ state, city, filters, fullscreen = false }: MapViewProps) => 
           });
         } else {
           console.warn("Geocoding failed with status:", status);
-          setMapError(`Geocoding failed: ${status}`);
+          if (isMounted.current) {
+            setMapError(`Geocoding failed: ${status}`);
+          }
         }
       });
     } catch (error) {
       console.error("Error during search:", error);
-      setMapError("Error during search operation");
+      if (isMounted.current) {
+        setMapError("Error during search operation");
+      }
     }
   };
 

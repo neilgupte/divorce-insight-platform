@@ -48,6 +48,12 @@ const Dashboard = () => {
     luxuryDensity: item.luxuryDensity
   }));
 
+  // Convert AI insights data to use string IDs
+  const formattedInsights = AI_INSIGHTS.map(insight => ({
+    ...insight,
+    id: String(insight.id)
+  }));
+
   const handleViewAllLocations = () => {
     navigate("/location", { state: { fromDashboard: true } });
   };
@@ -95,7 +101,7 @@ const Dashboard = () => {
         />
 
         {/* AI Insights */}
-        <AIInsightsCard insights={AI_INSIGHTS} />
+        <AIInsightsCard insights={formattedInsights} />
       </div>
     </div>
   );

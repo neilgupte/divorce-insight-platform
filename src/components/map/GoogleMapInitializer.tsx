@@ -33,11 +33,12 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
   const callbackName = useRef<string>(`initMap${Date.now()}`);
+  const isComponentMounted = useRef(true);
 
   // Initialize map with filters
   const initializeMap = () => {
     try {
-      if (!window.google || !mapRef.current) {
+      if (!window.google || !mapRef.current || !isComponentMounted.current) {
         console.warn("Google Maps or map container not available");
         return;
       }
@@ -226,9 +227,11 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
       // Define callback before creating script
       window[uniqueCallbackName] = () => {
         console.log("Google Maps script loaded successfully");
-        setScriptLoaded(true);
-        onMapLoaded(true);
-        initializeMap();
+        if (isComponentMounted.current) {
+          setScriptLoaded(true);
+          onMapLoaded(true);
+          initializeMap();
+        }
       };
 
       // Create script element
@@ -240,8 +243,10 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
       // Handle script load errors
       googleMapsScript.onerror = () => {
         console.error("Failed to load Google Maps script");
-        setScriptError("Failed to load Google Maps API");
-        if (onError) onError("Failed to load Google Maps API. Check your API key.");
+        if (isComponentMounted.current) {
+          setScriptError("Failed to load Google Maps API");
+          if (onError) onError("Failed to load Google Maps API. Check your API key.");
+        }
         
         // Clean up the callback to prevent memory leaks
         if (window[uniqueCallbackName]) {
@@ -261,6 +266,9 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
   };
 
   useEffect(() => {
+    // Set component mount state ref
+    isComponentMounted.current = true;
+    
     // If we have an API key, load the map
     if (apiKey) {
       loadGoogleMapsScript();
@@ -268,12 +276,27 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
 
     // Cleanup function to prevent memory leaks and DOM errors
     return () => {
+      // Mark component as unmounted to prevent state updates
+      isComponentMounted.current = false;
+      
       // Clean up Google Maps API script if component unmounts
       if (scriptRef.current) {
-        // Check if the script is still in the document before trying to remove it
-        const script = document.querySelector(`script[src*="${apiKey}"]`);
-        if (script && script.parentNode) {
-          script.parentNode.removeChild(script);
+        // Find the script in the document directly by the callback name, not by src attribute
+        // This avoids issues with comparing URLs with different query params
+        const scripts = document.getElementsByTagName('script');
+        for (let i = 0; i < scripts.length; i++) {
+          const script = scripts[i];
+          if (script.src.includes('maps.googleapis.com') && script.src.includes(callbackName.current)) {
+            try {
+              // Only remove the script if it is currently in the document
+              if (script.parentNode) {
+                script.parentNode.removeChild(script);
+              }
+            } catch (e) {
+              console.error("Error removing script:", e);
+            }
+            break;
+          }
         }
       }
       
@@ -285,12 +308,20 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
       // Clean up map instance
       if (map) {
         // Remove event listeners if any were added directly to the map
-        google.maps.event.clearInstanceListeners(map);
+        try {
+          google.maps.event.clearInstanceListeners(map);
+        } catch (e) {
+          console.error("Error clearing map listeners:", e);
+        }
         setMap(null);
       }
       
       if (heatmap) {
-        heatmap.setMap(null);
+        try {
+          heatmap.setMap(null);
+        } catch (e) {
+          console.error("Error clearing heatmap:", e);
+        }
         setHeatmap(null);
       }
     };
@@ -298,14 +329,14 @@ const GoogleMapInitializer: React.FC<GoogleMapInitializerProps> = ({
 
   useEffect(() => {
     // When state, city or filters change, update the map
-    if (map) {
+    if (map && isComponentMounted.current) {
       try {
         const geocoder = new google.maps.Geocoder();
         const searchTerm = city ? `${city}, ${state}, USA` : state ? `${state}, USA` : null;
         
         if (searchTerm) {
           geocoder.geocode({ address: searchTerm }, (results, status) => {
-            if (status === 'OK' && results && results[0]) {
+            if (status === 'OK' && results && results[0] && isComponentMounted.current) {
               map.setCenter(results[0].geometry.location);
               map.setZoom(city ? 10 : 7);
               
