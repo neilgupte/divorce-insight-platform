@@ -16,6 +16,7 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
 import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
+import DummyMapCard from "@/components/dashboard/DummyMapCard";
 
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
@@ -95,6 +96,14 @@ const Dashboard = () => {
 
         {/* AI Insights */}
         <AIInsightsCard insights={formattedInsights} />
+      </div>
+
+      {/* Dummy Map Section (full width) */}
+      <div className="mt-6">
+        <DummyMapCard 
+          selectedState={selectedState} 
+          selectedCity={selectedCity} 
+        />
       </div>
     </div>
   );
