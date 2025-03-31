@@ -77,8 +77,8 @@ const sampleAuditLogs = [
 
 const AuditLogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<string | undefined>(undefined);
-  const [selectedAction, setSelectedAction] = useState<string | undefined>(undefined);
+  const [selectedUser, setSelectedUser] = useState<string>("all-users");
+  const [selectedAction, setSelectedAction] = useState<string>("all-actions");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   
   // Filter logs based on search term, selected user, action, and date
@@ -91,11 +91,11 @@ const AuditLogs = () => {
       log.ipAddress.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesUser = 
-      !selectedUser || 
+      selectedUser === "all-users" || 
       log.userEmail === selectedUser;
     
     const matchesAction = 
-      !selectedAction || 
+      selectedAction === "all-actions" || 
       log.action === selectedAction;
     
     const matchesDate = 
@@ -135,8 +135,8 @@ const AuditLogs = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedUser(undefined);
-    setSelectedAction(undefined);
+    setSelectedUser("all-users");
+    setSelectedAction("all-actions");
     setSelectedDate(undefined);
   };
 
@@ -176,7 +176,7 @@ const AuditLogs = () => {
                   <SelectValue placeholder="All users" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All users</SelectItem>
+                  <SelectItem value="all-users">All users</SelectItem>
                   {uniqueUsers.map(user => (
                     <SelectItem key={user} value={user}>{user}</SelectItem>
                   ))}
@@ -191,7 +191,7 @@ const AuditLogs = () => {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all-actions">All actions</SelectItem>
                   {uniqueActions.map(action => (
                     <SelectItem key={action} value={action}>
                       {action.charAt(0).toUpperCase() + action.slice(1)}
