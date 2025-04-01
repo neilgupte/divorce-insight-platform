@@ -245,24 +245,6 @@ const LocationAnalyzer = () => {
             />
           </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <Button 
-            variant={view === "comparison" ? "default" : "outline"} 
-            onClick={() => setView("comparison")}
-          >
-            <BarChart3 className="mr-2 h-4 w-4" />
-            Comparison View
-          </Button>
-          
-          <Button 
-            variant="secondary" 
-            onClick={() => setIsAdvancedMapOpen(true)}
-          >
-            <Map className="mr-2 h-4 w-4" />
-            View on Map
-          </Button>
-        </div>
       </div>
 
       <ZIPCodeAnalysis

@@ -102,51 +102,53 @@ const ZIPCodeHeatmap: React.FC<ZIPCodeHeatmapProps> = ({
         </Button>
       </CardHeader>
       <CardContent className={`${expanded ? "h-[calc(100%-4rem)]" : "h-[400px]"} p-4`}>
-        {/* Top Filter Bar */}
-        <div className="flex flex-wrap gap-3 mb-4">
-          <div>
-            <Select value={opportunitySize} onValueChange={setOpportunitySize}>
-              <SelectTrigger className="w-40 h-8">
-                <SelectValue placeholder="Opportunity Size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Sizes">All Sizes</SelectItem>
-                <SelectItem value="Low (<$5M)">Low (&lt;$5M)</SelectItem>
-                <SelectItem value="Medium ($5M–$10M)">Medium ($5M–$10M)</SelectItem>
-                <SelectItem value="High ($10M+)">High ($10M+)</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Only show filters in non-expanded view */}
+        {!expanded && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div>
+              <Select value={opportunitySize} onValueChange={setOpportunitySize}>
+                <SelectTrigger className="w-40 h-8">
+                  <SelectValue placeholder="Opportunity Size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All Sizes">All Sizes</SelectItem>
+                  <SelectItem value="Low (<$5M)">Low (&lt;$5M)</SelectItem>
+                  <SelectItem value="Medium ($5M–$10M)">Medium ($5M–$10M)</SelectItem>
+                  <SelectItem value="High ($10M+)">High ($10M+)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Select value={urbanicity} onValueChange={setUrbanicity}>
+                <SelectTrigger className="w-40 h-8">
+                  <SelectValue placeholder="Urbanicity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Types</SelectItem>
+                  <SelectItem value="Urban">Urban</SelectItem>
+                  <SelectItem value="Suburban">Suburban</SelectItem>
+                  <SelectItem value="Rural">Rural</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Select value={viewMode} onValueChange={(value: 'opportunity' | 'tam') => setViewMode(value)}>
+                <SelectTrigger className="w-40 h-8">
+                  <SelectValue placeholder="View Mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="opportunity">Opportunity</SelectItem>
+                  <SelectItem value="tam">TAM</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          
-          <div>
-            <Select value={urbanicity} onValueChange={setUrbanicity}>
-              <SelectTrigger className="w-40 h-8">
-                <SelectValue placeholder="Urbanicity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Types</SelectItem>
-                <SelectItem value="Urban">Urban</SelectItem>
-                <SelectItem value="Suburban">Suburban</SelectItem>
-                <SelectItem value="Rural">Rural</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Select value={viewMode} onValueChange={(value: 'opportunity' | 'tam') => setViewMode(value)}>
-              <SelectTrigger className="w-40 h-8">
-                <SelectValue placeholder="View Mode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="opportunity">Opportunity</SelectItem>
-                <SelectItem value="tam">TAM</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
         
         {/* Map Container - Now Full Width */}
-        <div className="h-[calc(100%-3rem)]">
+        <div className={`${expanded ? 'h-full' : 'h-[calc(100%-3rem)]'}`}>
           <LeafletMap
             zipData={zipData}
             viewMode={viewMode}
@@ -154,27 +156,29 @@ const ZIPCodeHeatmap: React.FC<ZIPCodeHeatmapProps> = ({
             className="rounded-md"
           />
           
-          {/* Map Legend */}
-          <div className="absolute bottom-8 right-8 bg-card/90 backdrop-blur-sm rounded-md p-2 border z-10">
-            <div className="text-xs font-medium mb-2">
-              {viewMode === 'opportunity' ? 'Opportunity Tiers' : 'TAM Values'}
+          {/* Map Legend - only show in non-expanded view */}
+          {!expanded && (
+            <div className="absolute bottom-8 right-8 bg-card/90 backdrop-blur-sm rounded-md p-2 border z-10">
+              <div className="text-xs font-medium mb-2">
+                {viewMode === 'opportunity' ? 'Opportunity Tiers' : 'TAM Values'}
+              </div>
+              <div className="flex items-center space-x-2 text-xs mb-1">
+                <div className="h-3 w-3 bg-blue-500/50 rounded-sm"></div>
+                <span>Low {viewMode === 'opportunity' ? '($0-5M)' : '($0-10M)'}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs mb-1">
+                <div className="h-3 w-3 bg-purple-500/60 rounded-sm"></div>
+                <span>Medium {viewMode === 'opportunity' ? '($5-10M)' : '($10-20M)'}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs">
+                <div className="h-3 w-3 bg-red-500/70 rounded-sm"></div>
+                <span>High {viewMode === 'opportunity' ? '($10M+)' : '($20M+)'}</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2 text-xs mb-1">
-              <div className="h-3 w-3 bg-blue-500/50 rounded-sm"></div>
-              <span>Low {viewMode === 'opportunity' ? '($0-5M)' : '($0-10M)'}</span>
-            </div>
-            <div className="flex items-center space-x-2 text-xs mb-1">
-              <div className="h-3 w-3 bg-purple-500/60 rounded-sm"></div>
-              <span>Medium {viewMode === 'opportunity' ? '($5-10M)' : '($10-20M)'}</span>
-            </div>
-            <div className="flex items-center space-x-2 text-xs">
-              <div className="h-3 w-3 bg-red-500/70 rounded-sm"></div>
-              <span>High {viewMode === 'opportunity' ? '($10M+)' : '($20M+)'}</span>
-            </div>
-          </div>
+          )}
         </div>
         
-        {/* Expanded view controls */}
+        {/* Expanded view controls - only in expanded view */}
         {expanded && (
           <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
             <Button variant="outline" size="sm" onClick={handlePrint}>
