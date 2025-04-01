@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import DummyMapOverlay from "@/components/map/DummyMapOverlay";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AIChatbot from "@/components/common/AIChatbot";
+import ZIPCodeAnalysis from "@/components/location-analyzer/ZIPCodeAnalysis";
 
 interface Amenity {
   id: number;
@@ -108,11 +109,12 @@ const LocationAnalyzer = () => {
   const [competitorCount, setCompetitorCount] = useState<number>(3);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [aiChatPrompt, setAiChatPrompt] = useState("");
+  const [divorceRateThreshold, setDivorceRateThreshold] = useState<number>(5.0);
   
   const availableCities = state !== "All States" && TOP_CITIES[state] 
     ? ["All Cities", ...TOP_CITIES[state]] 
     : ["All Cities"];
-
+    
   const handleAddAmenity = () => {
     if (!newAmenity.name || !newAmenity.type || !newAmenity.region) {
       toast({
@@ -231,6 +233,17 @@ const LocationAnalyzer = () => {
               ))}
             </SelectContent>
           </Select>
+          
+          <div className="w-40">
+            <Label className="text-xs mb-1 block">Divorce Rate ({divorceRateThreshold}%+)</Label>
+            <Slider
+              value={[divorceRateThreshold]}
+              min={0}
+              max={10}
+              step={0.1}
+              onValueChange={(value) => setDivorceRateThreshold(value[0])}
+            />
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
@@ -251,6 +264,15 @@ const LocationAnalyzer = () => {
           </Button>
         </div>
       </div>
+
+      <ZIPCodeAnalysis
+        selectedState={state}
+        selectedCity={city}
+        netWorthRange={[1, 50]}
+        divorceRateThreshold={divorceRateThreshold}
+        usStates={US_STATES}
+        availableCities={availableCities}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
