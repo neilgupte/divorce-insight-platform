@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import ZIPCodeHeatmap from "./ZIPCodeHeatmap";
 import ZIPCodeTable from "./ZIPCodeTable";
 import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
+import ZIPOpportunitySummary from "./ZIPOpportunitySummary";
 import { ZIPCodeData } from "@/lib/zipUtils";
 
 interface ZIPCodeAnalysisProps {
@@ -22,19 +22,19 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
   usStates,
   availableCities
 }) => {
-  const [heatmapExpanded, setHeatmapExpanded] = useState(false);
   const [tableExpanded, setTableExpanded] = useState(false);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
   
   // Only one view can be expanded at a time
-  const toggleHeatmapExpand = () => {
-    setHeatmapExpanded(!heatmapExpanded);
-    if (!heatmapExpanded) setTableExpanded(false);
-  };
-  
   const toggleTableExpand = () => {
     setTableExpanded(!tableExpanded);
-    if (!tableExpanded) setHeatmapExpanded(false);
+    if (!tableExpanded) setSummaryExpanded(false);
+  };
+  
+  const toggleSummaryExpand = () => {
+    setSummaryExpanded(!summaryExpanded);
+    if (!summaryExpanded) setTableExpanded(false);
   };
 
   const handleZipCodeSelect = (zipData: ZIPCodeData) => {
@@ -67,16 +67,11 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
         
         {/* Summary card on the right (34% width) */}
         <div className="lg:col-span-4">
-          <ZIPCodeHeatmap
+          <ZIPOpportunitySummary
             selectedState={selectedState}
             selectedCity={selectedCity}
-            netWorthRange={netWorthRange}
-            divorceRateThreshold={divorceRateThreshold}
-            expanded={heatmapExpanded}
-            onToggleExpand={toggleHeatmapExpand}
-            usStates={usStates}
-            availableCities={availableCities}
-            onZipCodeSelect={handleZipCodeSelect}
+            expanded={summaryExpanded}
+            onToggleExpand={toggleSummaryExpand}
           />
         </div>
       </div>
