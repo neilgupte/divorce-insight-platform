@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -15,7 +14,8 @@ import {
   SaveIcon, 
   Share, 
   BookmarkIcon,
-  Filter
+  Filter,
+  X
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { normalizeAIInsights } from "@/lib/utils";
 
 // Import our components
 import KPICards from "@/components/dashboard/KPICards";
@@ -112,11 +113,8 @@ const Dashboard = () => {
       luxuryDensity: item.luxuryDensity
     }));
 
-  // Convert AI insights data to use string IDs
-  const formattedInsights = AI_INSIGHTS.map(insight => ({
-    ...insight,
-    id: String(insight.id)
-  }));
+  // Convert AI insights data to use string IDs and normalize format
+  const formattedInsights = normalizeAIInsights(AI_INSIGHTS);
 
   // Calculate KPI metric changes based on filters
   const getFilteredMetrics = useCallback(() => {

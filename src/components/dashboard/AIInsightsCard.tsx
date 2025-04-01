@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +12,13 @@ import {
 
 interface AIInsight {
   id: string;
-  text: string;
-  tags: string[];
-  category: "trend" | "anomaly" | "opportunity";
+  text?: string;
+  title?: string;
+  description?: string;
+  tags?: string[];
+  category?: "trend" | "anomaly" | "opportunity";
+  severity?: string;
+  trend?: string;
 }
 
 interface AIInsightsCardProps {
@@ -27,7 +30,11 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
   insights,
   isLoading
 }) => {
-  const getCategoryColor = (category: AIInsight["category"]) => {
+  const getCategoryColor = (insight: AIInsight) => {
+    const category = insight.category || 
+      (insight.severity === "high" && insight.trend === "increasing" ? "anomaly" :
+       insight.severity === "medium" && insight.trend === "increasing" ? "opportunity" : "trend");
+    
     switch (category) {
       case "trend":
         return "bg-blue-500/10 text-blue-500";
@@ -38,6 +45,43 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
       default:
         return "bg-muted text-muted-foreground";
     }
+  };
+
+  const getInsightText = (insight: AIInsight) => {
+    return insight.text || insight.description || "";
+  };
+
+  const getCategoryName = (insight: AIInsight) => {
+    if (insight.category) {
+      return insight.category.charAt(0).toUpperCase() + insight.category.slice(1);
+    }
+    
+    if (insight.severity === "high" && insight.trend === "increasing") {
+      return "Anomaly";
+    } else if (insight.severity === "medium" && insight.trend === "increasing") {
+      return "Opportunity";
+    } else {
+      return "Trend";
+    }
+  };
+  
+  const getTags = (insight: AIInsight) => {
+    if (insight.tags && insight.tags.length > 0) {
+      return insight.tags;
+    }
+    
+    const generatedTags = [];
+    if (insight.title && !insight.title.includes("Insight")) {
+      generatedTags.push(insight.title.split(" ")[0]);
+    }
+    if (insight.severity) {
+      generatedTags.push(insight.severity === "high" ? "Critical" : "Important");
+    }
+    if (insight.trend) {
+      generatedTags.push(insight.trend.charAt(0).toUpperCase() + insight.trend.slice(1));
+    }
+    
+    return generatedTags.length > 0 ? generatedTags : ["Insight"];
   };
 
   return (
@@ -82,16 +126,16 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
                 <div className="flex justify-between items-start mb-1.5">
                   <Badge
                     variant="outline"
-                    className={`${getCategoryColor(insight.category)} text-xs px-2 py-0 h-5`}
+                    className={`${getCategoryColor(insight)} text-xs px-2 py-0 h-5`}
                   >
-                    {insight.category.charAt(0).toUpperCase() + insight.category.slice(1)}
+                    {getCategoryName(insight)}
                   </Badge>
                   <Lightbulb className="h-4 w-4 text-amber-400" />
                 </div>
-                <p className="text-sm">{insight.text}</p>
+                <p className="text-sm">{getInsightText(insight)}</p>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {insight.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
+                  {getTags(insight).map((tag, idx) => (
+                    <Badge key={`${insight.id}-tag-${idx}`} variant="secondary" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
