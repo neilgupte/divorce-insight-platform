@@ -117,7 +117,11 @@ const Dashboard = () => {
     }
     
     return true;
-  });
+  }).map(location => ({
+    ...location,
+    trend: location.highNetWorthRatio > 0.7 ? "up" : location.highNetWorthRatio > 0.6 ? "stable" : "down",
+    change: `${Math.round((location.highNetWorthRatio - 0.6) * 100)}%`
+  }));
 
   const regionData = REGIONAL_METRICS
     .filter(item => {

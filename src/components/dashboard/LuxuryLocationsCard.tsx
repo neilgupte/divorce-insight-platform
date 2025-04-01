@@ -12,11 +12,12 @@ import {
 } from "@/components/ui/tooltip";
 
 interface LuxuryLocation {
-  id: number;
   city: string;
+  density: number;
   avgValue: string;
-  trend: "up" | "down" | "stable";
-  change: string;
+  highNetWorthRatio: number;
+  trend?: "up" | "down" | "stable";
+  change?: string;
 }
 
 interface LuxuryLocationsCardProps {
@@ -78,9 +79,9 @@ const LuxuryLocationsCard: React.FC<LuxuryLocationsCardProps> = ({
         ) : (
           <>
             <div className="space-y-1 max-h-[270px] overflow-auto pr-2">
-              {luxuryLocations.map((location) => (
+              {luxuryLocations.map((location, index) => (
                 <div
-                  key={location.id}
+                  key={index}
                   className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-md transition-colors"
                 >
                   <div>
@@ -94,7 +95,7 @@ const LuxuryLocationsCard: React.FC<LuxuryLocationsCardProps> = ({
                       ? "bg-red-500/10 text-red-500" 
                       : "bg-amber-500/10 text-amber-500"
                   }`}>
-                    {location.trend === "up" ? "↑" : location.trend === "down" ? "↓" : "→"} {location.change}
+                    {location.trend === "up" ? "↑" : location.trend === "down" ? "↓" : "→"} {location.change || "0%"}
                   </div>
                 </div>
               ))}
