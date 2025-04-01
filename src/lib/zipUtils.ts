@@ -1,4 +1,3 @@
-
 // Mock data generator for ZIP code analysis
 
 export interface ZIPCodeData {
@@ -81,7 +80,12 @@ const stateCities: Record<string, string[]> = {
   "Texas": ["Houston", "Dallas", "Austin", "San Antonio"],
   "Florida": ["Miami", "Orlando", "Tampa", "Jacksonville"],
   "Illinois": ["Chicago", "Springfield", "Peoria", "Rockford"],
-  // Add more as needed
+  "Arkansas": ["Little Rock", "Fayetteville", "Fort Smith", "Jonesboro"],
+  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville"],
+  "Alaska": ["Anchorage", "Fairbanks", "Juneau", "Sitka"],
+  "Arizona": ["Phoenix", "Tucson", "Mesa", "Scottsdale"],
+  "Colorado": ["Denver", "Boulder", "Colorado Springs", "Fort Collins"],
+  "Connecticut": ["Hartford", "New Haven", "Stamford", "Bridgeport"]
 };
 
 // Generate a random ZIP code for a given state
@@ -93,7 +97,7 @@ const generateZipForState = (state: string): string => {
     "Texas": [73301, 79999],
     "Florida": [32003, 34997],
     "Illinois": [60001, 62999],
-    // Default range for other states
+    "Arkansas": [71601, 72959],
     "default": [10000, 99999],
   };
   
@@ -110,10 +114,11 @@ const getCityForState = (state: string): string => {
   }
   
   const cities = stateCities[state];
-  if (cities) {
+  if (cities && cities.length > 0) {
     return cities[Math.floor(Math.random() * cities.length)];
   }
-  return "Unknown City";
+  
+  return "Major City";
 };
 
 // Generate mock ZIP code data based on filters

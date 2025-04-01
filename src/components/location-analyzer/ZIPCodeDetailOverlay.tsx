@@ -50,10 +50,18 @@ const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({
   onClose 
 }) => {
   const [hasOffice, setHasOffice] = useState(false);
-  const [competitorCount, setCompetitorCount] = useState(zipCodeData.competitorCount);
   
   // Generate simulated opportunity based on current competitor count
-  const calculatedOpportunity = zipCodeData.tam * 0.058 / (competitorCount + 1);
+  const calculatedOpportunity = zipCodeData.opportunity;
+  
+  // Get opportunity tier based on value
+  const getOpportunityTier = (value: number) => {
+    if (value >= 10) return { label: "High", variant: "destructive" as const };
+    if (value >= 5) return { label: "Medium", variant: "secondary" as const };
+    return { label: "Low", variant: "default" as const };
+  };
+  
+  const opportunityTier = getOpportunityTier(calculatedOpportunity);
   
   // Mock competitor data
   const competitors = [
@@ -78,7 +86,7 @@ const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({
       size: "Small (2-9 attorneys)",
       years: 12
     }
-  ].slice(0, competitorCount);
+  ].slice(0, zipCodeData.competitorCount);
 
   // Mock HNW household data
   const hnwData = {
@@ -115,8 +123,11 @@ const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({
     <Sheet open={!!zipCodeData} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-[66%] sm:max-w-[66%] overflow-y-auto">
         <SheetHeader className="sticky top-0 bg-background pb-2 pt-6 z-10">
-          <SheetTitle className="text-xl">
-            ZIP Code Overview – {zipCodeData.zipCode}
+          <SheetTitle className="text-xl flex items-center gap-2">
+            <span>ZIP Code Overview – {zipCodeData.zipCode}</span>
+            <Badge variant={opportunityTier.variant} className="ml-2">
+              Opportunity - {opportunityTier.label}
+            </Badge>
           </SheetTitle>
           <div className="text-muted-foreground">
             {zipCodeData.city}, {getStateAbbreviation(zipCodeData.state)}
@@ -156,35 +167,13 @@ const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({
                 <div className="text-xl font-bold">$10M-$50M</div>
               </div>
               
-              {/* Opportunity Calculator */}
+              {/* Opportunity Card */}
               <div className="border rounded-md p-3 bg-primary/5">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">Competitor Count</div>
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => setCompetitorCount(Math.max(0, competitorCount - 1))}
-                    >
-                      <span>-</span>
-                    </Button>
-                    <span className="text-sm font-medium">{competitorCount}</span>
-                    <Button 
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => setCompetitorCount(competitorCount + 1)}
-                    >
-                      <span>+</span>
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-1">
-                  <div className="text-sm text-muted-foreground">$ Opportunity</div>
-                  <div className="text-2xl font-bold text-primary">
+                <div className="text-sm text-muted-foreground">$ Opportunity</div>
+                <div className="text-2xl font-bold">
+                  <Badge variant={opportunityTier.variant} className="text-lg px-2 py-1">
                     ${calculatedOpportunity.toFixed(1)}M
-                  </div>
+                  </Badge>
                 </div>
               </div>
             </div>

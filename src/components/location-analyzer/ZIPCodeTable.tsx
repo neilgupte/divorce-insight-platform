@@ -300,7 +300,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 {sortedData.map((item) => {
                   const opportunityBadge = getOpportunityBadge(item.opportunity);
                   // Generate unique key using multiple properties
-                  const rowKey = `${item.zipCode}-${item.city}-${item.state}-${item.opportunity}`;
+                  const rowKey = `${item.zipCode}-${item.city}-${item.state}-${item.opportunity.toFixed(1)}`;
                   
                   return (
                     <TableRow 
@@ -334,7 +334,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant={opportunityBadge.variant}>
-                                ${item.opportunity}M
+                                ${item.opportunity.toFixed(1)}M
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
