@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -77,6 +76,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
     "tam-desc": { label: "TAM", key: "tam", direction: "descending" },
     "sam-desc": { label: "SAM", key: "sam", direction: "descending" },
     "city-asc": { label: "City (A-Z)", key: "city", direction: "ascending" },
+    "divorceRate-desc": { label: "Divorce Rate (High → Low)", key: "divorceRate", direction: "descending" },
   };
   
   // Current sort configuration
@@ -126,7 +126,13 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       return enhancedData;
     }
     
-    return baseData;
+    // Ensure data includes divorce rates
+    const enhancedData = baseData.map(item => ({
+      ...item,
+      divorceRate: item.divorceRate || (3 + Math.random() * 7) // 3-10% range if not already present
+    }));
+    
+    return enhancedData;
   }, [selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold]);
   
   // Filter data based on opportunity size
@@ -159,12 +165,6 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       return 0;
     });
   }, [filteredData, sortConfig]);
-  
-  // Function to get city abbreviation
-  const getCityAbbreviation = (city: string): string => {
-    // Simple abbreviation: first 3 chars uppercase
-    return city.substring(0, 3).toUpperCase();
-  };
   
   // Function to get opportunity tier badge
   const getOpportunityBadge = (opportunity: number) => {
@@ -255,7 +255,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead 
-                    className="cursor-pointer w-[100px]"
+                    className="cursor-pointer w-[80px]"
                     onClick={() => setSortOption("zipCode")}
                   >
                     <div className="flex items-center">
@@ -263,15 +263,30 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer w-[100px]"
+                    className="cursor-pointer w-[60px]"
                     onClick={() => setSortOption("city-asc")}
                   >
                     <div className="flex items-center">
-                      City, State
+                      City
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right w-[80px]"
+                    className="cursor-pointer w-[50px]"
+                  >
+                    <div className="flex items-center">
+                      State
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer text-right w-[70px]"
+                    onClick={() => setSortOption("divorceRate-desc")}
+                  >
+                    <div className="flex items-center justify-end">
+                      Divorce Rate
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer text-right w-[60px]"
                     onClick={() => setSortOption("tam-desc")}
                   >
                     <div className="flex items-center justify-end">
@@ -279,7 +294,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right w-[80px]"
+                    className="cursor-pointer text-right w-[60px]"
                     onClick={() => setSortOption("sam-desc")}
                   >
                     <div className="flex items-center justify-end">
@@ -287,7 +302,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right w-[140px]"
+                    className="cursor-pointer text-right w-[90px]"
                     onClick={() => setSortOption(sortOption === "opportunity-desc" ? "opportunity-asc" : "opportunity-desc")}
                   >
                     <div className="flex items-center justify-end">
@@ -310,26 +325,32 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                       onMouseEnter={() => setHoveredRow(item.zipCode)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
-                      <TableCell className="font-medium w-[100px]">{item.zipCode}</TableCell>
-                      <TableCell className="w-[100px]">
+                      <TableCell className="font-medium w-[80px]">{item.zipCode}</TableCell>
+                      <TableCell className="w-[60px]">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span>{getCityAbbreviation(item.city)}, {getStateAbbreviation(item.state)}</span>
+                              <span>{item.city.substring(0, 3).toUpperCase()}</span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{item.city}, {item.state}</p>
+                              <p>{item.city}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableCell>
-                      <TableCell className="text-right w-[80px]">
+                      <TableCell className="w-[50px]">
+                        {getStateAbbreviation(item.state)}
+                      </TableCell>
+                      <TableCell className="text-right w-[70px]">
+                        <Badge variant="outline">{item.divorceRate?.toFixed(1)}%</Badge>
+                      </TableCell>
+                      <TableCell className="text-right w-[60px]">
                         <Badge variant="outline">${item.tam}M</Badge>
                       </TableCell>
-                      <TableCell className="text-right w-[80px]">
+                      <TableCell className="text-right w-[60px]">
                         <Badge variant="outline">${item.sam}M</Badge>
                       </TableCell>
-                      <TableCell className="text-right font-medium w-[140px]">
+                      <TableCell className="text-right font-medium w-[90px]">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -348,7 +369,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 })}
                 {sortedData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       No results found.
                     </TableCell>
                   </TableRow>

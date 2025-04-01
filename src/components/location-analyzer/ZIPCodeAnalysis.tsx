@@ -49,30 +49,36 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
     <div className="mb-6">
       <h3 className="text-xl font-semibold mb-4">ZIP Code Opportunity Analysis</h3>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ZIPCodeHeatmap
-          selectedState={selectedState}
-          selectedCity={selectedCity}
-          netWorthRange={netWorthRange}
-          divorceRateThreshold={divorceRateThreshold}
-          expanded={heatmapExpanded}
-          onToggleExpand={toggleHeatmapExpand}
-          usStates={usStates}
-          availableCities={availableCities}
-          onZipCodeSelect={handleZipCodeSelect}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Table on the left (66% width) */}
+        <div className="lg:col-span-8">
+          <ZIPCodeTable
+            selectedState={selectedState}
+            selectedCity={selectedCity}
+            netWorthRange={netWorthRange}
+            divorceRateThreshold={divorceRateThreshold}
+            expanded={tableExpanded}
+            onToggleExpand={toggleTableExpand}
+            usStates={usStates}
+            availableCities={availableCities}
+            onZipCodeSelect={handleZipCodeSelect}
+          />
+        </div>
         
-        <ZIPCodeTable
-          selectedState={selectedState}
-          selectedCity={selectedCity}
-          netWorthRange={netWorthRange}
-          divorceRateThreshold={divorceRateThreshold}
-          expanded={tableExpanded}
-          onToggleExpand={toggleTableExpand}
-          usStates={usStates}
-          availableCities={availableCities}
-          onZipCodeSelect={handleZipCodeSelect}
-        />
+        {/* Map on the right (34% width) */}
+        <div className="lg:col-span-4">
+          <ZIPCodeHeatmap
+            selectedState={selectedState}
+            selectedCity={selectedCity}
+            netWorthRange={netWorthRange}
+            divorceRateThreshold={divorceRateThreshold}
+            expanded={heatmapExpanded}
+            onToggleExpand={toggleHeatmapExpand}
+            usStates={usStates}
+            availableCities={availableCities}
+            onZipCodeSelect={handleZipCodeSelect}
+          />
+        </div>
       </div>
 
       {selectedZipCode && (
