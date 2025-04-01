@@ -16,7 +16,6 @@ import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
 import { Download, Printer, Share2, X, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ZIPCodeMapOverlayProps {
   open: boolean;
@@ -98,11 +97,11 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
 
   // Office locations to show when enabled
   const officeLocations = [
-    { city: "New York", position: [40.7128, -74.0060] },
-    { city: "Los Angeles", position: [34.0522, -118.2437] },
-    { city: "Chicago", position: [41.8781, -87.6298] },
-    { city: "Miami", position: [25.7617, -80.1918] },
-    { city: "San Francisco", position: [37.7749, -122.4194] }
+    { city: "New York", position: [40.7128, -74.0060] as [number, number] },
+    { city: "Los Angeles", position: [34.0522, -118.2437] as [number, number] },
+    { city: "Chicago", position: [41.8781, -87.6298] as [number, number] },
+    { city: "Miami", position: [25.7617, -80.1918] as [number, number] },
+    { city: "San Francisco", position: [37.7749, -122.4194] as [number, number] }
   ];
 
   return (
@@ -135,10 +134,10 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           </div>
         </DialogHeader>
         
-        {/* Horizontal Filter Bar */}
-        <div className="px-4 py-3 border-b bg-white/90 dark:bg-gray-800/90 flex flex-wrap items-center gap-4">
+        {/* Horizontal Filter Bar - now with increased spacing between filters */}
+        <div className="px-6 py-4 border-b bg-white/90 dark:bg-gray-800/90 flex flex-wrap items-center gap-6">
           {/* Urbanicity Filter */}
-          <div className="flex flex-col gap-1 min-w-[140px]">
+          <div className="flex flex-col gap-1 min-w-[160px]">
             <Label htmlFor="urbanicity-filter" className="text-xs font-medium">
               Urbanicity Type
             </Label>
@@ -159,7 +158,7 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           </div>
           
           {/* Opportunity Size Filter */}
-          <div className="flex flex-col gap-1 min-w-[140px]">
+          <div className="flex flex-col gap-1 min-w-[160px]">
             <Label htmlFor="opportunity-filter" className="text-xs font-medium">
               Opportunity Size
             </Label>
@@ -179,8 +178,8 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
             </Select>
           </div>
           
-          {/* Net Worth Range Slider with two handles */}
-          <div className="flex flex-col gap-1 min-w-[240px]">
+          {/* Net Worth Range Slider with two handles - now showing both handles explicitly */}
+          <div className="flex flex-col gap-1 min-w-[260px]">
             <div className="flex justify-between items-center">
               <Label className="text-xs font-medium">Net Worth Range</Label>
               <span className="text-xs text-muted-foreground">
@@ -203,7 +202,7 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           </div>
           
           {/* Divorce Rate Threshold */}
-          <div className="flex flex-col gap-1 min-w-[180px]">
+          <div className="flex flex-col gap-1 min-w-[200px]">
             <div className="flex justify-between items-center">
               <Label className="text-xs font-medium">Divorce Rate Threshold</Label>
               <span className="text-xs text-muted-foreground">
@@ -225,16 +224,17 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
             </div>
           </div>
           
-          {/* Existing Office Location Toggle */}
-          <div className="flex flex-col gap-1">
+          {/* Existing Office Location Toggle - now with improved visibility */}
+          <div className="flex flex-col gap-1 min-w-[180px]">
             <Label htmlFor="show-offices" className="text-xs font-medium">Existing office location</Label>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 bg-secondary/20 p-2 rounded-md">
               <Switch 
                 id="show-offices" 
-                checked={showExistingOffices} 
+                checked={showExistingOffices}
                 onCheckedChange={setShowExistingOffices}
+                className="data-[state=checked]:bg-blue-500"
               />
-              <Label htmlFor="show-offices" className="text-xs">
+              <Label htmlFor="show-offices" className="text-sm font-medium">
                 {showExistingOffices ? "Yes" : "No"}
               </Label>
             </div>

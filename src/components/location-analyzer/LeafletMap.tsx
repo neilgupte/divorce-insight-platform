@@ -1,205 +1,197 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { 
-  MapContainer, 
-  TileLayer, 
-  Polygon, 
-  Tooltip,
-  ZoomControl,
-  useMap,
-  Marker
-} from 'react-leaflet';
-import { ZIPCodeData } from '@/lib/zipUtils';
-import { 
-  ZIPPolygon, 
-  generateZIPPolygons, 
-  getOpportunityColor, 
-  getOpportunityOpacity,
-  getMapBounds,
-  getOpportunityTier
-} from '@/lib/mapUtils';
-import 'leaflet/dist/leaflet.css';
-import { LatLngBoundsExpression, Icon } from 'leaflet';
-import { MapPin } from 'lucide-react';
-
-// Fix the Leaflet icon issue for markers
 import L from 'leaflet';
-delete L.Icon.Default.prototype._getIconUrl;
+import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
+import { ZIPCodeData } from '@/lib/zipUtils';
 
+// Fix for marker icons in Leaflet with React
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+// Custom icon for office locations
+const officeIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+// Define colors for opportunity levels
+const opportunityColors = {
+  Low: '#3b82f6', // Blue
+  Medium: '#8b5cf6', // Purple
+  High: '#ef4444', // Red
+  Default: '#6b7280', // Gray
+};
 
 interface LeafletMapProps {
   zipData: ZIPCodeData[];
   onZipClick: (data: ZIPCodeData) => void;
-  className?: string;
-  opportunityFilter?: 'Low' | 'Medium' | 'High' | 'All';
-  urbanicityFilter?: 'Urban' | 'Suburban' | 'Rural' | 'All';
+  opportunityFilter: 'Low' | 'Medium' | 'High' | 'All';
+  urbanicityFilter: 'Urban' | 'Suburban' | 'Rural' | 'All';
+  showOfficeLocations: boolean;
+  officeLocations: { city: string; position: [number, number] }[];
   fullscreen?: boolean;
-  showOfficeLocations?: boolean;
-  officeLocations?: Array<{ city: string; position: [number, number] }>;
 }
 
-// Component to update map bounds when data changes
-const MapBoundsUpdater: React.FC<{ bounds: LatLngBoundsExpression }> = ({ bounds }) => {
+// Function to filter the data based on filters
+const filterData = (
+  data: ZIPCodeData[],
+  opportunityFilter: 'Low' | 'Medium' | 'High' | 'All',
+  urbanicityFilter: 'Urban' | 'Suburban' | 'Rural' | 'All'
+) => {
+  return data.filter(item => {
+    // Filter by opportunity
+    if (opportunityFilter !== 'All') {
+      if (item.opportunitySize !== opportunityFilter) return false;
+    }
+    
+    // Filter by urbanicity
+    if (urbanicityFilter !== 'All') {
+      if (item.urbanicity !== urbanicityFilter) return false;
+    }
+    
+    return true;
+  });
+};
+
+// Map view updater component
+const MapViewUpdater: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
   const map = useMap();
   
   useEffect(() => {
-    map.fitBounds(bounds);
-  }, [bounds, map]);
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
   
   return null;
 };
 
-const LeafletMap: React.FC<LeafletMapProps> = ({ 
-  zipData, 
-  onZipClick,
-  className,
-  opportunityFilter = 'All',
-  urbanicityFilter = 'All',
-  fullscreen = false,
-  showOfficeLocations = false,
-  officeLocations = []
-}) => {
-  const [polygons, setPolygons] = useState<ZIPPolygon[]>([]);
-  const mapRef = useRef(null);
-  const [bounds, setBounds] = useState<LatLngBoundsExpression>([[25, -125], [49, -65]]);
-  
-  // Filter polygons based on opportunity and urbanicity filters
-  const getFilteredPolygons = (allPolygons: ZIPPolygon[]) => {
-    return allPolygons.filter(polygon => {
-      const data = polygon.data;
-      
-      // Filter by opportunity tier
-      if (opportunityFilter !== 'All') {
-        const tier = getOpportunityTier(data.opportunity);
-        if (tier !== opportunityFilter) return false;
-      }
-      
-      // Filter by urbanicity
-      if (urbanicityFilter !== 'All' && data.urbanicity !== urbanicityFilter) {
-        return false;
-      }
-      
-      return true;
-    });
-  };
-  
-  // Generate polygons when zipData changes
-  useEffect(() => {
-    if (zipData.length) {
-      const generatedPolygons = generateZIPPolygons(zipData);
-      const filteredPolygons = getFilteredPolygons(generatedPolygons);
-      setPolygons(filteredPolygons);
-      
-      // Calculate map bounds
-      const newBounds = getMapBounds(filteredPolygons);
-      setBounds(newBounds);
-    }
-  }, [zipData, opportunityFilter, urbanicityFilter]);
-  
-  // Use colorful OpenStreetMap tiles
-  const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  
+// Legend component
+const Legend: React.FC = () => {
   return (
-    <div className={`w-full h-full ${className || ''}`}>
+    <div className="leaflet-bottom leaflet-right">
+      <div className="leaflet-control leaflet-bar bg-white dark:bg-gray-800 p-2 m-2 rounded-md shadow-md">
+        <h4 className="text-sm font-semibold mb-1">Opportunity</h4>
+        <div className="space-y-1">
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.High }}></div>
+            <span className="text-xs">High ($10M+)</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.Medium }}></div>
+            <span className="text-xs">Medium ($5-10M)</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.Low }}></div>
+            <span className="text-xs">Low ($0-5M)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LeafletMap: React.FC<LeafletMapProps> = ({
+  zipData,
+  onZipClick,
+  opportunityFilter,
+  urbanicityFilter,
+  showOfficeLocations,
+  officeLocations,
+  fullscreen = false
+}) => {
+  const [mapReady, setMapReady] = useState(false);
+  const mapRef = useRef<L.Map | null>(null);
+  const filteredData = filterData(zipData, opportunityFilter, urbanicityFilter);
+  
+  // USA center coordinates and default zoom
+  const center: [number, number] = [39.8283, -98.5795];
+  const defaultZoom = 4;
+  
+  useEffect(() => {
+    if (mapRef.current) {
+      setMapReady(true);
+    }
+  }, [mapRef.current]);
+
+  return (
+    <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
-        ref={mapRef}
-        className="w-full h-full rounded-md"
-        style={{ background: '#f0f0f0' }}
-        bounds={bounds}
+        center={center}
+        zoom={defaultZoom}
+        zoomControl={false}
+        style={{ height: '100%', width: '100%' }}
+        whenReady={(map) => {
+          mapRef.current = map.target;
+          setMapReady(true);
+        }}
       >
         <TileLayer
-          url={tileLayerUrl}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <ZoomControl position="bottomleft" />
+        <MapViewUpdater center={center} zoom={defaultZoom} />
         
-        <ZoomControl position="bottomright" />
-        
-        {/* Update map bounds when data changes */}
-        <MapBoundsUpdater bounds={bounds} />
-        
-        {/* Render ZIP code polygons */}
-        {polygons.map((polygon) => {
-          const data = polygon.data;
-          const displayValue = `$${data.opportunity.toFixed(1)}M`;
-          const color = getOpportunityColor(data.opportunity);
-          const opacity = getOpportunityOpacity(data.opportunity);
+        {/* Render ZIP code data as markers */}
+        {mapReady && filteredData.map((zip, index) => {
+          const opportunityColor = opportunityColors[zip.opportunitySize] || opportunityColors.Default;
+          
+          // Create custom icon with color based on opportunity size
+          const zipMarker = new L.DivIcon({
+            className: 'custom-zip-marker',
+            html: `<div style="background-color: ${opportunityColor}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
+          });
           
           return (
-            <Polygon
-              key={data.zipCode}
-              positions={polygon.coordinates.map(point => [point.lat, point.lng])}
-              pathOptions={{
-                fillColor: color,
-                fillOpacity: opacity,
-                weight: 1,
-                opacity: 0.7,
-                color: 'white',
-              }}
+            <Marker
+              key={`zip-${index}`}
+              position={[zip.latitude, zip.longitude]}
+              icon={zipMarker}
               eventHandlers={{
-                click: () => onZipClick(data),
-                mouseover: (e) => {
-                  const layer = e.target;
-                  layer.setStyle({
-                    weight: 2,
-                    color: '#fff',
-                    fillOpacity: opacity + 0.2,
-                  });
-                },
-                mouseout: (e) => {
-                  const layer = e.target;
-                  layer.setStyle({
-                    weight: 1,
-                    color: 'white',
-                    fillOpacity: opacity,
-                  });
+                click: () => {
+                  onZipClick(zip);
                 },
               }}
             >
               <Tooltip>
-                <div className="font-semibold">{data.zipCode}</div>
-                <div>{data.city}, {data.state}</div>
-                <div className="font-medium">{displayValue}</div>
-                {data.divorceRate && (
-                  <div className="text-sm">Divorce Rate: {data.divorceRate}%</div>
-                )}
+                <div>
+                  <div className="font-semibold">{zip.zipCode} - {zip.city}</div>
+                  <div>Opportunity: ${zip.opportunityValue}M</div>
+                </div>
               </Tooltip>
-            </Polygon>
+            </Marker>
           );
         })}
         
-        {/* Office Location Markers */}
+        {/* Office locations */}
         {showOfficeLocations && officeLocations.map((office, index) => (
-          <Marker 
-            key={`office-${index}`} 
+          <Marker
+            key={`office-${index}`}
             position={office.position}
+            icon={officeIcon}
           >
-            <Tooltip permanent>
-              <div className="font-semibold">{office.city} Office</div>
-            </Tooltip>
+            <Popup>
+              <div>
+                <div className="font-semibold">{office.city} Office</div>
+                <div className="text-sm">Existing office location</div>
+              </div>
+            </Popup>
           </Marker>
         ))}
+        
+        {/* Map Legend */}
+        <Legend />
       </MapContainer>
-      
-      {/* Legend - fixed position at bottom right */}
-      <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-gray-800/90 p-2 rounded shadow-md text-xs z-10">
-        <div className="font-medium mb-1">Opportunity Tiers:</div>
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
-          <span>Low ($0-5M)</span>
-        </div>
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#a855f7' }}></div>
-          <span>Medium ($5-10M)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-          <span>High ($10M+)</span>
-        </div>
-      </div>
     </div>
   );
 };
