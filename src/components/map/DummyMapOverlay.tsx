@@ -54,13 +54,45 @@ const DummyMapOverlay: React.FC<DummyMapOverlayProps> = ({
     setting: S,
     value: MapFilters[K][S]
   ) => {
-    setFilters({
-      ...filters,
-      [category]: {
-        ...filters[category],
-        [setting]: value,
-      },
-    });
+    // Fixed: Create a proper copy of the filter object
+    if (category === 'divorceRate') {
+      setFilters({
+        ...filters,
+        divorceRate: {
+          ...filters.divorceRate,
+          [setting]: value,
+        },
+      });
+    } else if (category === 'netWorth') {
+      setFilters({
+        ...filters,
+        netWorth: {
+          ...filters.netWorth,
+          [setting]: value,
+        },
+      });
+    } else if (category === 'luxuryDensity') {
+      setFilters({
+        ...filters,
+        luxuryDensity: {
+          ...filters.luxuryDensity,
+          [setting]: value,
+        },
+      });
+    } else if (category === 'multiProperty') {
+      setFilters({
+        ...filters,
+        multiProperty: {
+          ...filters.multiProperty,
+          [setting]: value,
+        },
+      });
+    } else if (category === 'state') {
+      setFilters({
+        ...filters,
+        state: value as any,
+      });
+    }
   };
 
   const handleDeleteView = (viewId: string) => {
