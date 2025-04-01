@@ -131,9 +131,9 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           
           <MapContainer
             style={{ height: "100%", width: "100%" }}
+            center={center}
             zoom={defaultZoom}
             zoomControl={false}
-            center={center}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -146,11 +146,10 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
                 key={JSON.stringify(geoJSONData)}
                 data={geoJSONData}
                 pathOptions={(feature) => ({
-                  fillColor: feature.properties.fill || "#3388ff",
-                  weight: feature.properties["stroke-width"] || 1,
-                  opacity: feature.properties["stroke-opacity"] || 0.5,
-                  color: feature.properties.stroke || "#999",
+                  fillColor: feature.properties.fill || "#f00",
+                  color: feature.properties.stroke || "#000",
                   fillOpacity: feature.properties["fill-opacity"] || 0.7,
+                  weight: feature.properties["stroke-width"] || 1,
                 })}
               />
             )}

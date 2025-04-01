@@ -137,9 +137,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
         style={{ height: '100%', width: '100%' }}
+        center={center}
         zoom={defaultZoom}
         zoomControl={false}
-        center={center}
         whenCreated={(map) => {
           mapRef.current = map;
           setMapReady(true);
@@ -168,7 +168,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             <Marker
               key={`zip-${index}`}
               position={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
-              icon={zipMarker}
               eventHandlers={{
                 click: () => {
                   onZipClick(zip);
@@ -190,7 +189,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           <Marker
             key={`office-${index}`}
             position={office.position}
-            icon={officeIcon}
           >
             <Popup>
               <div>
