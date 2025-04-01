@@ -28,8 +28,8 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { generateMockZIPData, ZIPCodeData, getStateAbbreviation } from "@/lib/zipUtils";
 
 interface ZIPCodeTableProps {
@@ -60,11 +60,10 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
     key: keyof ZIPCodeData;
     direction: "ascending" | "descending";
   }>({ key: "opportunity", direction: "descending" });
-  const [competitors, setCompetitors] = useState<number>(3);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   
   // Generate simulated ZIP data
-  const zipData = generateMockZIPData(selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold, competitors);
+  const zipData = generateMockZIPData(selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold, 3);
   
   // Sort data based on current config
   const sortedData = [...zipData].sort((a, b) => {
@@ -93,6 +92,29 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       <ChevronDown className="h-4 w-4" />
     );
   };
+
+  // Function to get opportunity tier badge
+  const getOpportunityBadge = (opportunity: number) => {
+    if (opportunity >= 10) {
+      return {
+        variant: "destructive" as const,
+        label: "High Opportunity",
+        tooltip: "High Opportunity ($10M+)"
+      };
+    } else if (opportunity >= 5) {
+      return {
+        variant: "secondary" as const,
+        label: "Medium Opportunity",
+        tooltip: "Medium Opportunity ($5M-$10M)"
+      };
+    } else {
+      return {
+        variant: "default" as const,
+        label: "Low Opportunity",
+        tooltip: "Low Opportunity (Below $5M)"
+      };
+    }
+  };
   
   return (
     <Card className={`transition-all duration-300 ${expanded ? "fixed inset-4 z-50" : "h-full"}`}>
@@ -107,7 +129,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       </CardHeader>
       <CardContent className={`${expanded ? "h-[calc(100%-4rem)] overflow-y-auto" : "h-[400px] overflow-y-auto"}`}>
         <div className="space-y-4">
-          {/* Table filters */}
+          {/* Table filters - Removed competitor count filter */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
             <div>
               <Label htmlFor="urbanicity" className="text-xs">Urbanicity</Label>
@@ -122,36 +144,6 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                   <SelectItem value="Rural">Rural</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="competitor-count" className="text-xs">Competitor Count: {competitors}</Label>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCompetitors(Math.max(0, competitors - 1))}
-                >
-                  <span>-</span>
-                </Button>
-                <Input 
-                  id="competitor-count"
-                  type="number"
-                  min="0"
-                  value={competitors}
-                  onChange={(e) => setCompetitors(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="text-center h-8"
-                />
-                <Button 
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCompetitors(competitors + 1)}
-                >
-                  <span>+</span>
-                </Button>
-              </div>
             </div>
           </div>
           
@@ -202,14 +194,6 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer text-right"
-                    onClick={() => requestSort("competitorCount")}
-                  >
-                    <div className="flex items-center justify-end">
-                      Competitors {getSortIcon("competitorCount")}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer text-right"
                     onClick={() => requestSort("opportunity")}
                   >
                     <div className="flex items-center justify-end">
@@ -219,34 +203,45 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedData.map((item) => (
-                  <TableRow 
-                    key={item.zipCode}
-                    className={`cursor-pointer transition-colors ${hoveredRow === item.zipCode ? "bg-muted/90" : "hover:bg-muted/50"}`}
-                    onClick={() => onZipCodeSelect(item)}
-                    onMouseEnter={() => setHoveredRow(item.zipCode)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                  >
-                    <TableCell className="font-medium">{item.zipCode}</TableCell>
-                    <TableCell>{getStateAbbreviation(item.state)}</TableCell>
-                    <TableCell>{item.city}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline">${item.tam}M</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline">${item.sam}M</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{item.competitorCount}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      <Badge variant={item.opportunity > 8 ? "default" : item.opportunity > 4 ? "secondary" : "outline"}>
-                        ${item.opportunity}M
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {sortedData.map((item) => {
+                  const opportunityBadge = getOpportunityBadge(item.opportunity);
+                  return (
+                    <TableRow 
+                      key={item.zipCode}
+                      className={`cursor-pointer transition-colors ${hoveredRow === item.zipCode ? "bg-muted/90" : "hover:bg-muted/50"}`}
+                      onClick={() => onZipCodeSelect(item)}
+                      onMouseEnter={() => setHoveredRow(item.zipCode)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <TableCell className="font-medium">{item.zipCode}</TableCell>
+                      <TableCell>{getStateAbbreviation(item.state)}</TableCell>
+                      <TableCell>{item.city}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline">${item.tam}M</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline">${item.sam}M</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant={opportunityBadge.variant}>
+                                ${item.opportunity}M
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{opportunityBadge.tooltip}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {sortedData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No results found.
                     </TableCell>
                   </TableRow>
