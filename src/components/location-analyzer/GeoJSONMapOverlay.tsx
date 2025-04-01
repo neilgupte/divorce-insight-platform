@@ -142,22 +142,29 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           )}
           
           <MapContainer
-            center={center}
+            style={{ height: "100%", width: "100%" }}
             zoom={defaultZoom}
             zoomControl={false}
-            style={{ height: "100%", width: "100%" }}
+            center={center}
           >
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <ZoomControl position="bottomleft" />
             
             {/* GeoJSON Layer for ZIP Code boundaries */}
             {geoJSONData && (
               <GeoJSON
+                key={JSON.stringify(geoJSONData)}
                 data={geoJSONData}
-                style={geoJSONStyle}
+                pathOptions={(feature) => ({
+                  fillColor: feature.properties.fill || "#3388ff",
+                  weight: 1,
+                  opacity: feature.properties["stroke-opacity"] || 0.5,
+                  color: feature.properties.stroke || "#999",
+                  fillOpacity: feature.properties["fill-opacity"] || 0.2,
+                })}
               />
             )}
           </MapContainer>
