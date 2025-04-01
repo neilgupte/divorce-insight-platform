@@ -15,7 +15,6 @@ interface ZIPOpportunitySummaryProps {
   divorceRateThreshold?: number;
   urbanicityFilter?: 'Urban' | 'Suburban' | 'Rural' | 'All';
   opportunityFilter?: 'Low' | 'Medium' | 'High' | 'All';
-  hasOffice?: 'Yes' | 'No' | 'All';
 }
 
 const ZIPOpportunitySummary: React.FC<ZIPOpportunitySummaryProps> = ({
@@ -27,8 +26,7 @@ const ZIPOpportunitySummary: React.FC<ZIPOpportunitySummaryProps> = ({
   netWorthRange = [5, 50],
   divorceRateThreshold = 3,
   urbanicityFilter = 'All',
-  opportunityFilter = 'All',
-  hasOffice = 'All'
+  opportunityFilter = 'All'
 }) => {
   const [isMapOpen, setIsMapOpen] = useState(false);
   

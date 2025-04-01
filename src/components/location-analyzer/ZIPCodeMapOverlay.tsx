@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -14,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { ZIPCodeData, generateMockZIPData } from "@/lib/zipUtils";
 import LeafletMap from "./LeafletMap";
 import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
-import { Download, Printer, Share2, X, ArrowRightLeft } from "lucide-react";
+import { Download, Printer, Share2, X, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -37,10 +36,9 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
   const [urbanicityFilter, setUrbanicityFilter] = useState<'Urban' | 'Suburban' | 'Rural' | 'All'>('All');
   const [netWorthRange, setNetWorthRange] = useState<[number, number]>([5, 50]);
   const [divorceRateThreshold, setDivorceRateThreshold] = useState<number>(3);
-  const [hasOffice, setHasOffice] = useState<'Yes' | 'No' | 'All'>('All');
+  const [showExistingOffices, setShowExistingOffices] = useState<boolean>(false);
   const [zipData, setZipData] = useState<ZIPCodeData[]>([]);
   const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
-  const [viewMode, setViewMode] = useState<'opportunity' | 'tam'>('opportunity');
 
   // Generate mock data for demonstration
   useEffect(() => {
@@ -97,6 +95,15 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
   const formatDivorceRate = (value: number) => {
     return `${value}%`;
   };
+
+  // Office locations to show when enabled
+  const officeLocations = [
+    { city: "New York", position: [40.7128, -74.0060] },
+    { city: "Los Angeles", position: [34.0522, -118.2437] },
+    { city: "Chicago", position: [41.8781, -87.6298] },
+    { city: "Miami", position: [25.7617, -80.1918] },
+    { city: "San Francisco", position: [37.7749, -122.4194] }
+  ];
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -172,7 +179,7 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
             </Select>
           </div>
           
-          {/* Net Worth Range Slider */}
+          {/* Net Worth Range Slider with two handles */}
           <div className="flex flex-col gap-1 min-w-[240px]">
             <div className="flex justify-between items-center">
               <Label className="text-xs font-medium">Net Worth Range</Label>
@@ -218,29 +225,19 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
             </div>
           </div>
           
-          {/* Has Office Toggle */}
+          {/* Existing Office Location Toggle */}
           <div className="flex flex-col gap-1">
-            <Label className="text-xs font-medium">Has Office?</Label>
-            <ToggleGroup type="single" value={hasOffice} onValueChange={(value) => value && setHasOffice(value as any)}>
-              <ToggleGroupItem value="Yes" className="h-9 px-3 text-xs">Yes</ToggleGroupItem>
-              <ToggleGroupItem value="No" className="h-9 px-3 text-xs">No</ToggleGroupItem>
-              <ToggleGroupItem value="All" className="h-9 px-3 text-xs">All</ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-          
-          {/* View Mode Toggle */}
-          <div className="flex flex-col gap-1 ml-auto">
-            <Label className="text-xs font-medium">View Mode</Label>
-            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as any)}>
-              <ToggleGroupItem value="opportunity" className="h-9 px-3 text-xs flex items-center gap-1">
-                <ArrowRightLeft className="h-3 w-3" />
-                Opportunity
-              </ToggleGroupItem>
-              <ToggleGroupItem value="tam" className="h-9 px-3 text-xs flex items-center gap-1">
-                <ArrowRightLeft className="h-3 w-3" />
-                TAM
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <Label htmlFor="show-offices" className="text-xs font-medium">Existing office location</Label>
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="show-offices" 
+                checked={showExistingOffices} 
+                onCheckedChange={setShowExistingOffices}
+              />
+              <Label htmlFor="show-offices" className="text-xs">
+                {showExistingOffices ? "Yes" : "No"}
+              </Label>
+            </div>
           </div>
         </div>
         
@@ -248,10 +245,11 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           {/* Main map */}
           <LeafletMap 
             zipData={zipData}
-            viewMode={viewMode}
             onZipClick={handleZipClick}
             opportunityFilter={opportunityFilter}
             urbanicityFilter={urbanicityFilter}
+            showOfficeLocations={showExistingOffices}
+            officeLocations={officeLocations}
             fullscreen={true}
           />
           

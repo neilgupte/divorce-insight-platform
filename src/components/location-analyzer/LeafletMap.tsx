@@ -6,7 +6,8 @@ import {
   Polygon, 
   Tooltip,
   ZoomControl,
-  useMap
+  useMap,
+  Marker
 } from 'react-leaflet';
 import { ZIPCodeData } from '@/lib/zipUtils';
 import { 
@@ -18,18 +19,28 @@ import {
   getOpportunityTier
 } from '@/lib/mapUtils';
 import 'leaflet/dist/leaflet.css';
-import { LatLngBoundsExpression } from 'leaflet';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layers, Filter } from 'lucide-react';
+import { LatLngBoundsExpression, Icon } from 'leaflet';
+import { MapPin } from 'lucide-react';
+
+// Fix the Leaflet icon issue for markers
+import L from 'leaflet';
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
 
 interface LeafletMapProps {
   zipData: ZIPCodeData[];
-  viewMode?: 'opportunity' | 'tam';
   onZipClick: (data: ZIPCodeData) => void;
   className?: string;
   opportunityFilter?: 'Low' | 'Medium' | 'High' | 'All';
   urbanicityFilter?: 'Urban' | 'Suburban' | 'Rural' | 'All';
   fullscreen?: boolean;
+  showOfficeLocations?: boolean;
+  officeLocations?: Array<{ city: string; position: [number, number] }>;
 }
 
 // Component to update map bounds when data changes
@@ -45,17 +56,17 @@ const MapBoundsUpdater: React.FC<{ bounds: LatLngBoundsExpression }> = ({ bounds
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ 
   zipData, 
-  viewMode = 'opportunity', 
   onZipClick,
   className,
   opportunityFilter = 'All',
   urbanicityFilter = 'All',
-  fullscreen = false
+  fullscreen = false,
+  showOfficeLocations = false,
+  officeLocations = []
 }) => {
   const [polygons, setPolygons] = useState<ZIPPolygon[]>([]);
   const mapRef = useRef(null);
   const [bounds, setBounds] = useState<LatLngBoundsExpression>([[25, -125], [49, -65]]);
-  const [localViewMode, setLocalViewMode] = useState<'opportunity' | 'tam'>(viewMode);
   
   // Filter polygons based on opportunity and urbanicity filters
   const getFilteredPolygons = (allPolygons: ZIPPolygon[]) => {
@@ -90,33 +101,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   }, [zipData, opportunityFilter, urbanicityFilter]);
   
-  // Update view mode when prop changes
-  useEffect(() => {
-    setLocalViewMode(viewMode);
-  }, [viewMode]);
-  
   // Use colorful OpenStreetMap tiles
   const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   
   return (
     <div className={`w-full h-full ${className || ''}`}>
-      {fullscreen && (
-        <div className="absolute top-2 right-16 z-10 bg-white/90 dark:bg-gray-800/90 rounded shadow-md p-1">
-          <Tabs defaultValue={localViewMode} onValueChange={(value) => setLocalViewMode(value as 'opportunity' | 'tam')}>
-            <TabsList>
-              <TabsTrigger value="opportunity" className="flex items-center gap-1 px-3 py-1.5">
-                <Filter className="h-4 w-4" />
-                <span>Opportunity</span>
-              </TabsTrigger>
-              <TabsTrigger value="tam" className="flex items-center gap-1 px-3 py-1.5">
-                <Layers className="h-4 w-4" />
-                <span>TAM</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      )}
-      
       <MapContainer
         ref={mapRef}
         className="w-full h-full rounded-md"
@@ -135,17 +124,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         {/* Render ZIP code polygons */}
         {polygons.map((polygon) => {
           const data = polygon.data;
-          const displayValue = localViewMode === 'opportunity' 
-            ? `$${data.opportunity.toFixed(1)}M` 
-            : `$${data.tam.toFixed(1)}M`;
-          const color = localViewMode === 'opportunity' 
-            ? getOpportunityColor(data.opportunity) 
-            : getOpportunityColor(data.tam / 2); // Adjusting scale for TAM
-          const opacity = getOpportunityOpacity(localViewMode === 'opportunity' ? data.opportunity : data.tam / 2);
+          const displayValue = `$${data.opportunity.toFixed(1)}M`;
+          const color = getOpportunityColor(data.opportunity);
+          const opacity = getOpportunityOpacity(data.opportunity);
           
           return (
             <Polygon
-              key={`${data.zipCode}-${localViewMode}`}
+              key={data.zipCode}
               positions={polygon.coordinates.map(point => [point.lat, point.lng])}
               pathOptions={{
                 fillColor: color,
@@ -185,6 +170,18 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             </Polygon>
           );
         })}
+        
+        {/* Office Location Markers */}
+        {showOfficeLocations && officeLocations.map((office, index) => (
+          <Marker 
+            key={`office-${index}`} 
+            position={office.position}
+          >
+            <Tooltip permanent>
+              <div className="font-semibold">{office.city} Office</div>
+            </Tooltip>
+          </Marker>
+        ))}
       </MapContainer>
       
       {/* Legend - fixed position at bottom right */}
