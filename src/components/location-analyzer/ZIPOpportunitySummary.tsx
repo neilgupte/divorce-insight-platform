@@ -11,6 +11,11 @@ interface ZIPOpportunitySummaryProps {
   expanded?: boolean;
   onToggleExpand?: () => void;
   className?: string;
+  netWorthRange?: [number, number];
+  divorceRateThreshold?: number;
+  urbanicityFilter?: 'Urban' | 'Suburban' | 'Rural' | 'All';
+  opportunityFilter?: 'Low' | 'Medium' | 'High' | 'All';
+  hasOffice?: 'Yes' | 'No' | 'All';
 }
 
 const ZIPOpportunitySummary: React.FC<ZIPOpportunitySummaryProps> = ({
@@ -18,7 +23,12 @@ const ZIPOpportunitySummary: React.FC<ZIPOpportunitySummaryProps> = ({
   selectedCity,
   expanded = false,
   onToggleExpand,
-  className = ""
+  className = "",
+  netWorthRange = [5, 50],
+  divorceRateThreshold = 3,
+  urbanicityFilter = 'All',
+  opportunityFilter = 'All',
+  hasOffice = 'All'
 }) => {
   const [isMapOpen, setIsMapOpen] = useState(false);
   

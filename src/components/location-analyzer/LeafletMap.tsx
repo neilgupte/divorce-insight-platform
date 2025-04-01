@@ -122,7 +122,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         className="w-full h-full rounded-md"
         style={{ background: '#f0f0f0' }}
         bounds={bounds}
-        zoomControl={false}
       >
         <TileLayer
           url={tileLayerUrl}

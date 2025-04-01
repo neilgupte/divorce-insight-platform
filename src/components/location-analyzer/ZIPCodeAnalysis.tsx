@@ -25,6 +25,9 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
   const [tableExpanded, setTableExpanded] = useState(false);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
+  const [urbanicityFilter, setUrbanicityFilter] = useState<'Urban' | 'Suburban' | 'Rural' | 'All'>('All');
+  const [opportunityFilter, setOpportunityFilter] = useState<'Low' | 'Medium' | 'High' | 'All'>('All');
+  const [hasOffice, setHasOffice] = useState<'Yes' | 'No' | 'All'>('All');
   
   // Only one view can be expanded at a time
   const toggleTableExpand = () => {
@@ -62,6 +65,9 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
             usStates={usStates}
             availableCities={availableCities}
             onZipCodeSelect={handleZipCodeSelect}
+            urbanicityFilter={urbanicityFilter}
+            opportunityFilter={opportunityFilter}
+            hasOffice={hasOffice}
           />
         </div>
         
@@ -72,6 +78,11 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
             selectedCity={selectedCity}
             expanded={summaryExpanded}
             onToggleExpand={toggleSummaryExpand}
+            netWorthRange={netWorthRange}
+            divorceRateThreshold={divorceRateThreshold}
+            urbanicityFilter={urbanicityFilter}
+            opportunityFilter={opportunityFilter}
+            hasOffice={hasOffice}
           />
         </div>
       </div>
