@@ -10,6 +10,7 @@ export interface ZIPCodeData {
   opportunity: number; // in $M
   hasOffice: boolean;
   urbanicity: "Urban" | "Suburban" | "Rural";
+  divorceRate?: number; // Added divorceRate property as optional
 }
 
 // States with their abbreviations for reference
@@ -168,7 +169,7 @@ export const generateMockZIPData = (
     // Competitor count with some randomness around the user-set value
     const competitors = Math.max(0, Math.floor(competitorCount + (Math.random() * 4 - 2)));
     
-    // Divorce rate influenced by the threshold
+    // Divorce rate influenced by the threshold (modified to always include divorce rate)
     const divorceRate = (divorceRateThreshold + Math.random() * 3) / 100;
     
     // Opportunity calculation: TAM × Divorce Rate ÷ (Competitors + 1)
@@ -186,7 +187,8 @@ export const generateMockZIPData = (
       competitorCount: competitors,
       opportunity,
       hasOffice,
-      urbanicity: urbanType
+      urbanicity: urbanType,
+      divorceRate: parseFloat((divorceRate * 100).toFixed(1)) // Convert to percentage and store
     });
   }
   

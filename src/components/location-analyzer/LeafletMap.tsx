@@ -68,8 +68,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         ref={mapRef}
         className="w-full h-full rounded-md"
         style={{ background: '#f0f0f0' }}
-        center={[39.8283, -98.5795]} // Center of US
+        bounds={bounds}
         zoom={4}
+        zoomControl={false}
       >
         <TileLayer
           url={tileLayerUrl}
