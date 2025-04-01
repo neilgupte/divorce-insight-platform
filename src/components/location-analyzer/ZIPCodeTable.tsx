@@ -61,6 +61,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
     direction: "ascending" | "descending";
   }>({ key: "opportunity", direction: "descending" });
   const [competitors, setCompetitors] = useState<number>(3);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   
   // Generate simulated ZIP data
   const zipData = generateMockZIPData(selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold, competitors);
@@ -221,8 +222,10 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 {sortedData.map((item) => (
                   <TableRow 
                     key={item.zipCode}
-                    className="cursor-pointer hover:bg-muted/80"
+                    className={`cursor-pointer transition-colors ${hoveredRow === item.zipCode ? "bg-muted/90" : "hover:bg-muted/50"}`}
                     onClick={() => onZipCodeSelect(item)}
+                    onMouseEnter={() => setHoveredRow(item.zipCode)}
+                    onMouseLeave={() => setHoveredRow(null)}
                   >
                     <TableCell className="font-medium">{item.zipCode}</TableCell>
                     <TableCell>{getStateAbbreviation(item.state)}</TableCell>

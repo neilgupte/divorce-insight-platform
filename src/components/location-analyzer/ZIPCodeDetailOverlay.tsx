@@ -5,277 +5,367 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetDescription,
   SheetFooter,
   SheetClose
 } from "@/components/ui/sheet";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { 
-  Building2, 
-  Users, 
-  Plane, 
-  DollarSign, 
-  Download, 
-  FileText, 
-  Share2,
-  Star,
-  Calendar,
-  Users2
+  Building,
+  Users,
+  Home,
+  Map,
+  TrendingUp,
+  FileText,
+  Plus,
+  Link,
+  Pin,
+  X,
+  Plane,
+  Building2,
+  Store,
+  Hotel
 } from "lucide-react";
-import { ZIPCodeData, CompetitorData, HNWHouseholdStats, LuxuryInfrastructure, generateMockCompetitors, generateHNWHouseholdStats, generateLuxuryInfrastructure, getStateAbbreviation } from "@/lib/zipUtils";
-import { useToast } from "@/hooks/use-toast";
+import { ZIPCodeData, getStateAbbreviation } from "@/lib/zipUtils";
 
 interface ZIPCodeDetailOverlayProps {
   zipCodeData: ZIPCodeData;
   onClose: () => void;
 }
 
-const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({
-  zipCodeData,
-  onClose
+const ZIPCodeDetailOverlay: React.FC<ZIPCodeDetailOverlayProps> = ({ 
+  zipCodeData, 
+  onClose 
 }) => {
-  const { toast } = useToast();
-  const [hasOffice, setHasOffice] = useState<boolean>(zipCodeData.hasOffice);
-  const [competitorCount, setCompetitorCount] = useState<number>(zipCodeData.competitorCount);
-  const [competitors] = useState<CompetitorData[]>(
-    generateMockCompetitors(zipCodeData.zipCode, zipCodeData.competitorCount)
-  );
-  const [hnwStats] = useState<HNWHouseholdStats>(
-    generateHNWHouseholdStats(zipCodeData.zipCode, zipCodeData.urbanicity)
-  );
-  const [infrastructure] = useState<LuxuryInfrastructure>(
-    generateLuxuryInfrastructure(zipCodeData.zipCode, zipCodeData.urbanicity)
-  );
+  const [hasOffice, setHasOffice] = useState(false);
+  const [competitorCount, setCompetitorCount] = useState(zipCodeData.competitorCount);
   
-  // Calculate opportunity based on current competitor count
-  const calculateOpportunity = () => {
-    // Simulated divorce rate (based on threshold value)
-    const divorceRate = 0.058; // 5.8% (simulated)
-    return parseFloat((zipCodeData.tam * divorceRate / (competitorCount + 1)).toFixed(1));
+  // Generate simulated opportunity based on current competitor count
+  const calculatedOpportunity = zipCodeData.tam * 0.058 / (competitorCount + 1);
+  
+  // Mock competitor data
+  const competitors = [
+    {
+      name: "Elite Divorce Partners LLC",
+      address: `123 Wealth St, ${zipCodeData.city}, ${getStateAbbreviation(zipCodeData.state)} ${zipCodeData.zipCode}`,
+      principal: "Alexandra Morgan, Esq.",
+      size: "Large (25+ attorneys)",
+      years: 15
+    },
+    {
+      name: "Highworth Family Law Group",
+      address: `456 Fortune Ave, ${zipCodeData.city}, ${getStateAbbreviation(zipCodeData.state)} ${zipCodeData.zipCode}`,
+      principal: "Jonathan Wells, Esq.",
+      size: "Medium (10-24 attorneys)",
+      years: 8
+    },
+    {
+      name: "Prestige Matrimonial Solutions",
+      address: `789 Luxury Blvd, ${zipCodeData.city}, ${getStateAbbreviation(zipCodeData.state)} ${zipCodeData.zipCode}`,
+      principal: "Victoria Reynolds, Esq.",
+      size: "Small (2-9 attorneys)",
+      years: 12
+    }
+  ].slice(0, competitorCount);
+
+  // Mock HNW household data
+  const hnwData = {
+    totalHouseholds: Math.round(zipCodeData.tam * 10),
+    multiPropertyPercent: 68,
+    avgProperties: 3.4,
+    assetProtectionPercent: 76
   };
   
-  const handleExportPDF = () => {
-    toast({
-      title: "Exporting PDF",
-      description: `ZIP ${zipCodeData.zipCode} data is being exported to PDF.`
-    });
+  // Mock infrastructure data
+  const infrastructureData = {
+    luxuryRetail: Math.floor(Math.random() * 8) + 3,
+    privateAirports: Math.floor(Math.random() * 3),
+    exclusiveClubs: Math.floor(Math.random() * 6) + 2,
+    fiveStarHotels: Math.floor(Math.random() * 5) + 1
   };
   
-  const handleAddToReport = () => {
-    toast({
-      title: "Added to Report",
-      description: `ZIP ${zipCodeData.zipCode} has been added to your current report.`
-    });
+  // Mock trend data
+  const trendData = {
+    caseDuration: {
+      months: 9,
+      trend: 14, // percent change
+      direction: "up" as const
+    },
+    assetProtection: {
+      description: "Pre-divorce LLC transfers",
+      percent: 23,
+      period: "Q1"
+    },
+    aiInsight: `ZIP ${zipCodeData.zipCode} shows unusually high legal activity for high-net-worth divorces.`
   };
-  
-  const handleShareInsights = () => {
-    toast({
-      title: "Share ZIP Insights",
-      description: "ZIP insights link has been copied to clipboard."
-    });
-  };
-  
+
   return (
-    <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-md overflow-y-auto">
-        <SheetHeader className="mb-6">
-          <SheetTitle>ZIP Code Overview – {zipCodeData.zipCode}</SheetTitle>
-          <SheetDescription>
-            {zipCodeData.city}, {getStateAbbreviation(zipCodeData.state)} • {zipCodeData.urbanicity}
-          </SheetDescription>
+    <Sheet open={!!zipCodeData} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="w-[66%] sm:max-w-[66%] overflow-y-auto">
+        <SheetHeader className="sticky top-0 bg-background pb-2 pt-6 z-10">
+          <SheetTitle className="text-xl">
+            ZIP Code Overview – {zipCodeData.zipCode}
+          </SheetTitle>
+          <div className="text-muted-foreground">
+            {zipCodeData.city}, {getStateAbbreviation(zipCodeData.state)}
+          </div>
+          <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </SheetClose>
         </SheetHeader>
-        
-        <div className="space-y-6">
-          {/* TAM / SAM Section */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle className="text-lg flex items-center">
-                <DollarSign className="h-5 w-5 mr-2" />
-                Market Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-2 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Total Addressable Market</Label>
-                  <div className="text-xl font-bold">${zipCodeData.tam}M</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Serviceable Market</Label>
-                  <div className="text-xl font-bold">${zipCodeData.sam}M</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Competitors</Label>
-                  <div className="flex items-center gap-2">
+
+        <div className="py-6 space-y-8">
+          {/* 1. ZIP Summary */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Map className="mr-2 h-5 w-5" />
+              ZIP Summary
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Total Addressable Market</div>
+                <div className="text-xl font-bold">${zipCodeData.tam}M</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Serviceable Market</div>
+                <div className="text-xl font-bold">${zipCodeData.sam}M</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Divorce Rate</div>
+                <div className="text-xl font-bold">5.8%</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Avg. Net Worth</div>
+                <div className="text-xl font-bold">${zipCodeData.tam * 0.1}M</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Net Worth Bracket</div>
+                <div className="text-xl font-bold">$10M-$50M</div>
+              </div>
+              
+              {/* Opportunity Calculator */}
+              <div className="border rounded-md p-3 bg-primary/5">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">Competitor Count</div>
+                  <div className="flex items-center gap-1">
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-5 w-5"
                       onClick={() => setCompetitorCount(Math.max(0, competitorCount - 1))}
                     >
                       <span>-</span>
                     </Button>
-                    <Input 
-                      type="number"
-                      min="0"
-                      value={competitorCount}
-                      onChange={(e) => setCompetitorCount(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="text-center h-7"
-                    />
+                    <span className="text-sm font-medium">{competitorCount}</span>
                     <Button 
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-5 w-5"
                       onClick={() => setCompetitorCount(competitorCount + 1)}
                     >
                       <span>+</span>
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">$ Opportunity</Label>
-                  <div className="text-xl font-bold text-primary">${calculateOpportunity()}M</div>
+                <div className="mt-1">
+                  <div className="text-sm text-muted-foreground">$ Opportunity</div>
+                  <div className="text-2xl font-bold text-primary">
+                    ${calculatedOpportunity.toFixed(1)}M
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* 2. Competitor Intelligence */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Building className="mr-2 h-5 w-5" />
+              Competitor Intelligence
+            </h3>
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Business Name</TableHead>
+                    <TableHead>Principal</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Size</TableHead>
+                    <TableHead className="text-right">Years Active</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {competitors.map((comp, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{comp.name}</TableCell>
+                      <TableCell>{comp.principal}</TableCell>
+                      <TableCell className="text-sm">{comp.address}</TableCell>
+                      <TableCell>{comp.size}</TableCell>
+                      <TableCell className="text-right">{comp.years}</TableCell>
+                    </TableRow>
+                  ))}
+                  {competitors.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-6">
+                        No competitor data available for this ZIP code.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* 3. HNW Household Metrics */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Users className="mr-2 h-5 w-5" />
+              HNW Household Metrics
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Total HNW Households</div>
+                <div className="text-xl font-bold">{hnwData.totalHouseholds}</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Multi-Property Households</div>
+                <div className="text-xl font-bold">{hnwData.multiPropertyPercent}%</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Avg. Properties/Household</div>
+                <div className="text-xl font-bold">{hnwData.avgProperties}</div>
+              </div>
+              <div className="border rounded-md p-3">
+                <div className="text-sm text-muted-foreground">Asset Protection Entities</div>
+                <div className="text-xl font-bold">{hnwData.assetProtectionPercent}%</div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* 4. Nearby Infrastructure */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Home className="mr-2 h-5 w-5" />
+              Nearby Infrastructure
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="border rounded-md p-3 flex flex-col items-center">
+                <Store className="h-8 w-8 mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">Luxury Retail Hubs</div>
+                <div className="text-xl font-bold">{infrastructureData.luxuryRetail}</div>
+              </div>
+              <div className="border rounded-md p-3 flex flex-col items-center">
+                <Plane className="h-8 w-8 mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">Private Airports</div>
+                <div className="text-xl font-bold">{infrastructureData.privateAirports}</div>
+              </div>
+              <div className="border rounded-md p-3 flex flex-col items-center">
+                <Building2 className="h-8 w-8 mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">Exclusive Clubs</div>
+                <div className="text-xl font-bold">{infrastructureData.exclusiveClubs}</div>
+              </div>
+              <div className="border rounded-md p-3 flex flex-col items-center">
+                <Hotel className="h-8 w-8 mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">5-Star Hotels</div>
+                <div className="text-xl font-bold">{infrastructureData.fiveStarHotels}</div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* 5. Trends & Indicators */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <TrendingUp className="mr-2 h-5 w-5" />
+              Trends & Indicators
+            </h3>
+            <div className="space-y-4">
+              <div className="border rounded-md p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">Divorce Case Duration</div>
+                  <Badge variant={trendData.caseDuration.direction === "up" ? "destructive" : "default"}>
+                    {trendData.caseDuration.direction === "up" ? "↑" : "↓"} {trendData.caseDuration.trend}% YoY
+                  </Badge>
+                </div>
+                <div className="text-xl font-bold mt-1">Avg. {trendData.caseDuration.months} months</div>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">{trendData.assetProtection.description}</div>
+                  <Badge>
+                    ↑ {trendData.assetProtection.percent}% in {trendData.assetProtection.period}
+                  </Badge>
                 </div>
               </div>
               
-              <div className="pt-2 flex justify-between items-center">
-                <Label htmlFor="has-office" className="flex items-center cursor-pointer gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Has Office
-                </Label>
-                <Switch 
-                  id="has-office" 
-                  checked={hasOffice}
-                  onCheckedChange={setHasOffice}
-                />
+              <div className="bg-muted/30 rounded-md p-4 border border-dashed">
+                <div className="text-sm text-muted-foreground mb-1">AI Generated Insight</div>
+                <div className="text-sm font-medium italic">"{trendData.aiInsight}"</div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           
-          {/* Competitor Intelligence */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle className="text-lg flex items-center">
-                <Building2 className="h-5 w-5 mr-2" />
-                Competitor Intelligence
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-2 space-y-4">
-              {competitors.map((competitor, index) => (
-                <div key={index} className="border border-border rounded-md p-3 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div className="font-medium">{competitor.name}</div>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 text-yellow-500 mr-1" />
-                      <span className="text-sm">{competitor.rating}</span>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">{competitor.address}</div>
-                  <div className="text-sm flex justify-between">
-                    <div className="flex items-center gap-1">
-                      <Users2 className="h-3 w-3" />
-                      <span>{competitor.principal}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span className="text-xs">{competitor.yearsInOperation} yrs</span>
-                      </span>
-                      <span className="text-xs">{competitor.size}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <Separator />
           
-          {/* HNW Household Stats */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle className="text-lg flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                HNW Household Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Count</Label>
-                  <div className="text-lg font-bold">{hnwStats.count}</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Avg Net Worth</Label>
-                  <div className="text-lg font-bold">{hnwStats.averageNetWorth}</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Multi-Property</Label>
-                  <div className="text-lg font-bold">{hnwStats.multiPropertyPercentage}%</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Nearby Infrastructure */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle className="text-lg flex items-center">
-                <Plane className="h-5 w-5 mr-2" />
-                Nearby Infrastructure
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Private Airstrips</Label>
-                  <div className="text-lg font-bold">{infrastructure.privateAirstrips}</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Luxury Clubs</Label>
-                  <div className="text-lg font-bold">{infrastructure.luxuryClubs}</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">5-Star Hotels</Label>
-                  <div className="text-lg font-bold">{infrastructure.fiveStarHotels}</div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">High-End Retail</Label>
-                  <div className="text-lg font-bold">{infrastructure.highEndRetail}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* 6. Has Office Toggle */}
+          <div>
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Building className="mr-2 h-5 w-5" />
+              Office Location
+            </h3>
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="has-office" 
+                checked={hasOffice}
+                onCheckedChange={setHasOffice}
+              />
+              <Label htmlFor="has-office">
+                Do you have an office in this ZIP?
+              </Label>
+            </div>
+          </div>
         </div>
         
-        <Separator className="my-6" />
-        
-        {/* Actions */}
-        <div className="flex flex-col gap-3">
-          <Button onClick={handleExportPDF}>
-            <Download className="h-4 w-4 mr-2" />
-            Export as PDF
+        {/* 7. Actions Footer */}
+        <SheetFooter className="flex-col sm:flex-row gap-3 mt-6 border-t pt-6">
+          <Button className="flex-1">
+            <FileText className="mr-2 h-4 w-4" />
+            Export ZIP Report (PDF)
           </Button>
-          <Button variant="secondary" onClick={handleAddToReport}>
-            <FileText className="h-4 w-4 mr-2" />
-            Add to Report
+          <Button variant="outline" className="flex-1">
+            <Plus className="mr-2 h-4 w-4" />
+            Add to Report Builder
           </Button>
-          <Button variant="outline" onClick={handleShareInsights}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share ZIP Insights
+          <Button variant="outline" className="flex-1">
+            <Link className="mr-2 h-4 w-4" />
+            Copy Shareable Link
           </Button>
-        </div>
+          <Button variant="outline" className="flex-1">
+            <Pin className="mr-2 h-4 w-4" />
+            Pin to Comparison List
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
