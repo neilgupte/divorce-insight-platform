@@ -28,7 +28,7 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // California center coordinates
-  const center: [number, number] = [37.1841, -119.4696];
+  const center: [number, number] = [36.7783, -119.4179];
   const defaultZoom = 6;
 
   useEffect(() => {
@@ -131,8 +131,8 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           
           <MapContainer
             style={{ height: "100%", width: "100%" }}
-            center={center}
-            zoom={defaultZoom}
+            center={[36.7783, -119.4179]}
+            zoom={6}
             zoomControl={false}
           >
             <TileLayer
@@ -145,11 +145,11 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
               <GeoJSON
                 key={JSON.stringify(geoJSONData)}
                 data={geoJSONData}
-                pathOptions={(feature) => ({
-                  fillColor: feature.properties.fill || "#f00",
-                  color: feature.properties.stroke || "#000",
-                  fillOpacity: feature.properties["fill-opacity"] || 0.7,
-                  weight: feature.properties["stroke-width"] || 1,
+                style={(feature) => ({
+                  fillColor: feature?.properties?.fill || "#ccc",
+                  color: feature?.properties?.stroke || "#000",
+                  weight: 1,
+                  fillOpacity: 0.7,
                 })}
               />
             )}
