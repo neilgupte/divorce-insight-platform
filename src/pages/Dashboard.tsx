@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -26,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { normalizeAIInsights } from "@/lib/utils";
+import { normalizeAIInsights, generateAIInsight } from "@/lib/utils";
 
 // Import our components
 import KPICards from "@/components/dashboard/KPICards";
@@ -36,7 +37,6 @@ import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 import MapCard from "@/components/dashboard/MapCard";
 import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
-import AIChatbot from "@/components/common/AIChatbot";
 
 // Define snapshot interface
 interface DashboardSnapshot {
@@ -50,6 +50,17 @@ interface DashboardSnapshot {
   };
 }
 
+// Define interfaces for our components
+interface LuxuryLocation {
+  id: string;
+  city: string;
+  density: number;
+  avgValue: string;
+  highNetWorthRatio: number;
+  trend: string;
+  change: number;
+}
+
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
   const [selectedCity, setSelectedCity] = useState<string>("All Cities");
@@ -57,6 +68,7 @@ const Dashboard = () => {
   const [isSnapshotDialogOpen, setIsSnapshotDialogOpen] = useState(false);
   const [savedSnapshots, setSavedSnapshots] = useState<DashboardSnapshot[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
+  const [insights, setInsights] = useState(normalizeAIInsights(AI_INSIGHTS));
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -112,9 +124,6 @@ const Dashboard = () => {
       divorceRate: item.divorceRate,
       luxuryDensity: item.luxuryDensity
     }));
-
-  // Convert AI insights data to use string IDs and normalize format
-  const formattedInsights = normalizeAIInsights(AI_INSIGHTS);
 
   // Calculate KPI metric changes based on filters
   const getFilteredMetrics = useCallback(() => {
@@ -219,6 +228,26 @@ const Dashboard = () => {
       description: "The snapshot has been removed.",
       duration: 3000,
     });
+  };
+
+  // Handler for adding new AI insights
+  const handleAddInsight = async (prompt: string) => {
+    try {
+      const currentFilters = {
+        selectedState,
+        selectedCity,
+        netWorthRange
+      };
+      
+      const newInsight = await generateAIInsight(prompt, currentFilters);
+      const normalizedInsight = normalizeAIInsights([newInsight])[0];
+      
+      setInsights(prevInsights => [normalizedInsight, ...prevInsights]);
+      return normalizedInsight;
+    } catch (error) {
+      console.error("Error generating insight:", error);
+      return null;
+    }
   };
 
   return (
@@ -333,7 +362,7 @@ const Dashboard = () => {
         {/* Top Luxury Locations (33%) */}
         <div className="md:col-span-1">
           <LuxuryLocationsCard 
-            luxuryLocations={filteredLuxuryLocations} 
+            luxuryLocations={filteredLuxuryLocations as LuxuryLocation[]} 
             onViewAll={handleViewAllLocations}
             isLoading={isDataLoading}
           />
@@ -345,8 +374,9 @@ const Dashboard = () => {
         {/* AI Insights (33%) */}
         <div className="md:col-span-1">
           <AIInsightsCard 
-            insights={formattedInsights}
+            insights={insights}
             isLoading={isDataLoading}
+            onAddInsight={handleAddInsight}
           />
         </div>
         
@@ -355,7 +385,6 @@ const Dashboard = () => {
           <MapCard 
             selectedState={selectedState !== "All States" ? selectedState : null} 
             selectedCity={selectedCity !== "All Cities" ? selectedCity : null}
-            isLoading={isDataLoading}
           />
         </div>
       </div>
@@ -370,21 +399,6 @@ const Dashboard = () => {
           city: selectedCity,
           netWorthRange: netWorthRange
         }}
-      />
-      
-      {/* AI Chatbot */}
-      <AIChatbot 
-        dashboardFilters={{
-          selectedState,
-          selectedCity,
-          netWorthRange
-        }}
-        onUpdateFilters={{
-          setSelectedState,
-          setSelectedCity,
-          setNetWorthRange
-        }}
-        onExport={handleExport}
       />
     </div>
   );

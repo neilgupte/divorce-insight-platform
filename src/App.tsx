@@ -22,7 +22,6 @@ import LuxuryLocations from "@/pages/LuxuryLocations";
 import Index from "@/pages/Index";
 import AuditLogs from "@/pages/AuditLogs";
 import HelpSupport from "@/pages/HelpSupport";
-import AIChatbot from "@/components/common/AIChatbot";
 
 const queryClient = new QueryClient();
 
@@ -114,7 +113,6 @@ const App = () => (
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <AIChatbot />
               </BrowserRouter>
             </TooltipProvider>
           </MessagingProvider>
