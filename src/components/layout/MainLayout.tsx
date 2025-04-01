@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
@@ -199,6 +200,7 @@ const MainLayout = () => {
             </Button>
 
             <div className="flex items-center space-x-2 ml-auto">
+              <ThemeToggle />
               <NotificationCenter />
               <MessagingCenter />
             </div>
