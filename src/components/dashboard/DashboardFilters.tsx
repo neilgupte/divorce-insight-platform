@@ -57,15 +57,15 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     }
   }, [stateSearchValue, usStates]);
   
-  // Filter cities based on search input
+  // Filter cities based on search input and update when availableCities changes
   useEffect(() => {
+    setFilteredCities(availableCities);
+    
     if (citySearchValue) {
       const filtered = availableCities.filter(city => 
         city.toLowerCase().includes(citySearchValue.toLowerCase())
       );
       setFilteredCities(filtered);
-    } else {
-      setFilteredCities(availableCities);
     }
   }, [citySearchValue, availableCities]);
   
@@ -74,6 +74,14 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     setStateSearchValue("");
     setCitySearchValue("");
   }, [selectedState, selectedCity]);
+
+  // Reset city selection when state changes
+  useEffect(() => {
+    // If state changes, reset city to "All Cities"
+    if (selectedCity !== "All Cities") {
+      onCityChange("All Cities");
+    }
+  }, [selectedState]);
 
   return (
     <div className="mb-6 space-y-5">
@@ -170,12 +178,13 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({
                       />
                     </div>
                     <SelectItem value="All Cities">All Cities</SelectItem>
-                    {filteredCities.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                    {filteredCities.length === 0 && (
+                    {filteredCities.length > 0 ? (
+                      filteredCities.map(city => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))
+                    ) : (
                       <div className="p-2 text-center text-sm text-muted-foreground">
-                        No cities found
+                        No cities available for this state
                       </div>
                     )}
                   </>

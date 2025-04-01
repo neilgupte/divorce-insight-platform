@@ -41,9 +41,13 @@ const Dashboard = () => {
       return false;
     }
     
-    // Filter by net worth range (assuming location.avgNetWorth is in millions)
-    const netWorth = location.avgNetWorth / 1000000; // Convert to millions
-    if (netWorth < netWorthRange[0] || netWorth > netWorthRange[1]) {
+    // Convert the string average value to a number for filtering
+    // Example: "$6.5M" -> 6.5 (in millions)
+    const avgValueStr = location.avgValue.replace('$', '').replace('M', '');
+    const avgNetWorthInMillions = parseFloat(avgValueStr);
+    
+    // Filter by net worth range
+    if (avgNetWorthInMillions < netWorthRange[0] || avgNetWorthInMillions > netWorthRange[1]) {
       return false;
     }
     

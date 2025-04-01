@@ -1,4 +1,3 @@
-
 // Mock data for the platform
 
 // US States for filters and maps
@@ -15,11 +14,31 @@ export const US_STATES = [
 
 // Top cities by state for filters
 export const TOP_CITIES: Record<string, string[]> = {
-  "California": ["Los Angeles", "San Francisco", "San Diego", "Beverly Hills", "Malibu", "Newport Beach", "Palo Alto"],
-  "New York": ["New York City", "Hamptons", "Scarsdale", "Great Neck", "Bronxville", "Rye"],
-  "Florida": ["Miami", "Palm Beach", "Naples", "Boca Raton", "Key Biscayne", "Jupiter Island"],
-  "Texas": ["Dallas", "Houston", "Austin", "San Antonio", "Highland Park", "The Woodlands"],
-  // Add more states as needed
+  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+  "Alaska": ["Anchorage", "Fairbanks", "Juneau", "Sitka", "Ketchikan"],
+  "Arizona": ["Phoenix", "Tucson", "Mesa", "Scottsdale", "Chandler", "Sedona"],
+  "Arkansas": ["Little Rock", "Fayetteville", "Fort Smith", "Springdale", "Jonesboro"],
+  "California": ["Los Angeles", "San Francisco", "San Diego", "Beverly Hills", "Malibu", "Newport Beach", "Palo Alto", "San Jose", "Sacramento"],
+  "Colorado": ["Denver", "Boulder", "Colorado Springs", "Aspen", "Vail", "Fort Collins"],
+  "Connecticut": ["Hartford", "New Haven", "Stamford", "Greenwich", "Westport", "Darien"],
+  "Delaware": ["Wilmington", "Dover", "Newark", "Rehoboth Beach", "Lewes"],
+  "Florida": ["Miami", "Palm Beach", "Naples", "Boca Raton", "Key Biscayne", "Jupiter Island", "Orlando", "Tampa", "Jacksonville"],
+  "Georgia": ["Atlanta", "Savannah", "Augusta", "Athens", "Marietta", "Sea Island"],
+  "Hawaii": ["Honolulu", "Kahului", "Hilo", "Kailua", "Lahaina", "Kauai"],
+  "Idaho": ["Boise", "Coeur d'Alene", "Idaho Falls", "Sun Valley", "Sandpoint"],
+  "Illinois": ["Chicago", "Naperville", "Evanston", "Lake Forest", "Winnetka", "Highland Park"],
+  "New York": ["New York City", "Hamptons", "Scarsdale", "Great Neck", "Bronxville", "Rye", "Buffalo", "Albany", "Syracuse"],
+  "Texas": ["Dallas", "Houston", "Austin", "San Antonio", "Highland Park", "The Woodlands", "Fort Worth", "Plano", "El Paso"],
+  "Massachusetts": ["Boston", "Cambridge", "Newton", "Weston", "Lexington"],
+  "New Jersey": ["Newark", "Jersey City", "Princeton", "Short Hills", "Alpine"],
+  "Washington": ["Seattle", "Bellevue", "Medina", "Mercer Island", "Spokane"],
+  "Nevada": ["Las Vegas", "Reno", "Henderson", "Incline Village", "Carson City"],
+  "Virginia": ["Richmond", "Virginia Beach", "McLean", "Alexandria", "Great Falls"],
+  "Pennsylvania": ["Philadelphia", "Pittsburgh", "Bryn Mawr", "Gladwyne", "Sewickley Heights"],
+  "North Carolina": ["Charlotte", "Raleigh", "Chapel Hill", "Asheville", "Cary"],
+  "Maryland": ["Baltimore", "Bethesda", "Potomac", "Chevy Chase", "Annapolis"],
+  "Michigan": ["Detroit", "Ann Arbor", "Bloomfield Hills", "Grosse Pointe", "Birmingham"],
+  "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Shaker Heights", "Hudson"]
 };
 
 // Net worth brackets for filters
