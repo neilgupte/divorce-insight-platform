@@ -65,7 +65,7 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
           />
         </div>
         
-        {/* Map on the right (34% width) */}
+        {/* Summary card on the right (34% width) */}
         <div className="lg:col-span-4">
           <ZIPCodeHeatmap
             selectedState={selectedState}

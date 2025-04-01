@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -46,7 +47,7 @@ interface ZIPCodeTableProps {
 // Type for sorting options
 type SortOption = {
   label: string;
-  key: keyof ZIPCodeData;
+  key: keyof ZIPCodeData | "divorceRate";
   direction: "ascending" | "descending";
 };
 
@@ -126,13 +127,11 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       return enhancedData;
     }
     
-    // Ensure data includes divorce rates
-    const enhancedData = baseData.map(item => ({
+    // Ensure data includes divorce rates (updated to always provide a divorce rate)
+    return baseData.map(item => ({
       ...item,
-      divorceRate: item.divorceRate || (3 + Math.random() * 7) // 3-10% range if not already present
+      divorceRate: item.divorceRate !== undefined ? item.divorceRate : (3 + Math.random() * 7) // 3-10% range if not already present
     }));
-    
-    return enhancedData;
   }, [selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold]);
   
   // Filter data based on opportunity size
@@ -156,10 +155,18 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
   // Sort data based on current config
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
+      // Handle divorce rate sorting specially since it's not directly a key of ZIPCodeData
+      if (sortConfig.key === "divorceRate") {
+        const aValue = a.divorceRate || 0;
+        const bValue = b.divorceRate || 0;
+        return sortConfig.direction === "ascending" ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Handle other keys
+      if (a[sortConfig.key as keyof ZIPCodeData] < b[sortConfig.key as keyof ZIPCodeData]) {
         return sortConfig.direction === "ascending" ? -1 : 1;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
+      if (a[sortConfig.key as keyof ZIPCodeData] > b[sortConfig.key as keyof ZIPCodeData]) {
         return sortConfig.direction === "ascending" ? 1 : -1;
       }
       return 0;

@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Map, Maximize2, Printer, Download, Share2, Minimize2 } from "lucide-react";
+import { Maximize2, Map } from "lucide-react";
 import { generateMockZIPData, ZIPCodeData } from "@/lib/zipUtils";
 import { useToast } from "@/hooks/use-toast";
-import LeafletMap from "./LeafletMap";
 
 interface ZIPCodeHeatmapProps {
   selectedState: string;
@@ -50,120 +49,83 @@ const ZIPCodeHeatmap: React.FC<ZIPCodeHeatmapProps> = ({
     setZipData(data);
   }, [selectedState, selectedCity, netWorthRange, divorceRateThreshold]);
   
-  const handlePrint = () => {
-    toast({
-      title: "Print Functionality",
-      description: "Printing map view...",
-    });
-    window.print();
-  };
-  
-  const handleDownload = () => {
-    toast({
-      title: "Download Initiated",
-      description: "Map image downloading...",
-    });
-  };
-  
-  const handleShare = () => {
-    toast({
-      title: "Share Link Created",
-      description: "Map link copied to clipboard!",
-    });
+  // Count ZIP codes by opportunity tier
+  const opportunityCounts = {
+    high: zipData.filter(zip => zip.opportunity >= 10).length,
+    medium: zipData.filter(zip => zip.opportunity >= 5 && zip.opportunity < 10).length,
+    low: zipData.filter(zip => zip.opportunity < 5).length
   };
   
   return (
-    <Card className={`transition-all duration-300 ${expanded ? "fixed inset-0 z-50" : "h-full"}`}>
+    <Card className={`transition-all duration-300 h-full ${expanded ? "fixed inset-0 z-50" : ""}`}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center">
-          <Map className="mr-2 h-5 w-5" />
-          <CardTitle>ZIP Code Map</CardTitle>
+        <div>
+          <CardTitle className="flex items-center">
+            <Map className="mr-2 h-5 w-5" />
+            ZIP Opportunity Map
+          </CardTitle>
+          <CardDescription>
+            Explore high-opportunity ZIPs across the U.S.
+          </CardDescription>
         </div>
-        <Button variant="ghost" size="icon" onClick={onToggleExpand}>
-          {expanded ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
-        </Button>
       </CardHeader>
-      <CardContent className={`${expanded ? "h-[calc(100%-4rem)] p-0" : "h-[400px]"} relative`}>
-        {/* Simplified map view without filters */}
-        <div className={`w-full ${expanded ? 'h-full' : 'h-[calc(100%-1rem)]'}`}>
-          <LeafletMap
-            zipData={zipData}
-            viewMode={viewMode}
-            onZipClick={onZipCodeSelect}
-            className={`${expanded ? 'h-full' : 'h-full'} w-full`}
-          />
-          
-          {/* Expand overlay button for non-expanded view */}
-          {!expanded && (
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="absolute bottom-4 right-4 z-10"
-              onClick={onToggleExpand}
-            >
-              <Maximize2 className="h-4 w-4 mr-2" />
-              Expand to Full View
-            </Button>
-          )}
-          
-          {/* Map Legend */}
-          {!expanded && (
-            <div className="absolute bottom-16 right-4 bg-card/90 backdrop-blur-sm rounded-md p-2 border z-10">
-              <div className="text-xs font-medium mb-2">
-                Opportunity Tiers
-              </div>
-              <div className="flex items-center space-x-2 text-xs mb-1">
-                <div className="h-3 w-3 bg-blue-500/50 rounded-sm"></div>
-                <span>Low ($0-5M)</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs mb-1">
-                <div className="h-3 w-3 bg-purple-500/60 rounded-sm"></div>
-                <span>Medium ($5-10M)</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs">
-                <div className="h-3 w-3 bg-red-500/70 rounded-sm"></div>
-                <span>High ($10M+)</span>
-              </div>
-            </div>
-          )}
+      <CardContent className="space-y-4">
+        {/* USA Map Illustration or Icon */}
+        <div className="flex justify-center mb-2">
+          <div className="w-24 h-24 flex items-center justify-center rounded-full bg-muted">
+            <Map className="h-12 w-12 text-primary opacity-70" />
+          </div>
         </div>
         
-        {/* Expanded view filter and controls */}
-        {expanded && (
-          <>
-            <div className="absolute top-4 left-4 z-10 flex gap-4 bg-background/90 backdrop-blur-sm p-3 rounded-md border">
-              <Button 
-                variant={viewMode === 'opportunity' ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setViewMode('opportunity')}
-              >
-                Opportunity View
-              </Button>
-              <Button 
-                variant={viewMode === 'tam' ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setViewMode('tam')}
-              >
-                TAM View
-              </Button>
-            </div>
-            
-            <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            </div>
-          </>
-        )}
+        {/* Opportunity Summary */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col items-center p-3 rounded-md bg-red-500/10 border border-red-500/20">
+            <span className="text-lg font-bold">{opportunityCounts.high}</span>
+            <span className="text-xs text-muted-foreground">High</span>
+          </div>
+          <div className="flex flex-col items-center p-3 rounded-md bg-purple-500/10 border border-purple-500/20">
+            <span className="text-lg font-bold">{opportunityCounts.medium}</span>
+            <span className="text-xs text-muted-foreground">Medium</span>
+          </div>
+          <div className="flex flex-col items-center p-3 rounded-md bg-blue-500/10 border border-blue-500/20">
+            <span className="text-lg font-bold">{opportunityCounts.low}</span>
+            <span className="text-xs text-muted-foreground">Low</span>
+          </div>
+        </div>
+        
+        {/* Opportunity Tiers Legend */}
+        <div className="bg-card/90 backdrop-blur-sm rounded-md p-3 border">
+          <div className="text-xs font-medium mb-2">
+            Opportunity Tiers
+          </div>
+          <div className="flex items-center space-x-2 text-xs mb-1">
+            <div className="h-3 w-3 bg-red-500/70 rounded-sm"></div>
+            <span>High ($10M+)</span>
+          </div>
+          <div className="flex items-center space-x-2 text-xs mb-1">
+            <div className="h-3 w-3 bg-purple-500/60 rounded-sm"></div>
+            <span>Medium ($5-10M)</span>
+          </div>
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="h-3 w-3 bg-blue-500/50 rounded-sm"></div>
+            <span>Low ($0-5M)</span>
+          </div>
+        </div>
+        
+        {/* Total Opportunity Value */}
+        <div className="bg-muted p-3 rounded-md text-center">
+          <div className="text-sm font-medium mb-1">Total Opportunity Value</div>
+          <div className="text-xl font-bold">${zipData.reduce((sum, zip) => sum + zip.opportunity, 0).toFixed(1)}M</div>
+        </div>
+        
+        {/* View Full Map Button */}
+        <Button 
+          className="w-full" 
+          onClick={onToggleExpand}
+        >
+          <Maximize2 className="h-4 w-4 mr-2" />
+          View Full Map
+        </Button>
       </CardContent>
     </Card>
   );
