@@ -119,7 +119,7 @@ const Dashboard = () => {
     return true;
   }).map(location => ({
     ...location,
-    trend: location.highNetWorthRatio > 0.7 ? "up" : location.highNetWorthRatio > 0.6 ? "stable" : "down",
+    trend: location.highNetWorthRatio > 0.7 ? "up" as const : location.highNetWorthRatio > 0.6 ? "stable" as const : "down" as const,
     change: `${Math.round((location.highNetWorthRatio - 0.6) * 100)}%`
   }));
 
