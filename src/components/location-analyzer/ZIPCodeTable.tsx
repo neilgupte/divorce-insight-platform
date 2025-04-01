@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Table, 
@@ -44,6 +44,16 @@ interface ZIPCodeTableProps {
   onZipCodeSelect: (zipData: ZIPCodeData) => void;
 }
 
+// Type for sorting options
+type SortOption = {
+  label: string;
+  key: keyof ZIPCodeData;
+  direction: "ascending" | "descending";
+};
+
+// Type for opportunity size filter
+type OpportunitySize = "All" | "High" | "Medium" | "Low";
+
 const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
   selectedState,
   selectedCity,
@@ -56,43 +66,106 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
   onZipCodeSelect
 }) => {
   const [urbanicity, setUrbanicity] = useState<string>("All");
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof ZIPCodeData;
-    direction: "ascending" | "descending";
-  }>({ key: "opportunity", direction: "descending" });
+  const [opportunitySize, setOpportunitySize] = useState<OpportunitySize>("All");
+  const [sortOption, setSortOption] = useState<string>("opportunity-desc");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   
-  // Generate simulated ZIP data
-  const zipData = generateMockZIPData(selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold, 3);
+  // Sort options for the dropdown
+  const sortOptions: Record<string, SortOption> = {
+    "opportunity-desc": { label: "Opportunity (High → Low)", key: "opportunity", direction: "descending" },
+    "opportunity-asc": { label: "Opportunity (Low → High)", key: "opportunity", direction: "ascending" },
+    "tam-desc": { label: "TAM", key: "tam", direction: "descending" },
+    "sam-desc": { label: "SAM", key: "sam", direction: "descending" },
+    "city-asc": { label: "City (A-Z)", key: "city", direction: "ascending" },
+  };
+  
+  // Current sort configuration
+  const sortConfig = sortOptions[sortOption];
+  
+  // Generate simulated ZIP data with a variety of opportunity levels
+  const zipData = useMemo(() => {
+    const baseData = generateMockZIPData(selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold, 3, 15);
+    
+    // Ensure data includes at least 2 high tier, 3 medium tier items
+    const highTierCount = baseData.filter(item => item.opportunity >= 10).length;
+    const mediumTierCount = baseData.filter(item => item.opportunity >= 5 && item.opportunity < 10).length;
+    
+    if (highTierCount < 2 || mediumTierCount < 3) {
+      const enhancedData = [...baseData];
+      
+      // Add high tier items if needed
+      if (highTierCount < 2) {
+        for (let i = 0; i < 2 - highTierCount; i++) {
+          const existingItem = enhancedData[i];
+          if (existingItem) {
+            enhancedData[i] = {
+              ...existingItem,
+              opportunity: 10 + Math.floor(Math.random() * 5), // 10-15M
+              tam: 20 + Math.floor(Math.random() * 10),
+              sam: 15 + Math.floor(Math.random() * 5)
+            };
+          }
+        }
+      }
+      
+      // Add medium tier items if needed
+      if (mediumTierCount < 3) {
+        for (let i = 0; i < 3 - mediumTierCount; i++) {
+          const existingItem = enhancedData[2 + i];
+          if (existingItem) {
+            enhancedData[2 + i] = {
+              ...existingItem,
+              opportunity: 5 + Math.floor(Math.random() * 4) + Math.random(), // 5-9.9M
+              tam: 10 + Math.floor(Math.random() * 10),
+              sam: 8 + Math.floor(Math.random() * 5)
+            };
+          }
+        }
+      }
+      
+      return enhancedData;
+    }
+    
+    return baseData;
+  }, [selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold]);
+  
+  // Filter data based on opportunity size
+  const filteredData = useMemo(() => {
+    if (opportunitySize === "All") return zipData;
+    
+    return zipData.filter(item => {
+      switch (opportunitySize) {
+        case "High":
+          return item.opportunity >= 10;
+        case "Medium":
+          return item.opportunity >= 5 && item.opportunity < 10;
+        case "Low":
+          return item.opportunity < 5;
+        default:
+          return true;
+      }
+    });
+  }, [zipData, opportunitySize]);
   
   // Sort data based on current config
-  const sortedData = [...zipData].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === "ascending" ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === "ascending" ? 1 : -1;
-    }
-    return 0;
-  });
+  const sortedData = useMemo(() => {
+    return [...filteredData].sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredData, sortConfig]);
   
-  const requestSort = (key: keyof ZIPCodeData) => {
-    let direction: "ascending" | "descending" = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
+  // Function to get city abbreviation
+  const getCityAbbreviation = (city: string): string => {
+    // Simple abbreviation: first 3 chars uppercase
+    return city.substring(0, 3).toUpperCase();
   };
-
-  const getSortIcon = (key: keyof ZIPCodeData) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "ascending" ? (
-      <ChevronUp className="h-4 w-4" />
-    ) : (
-      <ChevronDown className="h-4 w-4" />
-    );
-  };
-
+  
   // Function to get opportunity tier badge
   const getOpportunityBadge = (opportunity: number) => {
     if (opportunity >= 10) {
@@ -129,8 +202,8 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       </CardHeader>
       <CardContent className={`${expanded ? "h-[calc(100%-4rem)] overflow-y-auto" : "h-[400px] overflow-y-auto"}`}>
         <div className="space-y-4">
-          {/* Table filters - Removed competitor count filter */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+          {/* Table filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div>
               <Label htmlFor="urbanicity" className="text-xs">Urbanicity</Label>
               <Select value={urbanicity} onValueChange={setUrbanicity}>
@@ -145,6 +218,35 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 </SelectContent>
               </Select>
             </div>
+            
+            <div>
+              <Label htmlFor="opportunity-size" className="text-xs">Opportunity Size</Label>
+              <Select value={opportunitySize} onValueChange={(value) => setOpportunitySize(value as OpportunitySize)}>
+                <SelectTrigger id="opportunity-size">
+                  <SelectValue placeholder="All Sizes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Sizes</SelectItem>
+                  <SelectItem value="High">High ($10M+)</SelectItem>
+                  <SelectItem value="Medium">Medium ($5M-$10M)</SelectItem>
+                  <SelectItem value="Low">Low (&lt;$5M)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="sort-by" className="text-xs">Sort By</Label>
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger id="sort-by">
+                  <SelectValue placeholder="Opportunity (High → Low)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(sortOptions).map(([key, option]) => (
+                    <SelectItem key={key} value={key}>{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           {/* Table */}
@@ -154,50 +256,42 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 <TableRow>
                   <TableHead 
                     className="cursor-pointer w-[100px]"
-                    onClick={() => requestSort("zipCode")}
+                    onClick={() => setSortOption("zipCode")}
                   >
                     <div className="flex items-center">
-                      ZIP Code {getSortIcon("zipCode")}
+                      ZIP Code
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer w-[80px]"
-                    onClick={() => requestSort("state")}
+                    className="cursor-pointer w-[100px]"
+                    onClick={() => setSortOption("city-asc")}
                   >
                     <div className="flex items-center">
-                      State {getSortIcon("state")}
+                      City, State
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer"
-                    onClick={() => requestSort("city")}
-                  >
-                    <div className="flex items-center">
-                      City {getSortIcon("city")}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer text-right w-[90px]"
-                    onClick={() => requestSort("tam")}
+                    className="cursor-pointer text-right w-[80px]"
+                    onClick={() => setSortOption("tam-desc")}
                   >
                     <div className="flex items-center justify-end">
-                      TAM {getSortIcon("tam")}
+                      TAM
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right w-[90px]"
-                    onClick={() => requestSort("sam")}
+                    className="cursor-pointer text-right w-[80px]"
+                    onClick={() => setSortOption("sam-desc")}
                   >
                     <div className="flex items-center justify-end">
-                      SAM {getSortIcon("sam")}
+                      SAM
                     </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer text-right w-[140px]"
-                    onClick={() => requestSort("opportunity")}
+                    onClick={() => setSortOption(sortOption === "opportunity-desc" ? "opportunity-asc" : "opportunity-desc")}
                   >
                     <div className="flex items-center justify-end">
-                      $ Opportunity {getSortIcon("opportunity")}
+                      $ Opportunity {sortOption.startsWith("opportunity") && (sortOption.endsWith("desc") ? <ChevronDown className="h-4 w-4 ml-1" /> : <ChevronUp className="h-4 w-4 ml-1" />)}
                     </div>
                   </TableHead>
                 </TableRow>
@@ -205,8 +299,8 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               <TableBody>
                 {sortedData.map((item) => {
                   const opportunityBadge = getOpportunityBadge(item.opportunity);
-                  // Generate unique key using more properties to avoid duplicate keys
-                  const rowKey = `${item.zipCode}-${item.city}-${item.state}`;
+                  // Generate unique key using multiple properties
+                  const rowKey = `${item.zipCode}-${item.city}-${item.state}-${item.opportunity}`;
                   
                   return (
                     <TableRow 
@@ -217,12 +311,22 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                       onMouseLeave={() => setHoveredRow(null)}
                     >
                       <TableCell className="font-medium w-[100px]">{item.zipCode}</TableCell>
-                      <TableCell className="w-[80px]">{getStateAbbreviation(item.state)}</TableCell>
-                      <TableCell>{item.city}</TableCell>
-                      <TableCell className="text-right w-[90px]">
+                      <TableCell className="w-[100px]">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>{getCityAbbreviation(item.city)}, {getStateAbbreviation(item.state)}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{item.city}, {item.state}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell className="text-right w-[80px]">
                         <Badge variant="outline">${item.tam}M</Badge>
                       </TableCell>
-                      <TableCell className="text-right w-[90px]">
+                      <TableCell className="text-right w-[80px]">
                         <Badge variant="outline">${item.sam}M</Badge>
                       </TableCell>
                       <TableCell className="text-right font-medium w-[140px]">
@@ -244,7 +348,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                 })}
                 {sortedData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No results found.
                     </TableCell>
                   </TableRow>
