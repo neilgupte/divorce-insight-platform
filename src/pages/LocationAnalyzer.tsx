@@ -33,11 +33,14 @@ import {
   LineChart as LineChartIcon, 
   PieChart as PieChartIcon, 
   Plus, 
-  Save 
+  Save,
+  DollarSign,
+  Info
 } from "lucide-react";
 import { US_STATES, TOP_CITIES } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import DummyMapOverlay from "@/components/map/DummyMapOverlay";
+import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Amenity {
   id: number;
@@ -100,6 +103,7 @@ const LocationAnalyzer = () => {
     amenities: 15,
   });
   const [view, setView] = useState<"standard" | "comparison">("standard");
+  const [competitorCount, setCompetitorCount] = useState<number>(3);
   
   const availableCities = state !== "All States" && TOP_CITIES[state] 
     ? ["All Cities", ...TOP_CITIES[state]] 
@@ -151,6 +155,21 @@ const LocationAnalyzer = () => {
     }, 0);
     
     return parseFloat(weightedSum.toFixed(1));
+  };
+
+  const calculateOpportunity = (): string => {
+    const totalNetWorth = 142000000; // $142M (simulated total net worth)
+    const divorceRate = 0.058; // 5.8% (from the mock data)
+    
+    const opportunity = totalNetWorth * divorceRate / (competitorCount + 1);
+    
+    if (opportunity >= 1000000) {
+      return `$${(opportunity / 1000000).toFixed(1)}M`;
+    } else if (opportunity >= 1000) {
+      return `$${(opportunity / 1000).toFixed(1)}K`;
+    } else {
+      return `$${opportunity.toFixed(0)}`;
+    }
   };
 
   const saveProfile = () => {
@@ -385,6 +404,80 @@ const LocationAnalyzer = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center">
+              <DollarSign className="mr-2 h-5 w-5" />
+              <CardTitle>$ Opportunity</CardTitle>
+            </div>
+            <CardDescription>
+              Potential market value in selected region
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-muted p-4 rounded-md text-center">
+              <div className="text-sm font-medium mb-1">Estimated Opportunity</div>
+              <div className="text-3xl font-bold">{calculateOpportunity()}</div>
+              <TooltipProvider>
+                <TooltipUI>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground cursor-help">
+                      <Info className="h-3 w-3 mr-1" />
+                      How is this calculated?
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>$ Opportunity = Total Regional Net Worth × Divorce Rate ÷ (Competitors + 1)</p>
+                  </TooltipContent>
+                </TooltipUI>
+              </TooltipProvider>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="competitor-count">Competitor Count ({competitorCount})</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCompetitorCount(Math.max(0, competitorCount - 1))}
+                  >
+                    -
+                  </Button>
+                  <Input 
+                    id="competitor-count"
+                    type="number"
+                    min="0"
+                    value={competitorCount}
+                    onChange={(e) => setCompetitorCount(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="text-center"
+                  />
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCompetitorCount(competitorCount + 1)}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between items-center text-sm">
+                <span>Net Worth (Simulated)</span>
+                <span className="font-medium">$142M</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span>Divorce Rate</span>
+                <span className="font-medium">5.8%</span>
+              </div>
             </div>
           </CardContent>
         </Card>
