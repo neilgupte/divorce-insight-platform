@@ -16,11 +16,14 @@
 }
 
 /* Dark mode styles */
-.leaflet-tooltip {
+.custom-tooltip {
   background-color: rgba(0, 0, 0, 0.85) !important;
   color: white !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
 }
 
 /* Fix tooltip arrow color */
@@ -57,4 +60,14 @@
 .custom-popup .leaflet-popup-tip {
   background: rgba(30, 30, 46, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Only show ZIP regions when zoomed in */
+.leaflet-zoom-animated g path {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.leaflet-container._zipVisible .leaflet-zoom-animated g path {
+  opacity: 1;
 }

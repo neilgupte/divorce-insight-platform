@@ -131,3 +131,8 @@ export const getMapBounds = (polygons: ZIPPolygon[]): [[number, number], [number
     [maxLat + latPadding, maxLng + lngPadding]
   ];
 };
+
+// Check if map is zoomed in enough to show ZIP codes
+export const shouldShowZIPs = (zoom: number): boolean => {
+  return zoom >= 8; // Only show ZIPs at zoom level 8 or higher
+};

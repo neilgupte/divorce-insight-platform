@@ -4,7 +4,7 @@ import {
   MapContainer, 
   TileLayer, 
   Polygon, 
-  Tooltip, 
+  Tooltip as LeafletTooltip,
   ZoomControl,
   useMap
 } from 'react-leaflet';
@@ -59,22 +59,21 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   }, [zipData]);
   
-  // Custom dark mode tile layer URL
-  const tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  // Use standard colored OpenStreetMap tiles
+  const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   
   return (
     <div className={`w-full h-full ${className || ''}`}>
       <MapContainer
         ref={mapRef}
         className="w-full h-full rounded-md"
-        zoom={4}
-        center={[39.8, -98.5]} // Center of US
-        zoomControl={false} // We'll add custom position for the zoom control
+        zoomControl={false}
         scrollWheelZoom={true}
-        style={{ background: '#1a1a2e' }}
+        style={{ background: '#f0f0f0' }}
+        bounds={[[25, -125], [49, -65]]}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url={tileLayerUrl}
         />
         
@@ -125,11 +124,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
                 },
               }}
             >
-              <Tooltip direction="top" offset={[0, -20]} opacity={0.9} className="bg-black/90 border-0 text-white px-3 py-1 rounded shadow-lg text-xs">
+              <LeafletTooltip sticky className="custom-tooltip">
                 <div className="font-semibold">{data.zipCode}</div>
                 <div>{data.city}, {data.state}</div>
                 <div className="font-medium">{displayValue}</div>
-              </Tooltip>
+              </LeafletTooltip>
             </Polygon>
           );
         })}
