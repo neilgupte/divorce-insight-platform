@@ -486,12 +486,12 @@ const InteractiveMapCard: React.FC<InteractiveMapCardProps> = ({ selectedState, 
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap justify-between gap-2 mb-4">
-          {/* Filter toggles */}
+          {/* Filter toggles with improved contrast */}
           <div className="flex items-center space-x-2">
             <Toggle 
               pressed={filters.divorceRate.enabled} 
               onPressedChange={() => toggleFilter('divorceRate')}
-              className="bg-red-100 data-[state=on]:bg-red-200 data-[state=on]:text-red-700 h-7"
+              className="bg-red-100/20 text-red-300 data-[state=on]:bg-red-200 data-[state=on]:text-red-700 font-medium h-7 shadow-sm"
               size="sm"
             >
               Divorce Rate
@@ -499,7 +499,7 @@ const InteractiveMapCard: React.FC<InteractiveMapCardProps> = ({ selectedState, 
             <Toggle 
               pressed={filters.netWorth.enabled} 
               onPressedChange={() => toggleFilter('netWorth')}
-              className="bg-blue-100 data-[state=on]:bg-blue-200 data-[state=on]:text-blue-700 h-7"
+              className="bg-blue-100/20 text-blue-300 data-[state=on]:bg-blue-200 data-[state=on]:text-blue-700 font-medium h-7 shadow-sm"
               size="sm"
             >
               Net Worth
@@ -507,7 +507,7 @@ const InteractiveMapCard: React.FC<InteractiveMapCardProps> = ({ selectedState, 
             <Toggle 
               pressed={filters.luxuryDensity.enabled} 
               onPressedChange={() => toggleFilter('luxuryDensity')}
-              className="bg-purple-100 data-[state=on]:bg-purple-200 data-[state=on]:text-purple-700 h-7"
+              className="bg-purple-100/20 text-purple-300 data-[state=on]:bg-purple-200 data-[state=on]:text-purple-700 font-medium h-7 shadow-sm"
               size="sm"
             >
               Luxury
@@ -515,7 +515,7 @@ const InteractiveMapCard: React.FC<InteractiveMapCardProps> = ({ selectedState, 
             <Toggle 
               pressed={filters.multiProperty.enabled} 
               onPressedChange={() => toggleFilter('multiProperty')}
-              className="bg-green-100 data-[state=on]:bg-green-200 data-[state=on]:text-green-700 h-7"
+              className="bg-green-100/20 text-green-300 data-[state=on]:bg-green-200 data-[state=on]:text-green-700 font-medium h-7 shadow-sm"
               size="sm"
             >
               Multi-Property
@@ -637,33 +637,33 @@ const InteractiveMapCard: React.FC<InteractiveMapCardProps> = ({ selectedState, 
           
           <div className="p-4 flex-1 overflow-hidden flex flex-col">
             <div className="flex flex-wrap justify-between gap-2 mb-4">
-              {/* Filter toggles for fullscreen */}
+              {/* Filter toggles for fullscreen with improved contrast */}
               <div className="flex items-center flex-wrap gap-2">
                 <Toggle 
                   pressed={filters.divorceRate.enabled} 
                   onPressedChange={() => toggleFilter('divorceRate')}
-                  className="bg-red-100 data-[state=on]:bg-red-200 data-[state=on]:text-red-700"
+                  className="bg-red-100/20 text-red-300 data-[state=on]:bg-red-200 data-[state=on]:text-red-700 font-medium shadow-sm"
                 >
                   Divorce Rate
                 </Toggle>
                 <Toggle 
                   pressed={filters.netWorth.enabled} 
                   onPressedChange={() => toggleFilter('netWorth')}
-                  className="bg-blue-100 data-[state=on]:bg-blue-200 data-[state=on]:text-blue-700"
+                  className="bg-blue-100/20 text-blue-300 data-[state=on]:bg-blue-200 data-[state=on]:text-blue-700 font-medium shadow-sm"
                 >
                   Net Worth
                 </Toggle>
                 <Toggle 
                   pressed={filters.luxuryDensity.enabled} 
                   onPressedChange={() => toggleFilter('luxuryDensity')}
-                  className="bg-purple-100 data-[state=on]:bg-purple-200 data-[state=on]:text-purple-700"
+                  className="bg-purple-100/20 text-purple-300 data-[state=on]:bg-purple-200 data-[state=on]:text-purple-700 font-medium shadow-sm"
                 >
                   Luxury Density
                 </Toggle>
                 <Toggle 
                   pressed={filters.multiProperty.enabled} 
                   onPressedChange={() => toggleFilter('multiProperty')}
-                  className="bg-green-100 data-[state=on]:bg-green-200 data-[state=on]:text-green-700"
+                  className="bg-green-100/20 text-green-300 data-[state=on]:bg-green-200 data-[state=on]:text-green-700 font-medium shadow-sm"
                 >
                   Multi-Property
                 </Toggle>
