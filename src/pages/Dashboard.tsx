@@ -361,10 +361,7 @@ const Dashboard = () => {
         {/* Top Luxury Locations (33%) */}
         <div className="md:col-span-1">
           <LuxuryLocationsCard 
-            luxuryLocations={filteredLuxuryLocations.map(location => ({
-              ...location,
-              id: typeof location.id === 'number' ? String(location.id) : location.id
-            }))} 
+            luxuryLocations={filteredLuxuryLocations.slice(0, 5)} 
             onViewAll={handleViewAllLocations}
             isLoading={isDataLoading}
           />
