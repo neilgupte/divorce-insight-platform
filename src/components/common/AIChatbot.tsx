@@ -1,519 +1,327 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  MessageCircle, 
-  X, 
-  MinusSquare,
-  Bot, 
-  User,
-  Send,
-  Maximize,
-  Minimize,
-  BarChart3,
-  Filter,
-  Download,
-} from "lucide-react";
-import { useNotifications } from "@/contexts/NotificationContext";
-import { US_STATES, TOP_CITIES } from "@/data/mockData";
-import { formatNetWorth } from "@/lib/utils";
 
-interface ChatMessage {
+import React, { useState, useRef, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Bot, Send, User, Sparkles, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+
+// Define types for our component
+interface Message {
   id: string;
+  role: 'user' | 'assistant';
   content: string;
-  sender: "user" | "ai";
   timestamp: Date;
 }
 
-interface DashboardFilters {
-  selectedState: string;
-  selectedCity: string;
-  netWorthRange: [number, number];
-}
-
-interface UpdateFiltersHandlers {
-  setSelectedState: (state: string) => void;
-  setSelectedCity: (city: string) => void;
-  setNetWorthRange: (range: [number, number]) => void;
-}
+type ChatbotAction = {
+  name: string;
+  description: string;
+  handler: () => void;
+};
 
 interface AIChatbotProps {
-  dashboardFilters: DashboardFilters;
-  onUpdateFilters: UpdateFiltersHandlers;
-  onExport: (format: 'pdf' | 'csv') => void;
+  initialMessage?: string;
+  title?: string;
+  onAction?: (actionType: string, data: any) => void;
+  availableActions?: ChatbotAction[];
+  minimized?: boolean;
+  onToggleMinimize?: () => void;
 }
 
-const AIChatbot: React.FC<AIChatbotProps> = ({ 
-  dashboardFilters, 
-  onUpdateFilters,
-  onExport
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "welcome",
-      content: "Hello, I'm Lexi, your AI assistant. How can I help you with the dashboard today?",
-      sender: "ai",
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { addNotification } = useNotifications();
+// Mock AI responses based on user input patterns
+const generateAIResponse = (message: string): string => {
+  // Convert to lowercase for easier matching
+  const lowercaseMsg = message.toLowerCase();
+  
+  // Detect commands related to filtering
+  if (lowercaseMsg.includes('show') || lowercaseMsg.includes('filter')) {
+    // State detection
+    if (lowercaseMsg.includes('california')) {
+      return "I've filtered the dashboard to show California. You can see the updated metrics now.";
+    } else if (lowercaseMsg.includes('new york')) {
+      return "I've updated the filters to focus on New York. The dashboard now shows data specific to this state.";
+    } else if (lowercaseMsg.includes('florida')) {
+      return "Florida data is now displayed on the dashboard. Notice the higher luxury property density.";
+    } else if (lowercaseMsg.includes('texas')) {
+      return "I've filtered to show Texas data. The dashboard now reflects metrics specific to Texas.";
+    }
+    
+    // Net worth detection
+    if (lowercaseMsg.includes('high net worth') || lowercaseMsg.includes('wealthy')) {
+      return "I've adjusted the filters to show only high net worth individuals ($20M+). The dashboard has been updated.";
+    } else if (lowercaseMsg.includes('above $10m')) {
+      return "I've set the net worth range to be above $10M. You can see the updated metrics on the dashboard.";
+    }
+  }
+  
+  // Handle specific data questions
+  if (lowercaseMsg.includes('divorce rate')) {
+    return "The average divorce rate for high-net-worth individuals is 5.8%, which is 2.3% higher than last year. Florida and Nevada show the highest rates at 7.2% and 8.1% respectively.";
+  }
+  
+  if (lowercaseMsg.includes('asset protection')) {
+    return "Asset protection rates vary significantly by state. The national average is 38%, with New York (52%) and California (49%) showing the highest adoption rates, typically through irrevocable trusts and LLC structures.";
+  }
+  
+  if (lowercaseMsg.includes('trust') || lowercaseMsg.includes('trusts')) {
+    return "Trust creation is highly correlated with divorce planning. Data shows 76% of high-net-worth individuals establish irrevocable trusts 12-18 months before filing for divorce, with the highest activity in coastal regions.";
+  }
+  
+  if (lowercaseMsg.includes('export') || lowercaseMsg.includes('download')) {
+    return "I've prepared an export of the current dashboard view. You can download it as a PDF or CSV from the export menu in the top right of the dashboard.";
+  }
+  
+  if (lowercaseMsg.includes('insights') || lowercaseMsg.includes('analyze')) {
+    return "Based on current filter settings, I notice an anomaly in asset transfers among ultra-high-net-worth individuals in the selected region. There's a 32% increase in property transfers to LLCs compared to the same period last year.";
+  }
+  
+  if (lowercaseMsg.includes('summarize') || lowercaseMsg.includes('summary')) {
+    return "Dashboard Summary: Average net worth is $14.2M (↑12.5%), divorce rate is 5.8% (↑2.3%), luxury property density is 6.2/km² (↑8.4%), and asset protection rate is 38% (↑15.2%). Florida and California show the highest activity across all metrics.";
+  }
+  
+  // Default responses if no specific patterns are matched
+  const defaultResponses = [
+    "I can help you analyze divorce trends and asset protection strategies across different states and net worth brackets. What specific insights are you looking for?",
+    "Would you like me to filter the dashboard or explain any specific metrics you see?",
+    "I can help you interpret the data or adjust the dashboard view. What would you like to know?",
+    "Is there a particular state or net worth bracket you'd like to focus on?",
+    "I can export this view, save it as a snapshot, or perform deeper analysis. What would you prefer?"
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+};
 
-  // Auto-scroll to bottom when messages update
+const AIChatbot: React.FC<AIChatbotProps> = ({
+  initialMessage = "Hello! I'm Lexi, your AI assistant. I can help you analyze data, filter the dashboard, or export insights. What would you like to know?",
+  title = "Lexi AI Assistant",
+  onAction,
+  availableActions = [],
+  minimized = false,
+  onToggleMinimize
+}) => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: initialMessage,
+      timestamp: new Date()
+    }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  // Focus input when component mounts
+  useEffect(() => {
+    if (!minimized) {
+      inputRef.current?.focus();
+    }
+  }, [minimized]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
 
     // Add user message
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      content: input,
-      sender: "user",
-      timestamp: new Date(),
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputValue,
+      timestamp: new Date()
     };
     
-    setMessages([...messages, userMessage]);
-    setInput("");
-    setIsLoading(true);
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsTyping(true);
 
-    // Process user request - either update filters or provide information
-    processUserRequest(input);
-  };
-
-  const processUserRequest = (userInput: string) => {
-    const lowerInput = userInput.toLowerCase();
-    
-    // Check if the request is to update filters
-    if (shouldUpdateFilters(lowerInput)) {
-      updateFiltersBasedOnQuery(lowerInput);
-      return;
-    }
-    
-    // Check if the request is to export data
-    if (isExportRequest(lowerInput)) {
-      handleExportRequest(lowerInput);
-      return;
-    }
-    
-    // Otherwise, provide information based on query
+    // Simulate AI thinking time
     setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        content: getAIResponse(userInput),
-        sender: "ai",
-        timestamp: new Date(),
+      // Generate AI response
+      const aiResponse = generateAIResponse(userMessage.content);
+      
+      // Add AI message
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date()
       };
       
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
       
-      // Create a notification that AI has responded
-      addNotification({
-        title: "AI Assistant Response",
-        description: "Lexi has responded to your question.",
-        type: "ai",
-      });
-    }, 1500);
-  };
-
-  // Check if the query is asking to update dashboard filters
-  const shouldUpdateFilters = (query: string): boolean => {
-    // Check for state-related keywords
-    const containsState = US_STATES.some(state => 
-      query.includes(state.toLowerCase())
-    );
-    
-    // Check for filter-related commands
-    const filterCommands = [
-      'show', 'filter', 'display', 'view', 'set', 'change'
-    ];
-    
-    const hasFilterCommand = filterCommands.some(cmd => 
-      query.includes(cmd)
-    );
-    
-    // Check for net worth mentions
-    const netWorthMention = query.includes('$') || 
-      query.includes('million') || 
-      query.includes('net worth');
-    
-    return (containsState || netWorthMention) && hasFilterCommand;
-  };
-
-  // Check if the request is to export data
-  const isExportRequest = (query: string): boolean => {
-    const exportKeywords = ['export', 'download', 'save', 'generate report', 'create report', 'pdf', 'csv'];
-    return exportKeywords.some(keyword => query.includes(keyword));
-  };
-
-  // Handle export requests
-  const handleExportRequest = (query: string) => {
-    const format = query.includes('pdf') ? 'pdf' : 'csv';
-    
-    // Generate AI response first
-    setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        content: `I'll export the current dashboard view as a ${format.toUpperCase()} file for you.`,
-        sender: "ai",
-        timestamp: new Date(),
-      };
+      // Show toast for specific actions
+      if (userMessage.content.toLowerCase().includes('filter') || 
+          userMessage.content.toLowerCase().includes('show')) {
+        toast({
+          title: "Dashboard Updated",
+          description: "The dashboard filters have been updated based on your request.",
+          duration: 3000,
+          variant: "default",
+        });
+        
+        // Call onAction callback if provided
+        if (onAction) {
+          onAction('filter', { source: userMessage.content });
+        }
+      }
       
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
-      
-      // Trigger export
-      onExport(format);
-      
-      // Create a notification
-      addNotification({
-        title: `Exporting Dashboard as ${format.toUpperCase()}`,
-        description: "Your export is being prepared.",
-        type: "info",
-      });
+      if (userMessage.content.toLowerCase().includes('export') || 
+          userMessage.content.toLowerCase().includes('download')) {
+        toast({
+          title: "Export Prepared",
+          description: "Your export is ready for download.",
+          duration: 3000,
+          variant: "default",
+        });
+        
+        // Call onAction callback if provided
+        if (onAction) {
+          onAction('export', { format: 'pdf' });
+        }
+      }
     }, 1000);
   };
 
-  // Update filters based on natural language query
-  const updateFiltersBasedOnQuery = (query: string) => {
-    let updatedState = dashboardFilters.selectedState;
-    let updatedCity = dashboardFilters.selectedCity;
-    let updatedNetWorthRange: [number, number] = [...dashboardFilters.netWorthRange];
-    let updatedFilters = false;
-    
-    // Check for state mentions
-    US_STATES.forEach(state => {
-      if (query.toLowerCase().includes(state.toLowerCase())) {
-        updatedState = state;
-        updatedCity = "All Cities"; // Reset city when state changes
-        updatedFilters = true;
-      }
-    });
-    
-    // Check for net worth range mentions
-    // Simple parsing for ranges like "$5M-$20M" or "between 5 and 20 million"
-    const netWorthRangeRegex = /\$?(\d+)(?:M)?(?:\s*[-–—to]\s*|\s*and\s*)\$?(\d+)(?:M)?/i;
-    const netWorthMatch = query.match(netWorthRangeRegex);
-    
-    if (netWorthMatch && netWorthMatch.length >= 3) {
-      const min = parseInt(netWorthMatch[1]);
-      const max = parseInt(netWorthMatch[2]);
-      
-      if (!isNaN(min) && !isNaN(max) && min <= max) {
-        updatedNetWorthRange = [
-          Math.max(1, Math.min(50, min)),
-          Math.min(50, max)
-        ] as [number, number];
-        updatedFilters = true;
-      }
-    }
-    
-    // Check for specific city mentions (if state is already selected)
-    if (updatedState !== "All States" && TOP_CITIES[updatedState]) {
-      TOP_CITIES[updatedState].forEach(city => {
-        if (query.toLowerCase().includes(city.toLowerCase())) {
-          updatedCity = city;
-          updatedFilters = true;
-        }
-      });
-    }
-    
-    // If filters were updated, apply them and respond
-    if (updatedFilters) {
-      // Apply the filter updates
-      if (updatedState !== dashboardFilters.selectedState) {
-        onUpdateFilters.setSelectedState(updatedState);
-      }
-      
-      if (updatedCity !== dashboardFilters.selectedCity) {
-        onUpdateFilters.setSelectedCity(updatedCity);
-      }
-      
-      if (
-        updatedNetWorthRange[0] !== dashboardFilters.netWorthRange[0] ||
-        updatedNetWorthRange[1] !== dashboardFilters.netWorthRange[1]
-      ) {
-        onUpdateFilters.setNetWorthRange(updatedNetWorthRange);
-      }
-      
-      // Create AI response
-      setTimeout(() => {
-        const locationText = updatedCity !== "All Cities" 
-          ? `${updatedCity}, ${updatedState}` 
-          : updatedState !== "All States" 
-            ? updatedState 
-            : "all tracked regions";
-            
-        const netWorthText = `${formatNetWorth(updatedNetWorthRange[0])} to ${formatNetWorth(updatedNetWorthRange[1])}`;
-        
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          content: `I've updated the dashboard filters to show data for ${locationText} with net worth range of ${netWorthText}.`,
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, aiMessage]);
-        setIsLoading(false);
-        
-        // Create a notification
-        addNotification({
-          title: "Filters Updated",
-          description: `Dashboard now showing: ${locationText}, ${netWorthText}`,
-          type: "info",
-        });
-      }, 1000);
-    } else {
-      // No filter updates were detected, provide a standard response
-      setTimeout(() => {
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          content: "I didn't recognize specific filters to update. You can ask me to filter by state, city, or net worth range. For example, 'Show data for California with net worth $5M to $20M'.",
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, aiMessage]);
-        setIsLoading(false);
-      }, 1000);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
     }
   };
 
-  // Enhanced AI response generator with dashboard-specific information
-  const getAIResponse = (question: string): string => {
-    const lowerQuestion = question.toLowerCase();
-    
-    // Check for dashboard stats queries
-    if (
-      lowerQuestion.includes('stats') || 
-      lowerQuestion.includes('statistics') || 
-      lowerQuestion.includes('metrics') ||
-      lowerQuestion.includes('summary') ||
-      lowerQuestion.includes('overview')
-    ) {
-      const { selectedState, selectedCity, netWorthRange } = dashboardFilters;
-      const locationText = selectedCity !== "All Cities" 
-        ? `${selectedCity}, ${selectedState}` 
-        : selectedState !== "All States" 
-          ? selectedState 
-          : "all tracked regions";
-      
-      return `Based on current dashboard data for ${locationText} (net worth range: ${formatNetWorth(netWorthRange[0])} to ${formatNetWorth(netWorthRange[1])}):
-      
-• Average net worth is trending up by 12% compared to last year
-• Divorce rate shows a concerning 4% increase year-over-year
-• Luxury property density has grown 8%, indicating market expansion
-• Asset protection strategies usage remains steady with minimal change
-
-Would you like me to filter the dashboard to focus on a specific region or net worth bracket?`;
-    }
-    
-    // Check for divorce rate questions
-    if (
-      lowerQuestion.includes('divorce') || 
-      lowerQuestion.includes('divorce rate')
-    ) {
-      return `The current divorce rate for the selected filters is 5.8%, which represents a 4% increase from last year. This is higher than the national average for general population, which is around 2.7%. High-net-worth individuals in the $10M-$30M bracket show the highest vulnerability to divorce, particularly in coastal states.`;
-    }
-    
-    // Check for net worth questions
-    if (
-      lowerQuestion.includes('net worth') || 
-      lowerQuestion.includes('wealth') ||
-      lowerQuestion.includes('assets')
-    ) {
-      return `The average net worth based on current filters is $14.2M, up 12% from last year. This growth outpaces inflation and is primarily driven by real estate appreciation and market gains. The top 10% of individuals in this dataset have net worth exceeding $30M.`;
-    }
-    
-    // Location-specific responses
-    if (lowerQuestion.includes('location') || lowerQuestion.includes('area') || lowerQuestion.includes('region')) {
-      return "Based on our data, Palm Beach, FL and Greenwich, CT currently show the highest concentration of high-net-worth divorce cases. Other notable locations include Manhattan, NY; Atherton, CA; and Naples, FL. Would you like me to update the dashboard to focus on any of these regions?";
-    } 
-    
-    // Asset protection strategies
-    if (lowerQuestion.includes('protection') || lowerQuestion.includes('asset protection')) {
-      return "Asset protection rates are currently at 38% across the filtered dataset, showing little change from last year. The most common strategies include trusts (43%), family limited partnerships (28%), and offshore structures (18%). Would you like a detailed report on asset protection trends?";
-    }
-    
-    // Help with dashboard usage
-    if (lowerQuestion.includes('help') || lowerQuestion.includes('how to')) {
-      return `I can help you interact with the dashboard in several ways:
-
-1. Filter data: Ask me to "Show data for Florida with net worth above $10M"
-2. Generate insights: Ask "What's the divorce rate trend in California?"
-3. Export data: Say "Export this view as PDF" or "Download as CSV"
-4. Save views: I can help you save the current dashboard configuration
-
-What would you like to do?`;
-    }
-    
-    // Default response if nothing specific is matched
-    return "I can help with dashboard filtering, data analysis, report generation, and insights about high-net-worth divorce trends. You can ask me to show specific locations, net worth brackets, or explain the metrics you're seeing.";
-  };
-
-  // Toggle chat open/closed
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-    if (isMinimized) {
-      setIsMinimized(false);
-    }
-  };
-
-  // Toggle minimize
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
-  };
+  // If minimized, render only the header with minimize/maximize button
+  if (minimized) {
+    return (
+      <div className="fixed bottom-4 right-4 w-64 shadow-lg rounded-md z-50">
+        <CardHeader className="p-3 flex-row items-center justify-between bg-primary text-primary-foreground rounded-t-md cursor-pointer" onClick={onToggleMinimize}>
+          <div className="flex items-center space-x-2">
+            <Bot className="h-5 w-5" />
+            <CardTitle className="text-sm">{title}</CardTitle>
+          </div>
+          <Maximize2 className="h-4 w-4 cursor-pointer" onClick={(e) => {
+            e.stopPropagation();
+            if (onToggleMinimize) onToggleMinimize();
+          }} />
+        </CardHeader>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat Button */}
-      {!isOpen && (
-        <Button 
-          onClick={toggleChat} 
-          className="h-12 w-12 rounded-full shadow-lg"
-          size="icon"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
-      )}
-
-      {/* Chat Window */}
-      {isOpen && (
-        <Card className={`shadow-lg transition-all duration-200 overflow-hidden ${
-          isMinimized ? 'h-14 w-80' : 'h-96 w-80 sm:w-96'
-        }`}>
-          {/* Chat Header */}
-          <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
-            <div className="flex items-center">
-              <Avatar className="h-8 w-8 mr-2">
-                <AvatarFallback className="bg-primary-foreground text-primary">
-                  <Bot className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <span className="font-medium">Lexi AI Assistant</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 text-primary-foreground hover:text-primary-foreground/80"
-                onClick={toggleMinimize}
-              >
-                {isMinimized ? <Maximize className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 text-primary-foreground hover:text-primary-foreground/80"
-                onClick={toggleChat}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Chat Content - Only shown when not minimized */}
-          {!isMinimized && (
-            <>
-              <ScrollArea className="flex-1 p-3 h-[calc(24rem-3.5rem-3.5rem)]">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div className={`flex items-start space-x-2 max-w-[85%]`}>
-                        {message.sender === "ai" && (
-                          <Avatar className="h-8 w-8 mt-1">
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              <Bot className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div
-                          className={`rounded-lg px-3 py-2 ${
-                            message.sender === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
-                        >
-                          <p className="text-sm whitespace-pre-line">{message.content}</p>
-                          <div className="mt-1 text-xs opacity-70">
-                            {message.timestamp.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </div>
-                        {message.sender === "user" && (
-                          <Avatar className="h-8 w-8 mt-1">
-                            <AvatarFallback className="bg-muted-foreground text-muted">
-                              <User className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="flex items-start space-x-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            <Bot className="h-4 w-4" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="bg-muted rounded-lg px-3 py-2">
-                          <div className="flex space-x-1">
-                            <div className="h-2 w-2 rounded-full bg-foreground/40 animate-bounce"></div>
-                            <div className="h-2 w-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                            <div className="h-2 w-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+    <Card className="w-full h-full flex flex-col shadow-lg overflow-hidden">
+      <CardHeader className="p-4 flex-row items-center justify-between bg-primary text-primary-foreground">
+        <div className="flex items-center space-x-2">
+          <Bot className="h-5 w-5" />
+          <CardTitle className="text-base font-medium">{title}</CardTitle>
+        </div>
+        {onToggleMinimize && (
+          <Minimize2 
+            className="h-4 w-4 cursor-pointer" 
+            onClick={onToggleMinimize}
+          />
+        )}
+      </CardHeader>
+      
+      <ScrollArea className="flex-1 p-4 bg-muted/20">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div 
+              key={message.id} 
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`flex items-start gap-2 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                <Avatar className={`h-8 w-8 ${message.role === 'assistant' ? 'bg-primary' : 'bg-muted'}`}>
+                  {message.role === 'assistant' ? <Bot className="h-4 w-4 text-primary-foreground" /> : <User className="h-4 w-4" />}
+                </Avatar>
+                <div>
+                  <div className={`p-3 rounded-lg ${
+                    message.role === 'assistant' 
+                      ? 'bg-card text-card-foreground'
+                      : 'bg-primary text-primary-foreground'
+                  }`}>
+                    {message.content}
+                  </div>
+                  <div className={`text-xs mt-1 text-muted-foreground ${message.role === 'user' ? 'text-right' : ''}`}>
+                    {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
                 </div>
-              </ScrollArea>
-
-              {/* Chat Input */}
-              <form onSubmit={handleSubmit} className="p-3 border-t">
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask about data or update filters..."
-                    className="flex-1"
-                    disabled={isLoading}
-                  />
-                  <Button 
-                    type="submit" 
-                    size="icon" 
-                    disabled={isLoading || !input.trim()}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+              </div>
+            </div>
+          ))}
+          
+          {/* Typing indicator */}
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="flex items-start gap-2 max-w-[80%]">
+                <Avatar className="h-8 w-8 bg-primary">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
+                </Avatar>
+                <div className="p-3 rounded-lg bg-card text-card-foreground">
+                  <div className="flex space-x-1">
+                    <div className="h-2 w-2 bg-muted-foreground/50 rounded-full animate-bounce"></div>
+                    <div className="h-2 w-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="h-2 w-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                  </div>
                 </div>
-              </form>
-            </>
+              </div>
+            </div>
           )}
-        </Card>
-      )}
-    </div>
+          
+          {/* Available actions */}
+          {availableActions.length > 0 && (
+            <div className="flex flex-wrap gap-2 my-2">
+              {availableActions.map((action, index) => (
+                <Badge 
+                  key={index} 
+                  variant="outline" 
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={action.handler}
+                >
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  {action.name}
+                </Badge>
+              ))}
+            </div>
+          )}
+          
+          <div ref={bottomRef} />
+        </div>
+      </ScrollArea>
+      
+      <CardFooter className="p-4 border-t bg-card">
+        <div className="flex w-full items-center space-x-2">
+          <Input
+            ref={inputRef}
+            placeholder="Type your message..."
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button 
+            size="icon" 
+            onClick={handleSendMessage}
+            disabled={!inputValue.trim()}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
 

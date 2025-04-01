@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -35,7 +34,7 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
 import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
-import MapCard from "@/components/dashboard/MapCard";
+import InteractiveMapCard from "@/components/dashboard/InteractiveMapCard";
 import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
 
 // Define snapshot interface
@@ -362,7 +361,10 @@ const Dashboard = () => {
         {/* Top Luxury Locations (33%) */}
         <div className="md:col-span-1">
           <LuxuryLocationsCard 
-            luxuryLocations={filteredLuxuryLocations as LuxuryLocation[]} 
+            luxuryLocations={filteredLuxuryLocations.map(location => ({
+              ...location,
+              id: typeof location.id === 'number' ? String(location.id) : location.id
+            }))} 
             onViewAll={handleViewAllLocations}
             isLoading={isDataLoading}
           />
@@ -380,9 +382,9 @@ const Dashboard = () => {
           />
         </div>
         
-        {/* Map Card (66%) */}
+        {/* Interactive Map Card (66%) */}
         <div className="md:col-span-2">
-          <MapCard 
+          <InteractiveMapCard 
             selectedState={selectedState !== "All States" ? selectedState : null} 
             selectedCity={selectedCity !== "All Cities" ? selectedCity : null}
           />
