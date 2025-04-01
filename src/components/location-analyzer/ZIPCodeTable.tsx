@@ -153,7 +153,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead 
-                    className="cursor-pointer"
+                    className="cursor-pointer w-[100px]"
                     onClick={() => requestSort("zipCode")}
                   >
                     <div className="flex items-center">
@@ -161,7 +161,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer"
+                    className="cursor-pointer w-[80px]"
                     onClick={() => requestSort("state")}
                   >
                     <div className="flex items-center">
@@ -177,7 +177,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right"
+                    className="cursor-pointer text-right w-[90px]"
                     onClick={() => requestSort("tam")}
                   >
                     <div className="flex items-center justify-end">
@@ -185,7 +185,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right"
+                    className="cursor-pointer text-right w-[90px]"
                     onClick={() => requestSort("sam")}
                   >
                     <div className="flex items-center justify-end">
@@ -193,7 +193,7 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer text-right"
+                    className="cursor-pointer text-right w-[140px]"
                     onClick={() => requestSort("opportunity")}
                   >
                     <div className="flex items-center justify-end">
@@ -205,24 +205,27 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               <TableBody>
                 {sortedData.map((item) => {
                   const opportunityBadge = getOpportunityBadge(item.opportunity);
+                  // Generate unique key using more properties to avoid duplicate keys
+                  const rowKey = `${item.zipCode}-${item.city}-${item.state}`;
+                  
                   return (
                     <TableRow 
-                      key={item.zipCode}
+                      key={rowKey}
                       className={`cursor-pointer transition-colors ${hoveredRow === item.zipCode ? "bg-muted/90" : "hover:bg-muted/50"}`}
                       onClick={() => onZipCodeSelect(item)}
                       onMouseEnter={() => setHoveredRow(item.zipCode)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
-                      <TableCell className="font-medium">{item.zipCode}</TableCell>
-                      <TableCell>{getStateAbbreviation(item.state)}</TableCell>
+                      <TableCell className="font-medium w-[100px]">{item.zipCode}</TableCell>
+                      <TableCell className="w-[80px]">{getStateAbbreviation(item.state)}</TableCell>
                       <TableCell>{item.city}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right w-[90px]">
                         <Badge variant="outline">${item.tam}M</Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right w-[90px]">
                         <Badge variant="outline">${item.sam}M</Badge>
                       </TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className="text-right font-medium w-[140px]">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
