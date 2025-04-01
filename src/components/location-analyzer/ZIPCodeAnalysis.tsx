@@ -57,6 +57,9 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
           divorceRateThreshold={divorceRateThreshold}
           expanded={heatmapExpanded}
           onToggleExpand={toggleHeatmapExpand}
+          usStates={usStates}
+          availableCities={availableCities}
+          onZipCodeSelect={handleZipCodeSelect}
         />
         
         <ZIPCodeTable

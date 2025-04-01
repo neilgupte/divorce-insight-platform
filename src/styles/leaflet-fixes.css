@@ -1,0 +1,60 @@
+
+/* Ensure Leaflet elements are properly styled */
+
+.leaflet-container {
+  font-family: inherit;
+  font-size: 0.875rem;
+  height: 100%;
+  width: 100%;
+}
+
+.leaflet-tooltip {
+  font-family: inherit;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode styles */
+.leaflet-tooltip {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Fix tooltip arrow color */
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.leaflet-tooltip-left:before {
+  border-left-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.leaflet-tooltip-right:before {
+  border-right-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Make pane background transparent */
+.leaflet-pane {
+  z-index: 1;
+}
+
+/* Custom popup styles */
+.custom-popup .leaflet-popup-content-wrapper {
+  background: rgba(30, 30, 46, 0.9);
+  color: white;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: rgba(30, 30, 46, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
