@@ -16,7 +16,7 @@
 }
 
 /* Dark mode styles */
-.custom-tooltip {
+.leaflet-tooltip {
   background-color: rgba(0, 0, 0, 0.85) !important;
   color: white !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -71,4 +71,3 @@
 .leaflet-container._zipVisible .leaflet-zoom-animated g path {
   opacity: 1;
 }
-

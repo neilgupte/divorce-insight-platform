@@ -67,7 +67,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       <MapContainer
         ref={mapRef}
         className="w-full h-full rounded-md"
-        scrollWheelZoom={true}
+        zoom={4}
+        center={[39.5, -98.35]}
         style={{ background: '#f0f0f0' }}
         bounds={[[25, -125], [49, -65]]}
       >
@@ -122,7 +123,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
                 },
               }}
             >
-              <Tooltip className="custom-tooltip">
+              <Tooltip sticky>
                 <div className="font-semibold">{data.zipCode}</div>
                 <div>{data.city}, {data.state}</div>
                 <div className="font-medium">{displayValue}</div>
