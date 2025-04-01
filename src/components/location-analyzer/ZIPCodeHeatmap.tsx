@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Map, Maximize2, Printer, Download, Share2, Minimize2, Filter } from "lucide-react";
+import { Map, Maximize2, Printer, Download, Share2, Minimize2 } from "lucide-react";
 import { generateMockZIPData, ZIPCodeData } from "@/lib/zipUtils";
 import { useToast } from "@/hooks/use-toast";
 import LeafletMap from "./LeafletMap";

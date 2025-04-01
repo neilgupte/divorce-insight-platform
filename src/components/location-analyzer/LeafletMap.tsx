@@ -4,7 +4,7 @@ import {
   MapContainer, 
   TileLayer, 
   Polygon, 
-  Tooltip as LeafletTooltip,
+  Tooltip,
   ZoomControl,
   useMap
 } from 'react-leaflet';
@@ -67,13 +67,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       <MapContainer
         ref={mapRef}
         className="w-full h-full rounded-md"
-        zoomControl={false}
         scrollWheelZoom={true}
         style={{ background: '#f0f0f0' }}
         bounds={[[25, -125], [49, -65]]}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url={tileLayerUrl}
         />
         
@@ -124,11 +122,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
                 },
               }}
             >
-              <LeafletTooltip sticky className="custom-tooltip">
+              <Tooltip className="custom-tooltip">
                 <div className="font-semibold">{data.zipCode}</div>
                 <div>{data.city}, {data.state}</div>
                 <div className="font-medium">{displayValue}</div>
-              </LeafletTooltip>
+              </Tooltip>
             </Polygon>
           );
         })}
