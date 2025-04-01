@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   REGIONAL_METRICS, 
@@ -9,6 +9,23 @@ import {
   TOP_CITIES, 
   NET_WORTH_BRACKETS 
 } from "@/data/mockData";
+import { Button } from "@/components/ui/button";
+import { 
+  DownloadIcon, 
+  SaveIcon, 
+  Share, 
+  BookmarkIcon,
+  Filter
+} from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Import our components
 import KPICards from "@/components/dashboard/KPICards";
@@ -17,17 +34,44 @@ import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
 import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 import MapCard from "@/components/dashboard/MapCard";
+import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
+import AIChatbot from "@/components/common/AIChatbot";
+
+// Define snapshot interface
+interface DashboardSnapshot {
+  id: string;
+  name: string;
+  date: Date;
+  filters: {
+    selectedState: string;
+    selectedCity: string;
+    netWorthRange: [number, number];
+  };
+}
 
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
   const [selectedCity, setSelectedCity] = useState<string>("All Cities");
   const [netWorthRange, setNetWorthRange] = useState<[number, number]>([1, 50]);
+  const [isSnapshotDialogOpen, setIsSnapshotDialogOpen] = useState(false);
+  const [savedSnapshots, setSavedSnapshots] = useState<DashboardSnapshot[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Filter cities based on selected state
   const availableCities = selectedState !== "All States" && TOP_CITIES[selectedState] 
     ? TOP_CITIES[selectedState] 
     : ["All Cities"];
+
+  // Simulate data loading when filters change
+  useEffect(() => {
+    setIsDataLoading(true);
+    const timer = setTimeout(() => {
+      setIsDataLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [selectedState, selectedCity, netWorthRange]);
 
   // Filter data based on selections
   const filteredLuxuryLocations = TOP_LUXURY_LOCATIONS.filter(location => {
@@ -74,17 +118,193 @@ const Dashboard = () => {
     id: String(insight.id)
   }));
 
+  // Calculate KPI metric changes based on filters
+  const getFilteredMetrics = useCallback(() => {
+    // This would normally fetch from a backend based on filters
+    // For now we'll simulate variations based on the filters
+    const baseNetWorth = 14.2;
+    const baseDivorceRate = 5.8;
+    const baseLuxuryDensity = 6.2;
+    const baseProtectionRate = 38;
+
+    // Adjust metrics based on state selection
+    let stateMultiplier = 1.0;
+    if (selectedState !== "All States") {
+      // Simulate different values for different states
+      const stateHash = selectedState.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      stateMultiplier = 0.85 + (stateHash % 30) / 100;
+    }
+    
+    // Adjust metrics based on net worth range
+    let netWorthMultiplier = 1.0;
+    // Higher net worth ranges = higher metrics
+    if (netWorthRange[0] > 10) {
+      netWorthMultiplier = 1.15;
+    } else if (netWorthRange[1] < 20) {
+      netWorthMultiplier = 0.9;
+    }
+    
+    return {
+      netWorth: baseNetWorth * stateMultiplier * netWorthMultiplier,
+      divorceRate: baseDivorceRate * (stateMultiplier * 0.9),
+      luxuryDensity: baseLuxuryDensity * stateMultiplier * netWorthMultiplier,
+      protectionRate: baseProtectionRate * (netWorthMultiplier * 0.95)
+    };
+  }, [selectedState, selectedCity, netWorthRange]);
+  
+  const metrics = getFilteredMetrics();
+
   const handleViewAllLocations = () => {
     navigate("/location", { state: { fromDashboard: true } });
   };
 
+  // Export current dashboard as PDF or CSV
+  const handleExport = (format: 'pdf' | 'csv') => {
+    toast({
+      title: `Exporting as ${format.toUpperCase()}`,
+      description: `Your dashboard with current filters is being exported.`,
+      duration: 3000,
+    });
+    
+    // In a real implementation, this would trigger a backend export process
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: `Your ${format.toUpperCase()} has been exported and is ready for download.`,
+        duration: 3000,
+      });
+    }, 2000);
+  };
+
+  // Save current view as a snapshot
+  const handleSaveSnapshot = (name: string) => {
+    const newSnapshot: DashboardSnapshot = {
+      id: Date.now().toString(),
+      name,
+      date: new Date(),
+      filters: {
+        selectedState,
+        selectedCity,
+        netWorthRange,
+      }
+    };
+    
+    setSavedSnapshots([...savedSnapshots, newSnapshot]);
+    setIsSnapshotDialogOpen(false);
+    
+    toast({
+      title: "Dashboard View Saved",
+      description: `Your snapshot "${name}" has been saved.`,
+      duration: 3000,
+    });
+  };
+
+  // Load a saved snapshot
+  const loadSnapshot = (snapshot: DashboardSnapshot) => {
+    setSelectedState(snapshot.filters.selectedState);
+    setSelectedCity(snapshot.filters.selectedCity);
+    setNetWorthRange(snapshot.filters.netWorthRange);
+    
+    toast({
+      title: "Snapshot Loaded",
+      description: `Loaded "${snapshot.name}" snapshot.`,
+      duration: 3000,
+    });
+  };
+  
+  // Delete a saved snapshot
+  const deleteSnapshot = (snapshotId: string) => {
+    setSavedSnapshots(snapshots => snapshots.filter(s => s.id !== snapshotId));
+    
+    toast({
+      title: "Snapshot Deleted",
+      description: "The snapshot has been removed.",
+      duration: 3000,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of high-net-worth divorce metrics across the United States
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of high-net-worth divorce metrics across the United States
+          </p>
+        </div>
+        
+        <div className="flex space-x-2 mt-4 sm:mt-0">
+          {/* Export Options */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <DownloadIcon className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Save View Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsSnapshotDialogOpen(true)}
+          >
+            <SaveIcon className="h-4 w-4 mr-2" />
+            Save View
+          </Button>
+          
+          {/* Saved Snapshots */}
+          {savedSnapshots.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <BookmarkIcon className="h-4 w-4 mr-2" />
+                  Saved Views
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Saved Snapshots</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {savedSnapshots.map((snapshot) => (
+                  <DropdownMenuItem 
+                    key={snapshot.id}
+                    className="flex justify-between items-center"
+                  >
+                    <span 
+                      className="cursor-pointer hover:text-primary mr-4"
+                      onClick={() => loadSnapshot(snapshot)}
+                    >
+                      {snapshot.name}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 text-muted-foreground"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSnapshot(snapshot.id);
+                      }}
+                    >
+                      <span className="sr-only">Delete</span>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -100,20 +320,24 @@ const Dashboard = () => {
       />
 
       {/* KPI Cards */}
-      <KPICards />
+      <KPICards 
+        isLoading={isDataLoading}
+        metrics={metrics}
+      />
 
       {/* Main content area - first row (66/33 split) */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mb-6">
         {/* Regional Metrics (66%) */}
         <div className="md:col-span-2">
-          <RegionalMetricsChart regionData={regionData} />
+          <RegionalMetricsChart regionData={regionData} isLoading={isDataLoading} />
         </div>
 
         {/* Top Luxury Locations (33%) */}
         <div className="md:col-span-1">
           <LuxuryLocationsCard 
             luxuryLocations={filteredLuxuryLocations} 
-            onViewAll={handleViewAllLocations} 
+            onViewAll={handleViewAllLocations}
+            isLoading={isDataLoading}
           />
         </div>
       </div>
@@ -122,17 +346,48 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* AI Insights (33%) */}
         <div className="md:col-span-1">
-          <AIInsightsCard insights={formattedInsights} />
+          <AIInsightsCard 
+            insights={formattedInsights}
+            isLoading={isDataLoading}
+          />
         </div>
         
         {/* Map Card (66%) */}
         <div className="md:col-span-2">
           <MapCard 
             selectedState={selectedState !== "All States" ? selectedState : null} 
-            selectedCity={selectedCity !== "All Cities" ? selectedCity : null} 
+            selectedCity={selectedCity !== "All Cities" ? selectedCity : null}
+            isLoading={isDataLoading}
           />
         </div>
       </div>
+      
+      {/* Snapshot Dialog */}
+      <SnapshotDialog
+        isOpen={isSnapshotDialogOpen}
+        onClose={() => setIsSnapshotDialogOpen(false)}
+        onSave={handleSaveSnapshot}
+        currentFilters={{
+          state: selectedState,
+          city: selectedCity,
+          netWorthRange: netWorthRange
+        }}
+      />
+      
+      {/* AI Chatbot */}
+      <AIChatbot 
+        dashboardFilters={{
+          selectedState,
+          selectedCity,
+          netWorthRange
+        }}
+        onUpdateFilters={{
+          setSelectedState,
+          setSelectedCity,
+          setNetWorthRange
+        }}
+        onExport={handleExport}
+      />
     </div>
   );
 };
