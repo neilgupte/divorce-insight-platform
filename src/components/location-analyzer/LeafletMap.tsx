@@ -68,6 +68,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         ref={mapRef}
         className="w-full h-full rounded-md"
         style={{ background: '#f0f0f0' }}
+        center={[39.8, -98.5]} // Center of USA
+        zoom={4}
         bounds={[[25, -125], [49, -65]]}
       >
         <TileLayer
@@ -121,7 +123,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
                 },
               }}
             >
-              <Tooltip>
+              <Tooltip sticky>
                 <div className="font-semibold">{data.zipCode}</div>
                 <div>{data.city}, {data.state}</div>
                 <div className="font-medium">{displayValue}</div>

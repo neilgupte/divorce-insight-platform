@@ -101,54 +101,52 @@ const ZIPCodeHeatmap: React.FC<ZIPCodeHeatmapProps> = ({
           {expanded ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
         </Button>
       </CardHeader>
-      <CardContent className={`${expanded ? "h-[calc(100%-4rem)]" : "h-[400px]"} p-4`}>
-        {/* Only show filters in non-expanded view */}
-        {!expanded && (
-          <div className="flex flex-wrap gap-3 mb-4">
-            <div>
-              <Select value={opportunitySize} onValueChange={setOpportunitySize}>
-                <SelectTrigger className="w-40 h-8">
-                  <SelectValue placeholder="Opportunity Size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All Sizes">All Sizes</SelectItem>
-                  <SelectItem value="Low (<$5M)">Low (&lt;$5M)</SelectItem>
-                  <SelectItem value="Medium ($5M–$10M)">Medium ($5M–$10M)</SelectItem>
-                  <SelectItem value="High ($10M+)">High ($10M+)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Select value={urbanicity} onValueChange={setUrbanicity}>
-                <SelectTrigger className="w-40 h-8">
-                  <SelectValue placeholder="Urbanicity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Types</SelectItem>
-                  <SelectItem value="Urban">Urban</SelectItem>
-                  <SelectItem value="Suburban">Suburban</SelectItem>
-                  <SelectItem value="Rural">Rural</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Select value={viewMode} onValueChange={(value: 'opportunity' | 'tam') => setViewMode(value)}>
-                <SelectTrigger className="w-40 h-8">
-                  <SelectValue placeholder="View Mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="opportunity">Opportunity</SelectItem>
-                  <SelectItem value="tam">TAM</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <CardContent className={`${expanded ? "h-[calc(100%-4rem)] p-0" : "h-[400px]"} p-4`}>
+        {/* Filters - show in both normal and expanded view */}
+        <div className={`flex flex-wrap gap-3 ${expanded ? "bg-background/95 px-4 py-3 border-b" : "mb-4"}`}>
+          <div>
+            <Select value={opportunitySize} onValueChange={setOpportunitySize}>
+              <SelectTrigger className="w-40 h-8">
+                <SelectValue placeholder="Opportunity Size" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All Sizes">All Sizes</SelectItem>
+                <SelectItem value="Low (<$5M)">Low (&lt;$5M)</SelectItem>
+                <SelectItem value="Medium ($5M–$10M)">Medium ($5M–$10M)</SelectItem>
+                <SelectItem value="High ($10M+)">High ($10M+)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
+          
+          <div>
+            <Select value={urbanicity} onValueChange={setUrbanicity}>
+              <SelectTrigger className="w-40 h-8">
+                <SelectValue placeholder="Urbanicity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Types</SelectItem>
+                <SelectItem value="Urban">Urban</SelectItem>
+                <SelectItem value="Suburban">Suburban</SelectItem>
+                <SelectItem value="Rural">Rural</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Select value={viewMode} onValueChange={(value: 'opportunity' | 'tam') => setViewMode(value)}>
+              <SelectTrigger className="w-40 h-8">
+                <SelectValue placeholder="View Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="opportunity">Opportunity</SelectItem>
+                <SelectItem value="tam">TAM</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         
         {/* Map Container - Now Full Width */}
-        <div className={`${expanded ? 'h-full' : 'h-[calc(100%-3rem)]'}`}>
+        <div className={`${expanded ? 'h-[calc(100%-3.5rem)]' : 'h-[calc(100%-3rem)]'}`}>
           <LeafletMap
             zipData={zipData}
             viewMode={viewMode}
