@@ -15,7 +15,9 @@ import {
   Share, 
   BookmarkIcon,
   Filter,
-  X
+  X,
+  Plus,
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -27,17 +29,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { normalizeAIInsights, generateAIInsight } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import AIChatbot from "@/components/common/AIChatbot";
 
-// Import our components
-import KPICards from "@/components/dashboard/KPICards";
-import DashboardFilters from "@/components/dashboard/DashboardFilters";
-import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
-import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
-import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
-import InteractiveMapCard from "@/components/dashboard/InteractiveMapCard";
-import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
-
-// Define snapshot interface
 interface DashboardSnapshot {
   id: string;
   name: string;
@@ -49,7 +50,6 @@ interface DashboardSnapshot {
   };
 }
 
-// Define interfaces for our components
 interface LuxuryLocation {
   id: string;
   city: string;
@@ -60,6 +60,14 @@ interface LuxuryLocation {
   change: number;
 }
 
+interface CustomMetric {
+  id: string;
+  title: string;
+  value: string;
+  change: number;
+  description: string;
+}
+
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState<string>("All States");
   const [selectedCity, setSelectedCity] = useState<string>("All Cities");
@@ -68,15 +76,15 @@ const Dashboard = () => {
   const [savedSnapshots, setSavedSnapshots] = useState<DashboardSnapshot[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [insights, setInsights] = useState(normalizeAIInsights(AI_INSIGHTS));
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [customMetrics, setCustomMetrics] = useState<CustomMetric[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Filter cities based on selected state
   const availableCities = selectedState !== "All States" && TOP_CITIES[selectedState] 
     ? TOP_CITIES[selectedState] 
     : ["All Cities"];
 
-  // Simulate data loading when filters change
   useEffect(() => {
     setIsDataLoading(true);
     const timer = setTimeout(() => {
@@ -85,24 +93,18 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, [selectedState, selectedCity, netWorthRange]);
 
-  // Filter data based on selections
   const filteredLuxuryLocations = TOP_LUXURY_LOCATIONS.filter(location => {
-    // Filter by state
     if (selectedState !== "All States" && !location.city.includes(selectedState)) {
       return false;
     }
     
-    // Filter by city
     if (selectedCity !== "All Cities" && !location.city.includes(selectedCity)) {
       return false;
     }
     
-    // Convert the string average value to a number for filtering
-    // Example: "$6.5M" -> 6.5 (in millions)
     const avgValueStr = location.avgValue.replace('$', '').replace('M', '');
     const avgNetWorthInMillions = parseFloat(avgValueStr);
     
-    // Filter by net worth range
     if (avgNetWorthInMillions < netWorthRange[0] || avgNetWorthInMillions > netWorthRange[1]) {
       return false;
     }
@@ -110,40 +112,31 @@ const Dashboard = () => {
     return true;
   });
 
-  // Transform data for regional metrics chart
   const regionData = REGIONAL_METRICS
     .filter(item => {
-      // Apply net worth filter to chart data
-      const netWorth = item.avgNetWorth / 1000000; // Convert to millions
+      const netWorth = item.avgNetWorth / 1000000;
       return netWorth >= netWorthRange[0] && netWorth <= netWorthRange[1];
     })
     .map(item => ({
       name: item.region,
-      netWorth: item.avgNetWorth / 1000000, // Convert to millions
+      netWorth: item.avgNetWorth / 1000000,
       divorceRate: item.divorceRate,
       luxuryDensity: item.luxuryDensity
     }));
 
-  // Calculate KPI metric changes based on filters
   const getFilteredMetrics = useCallback(() => {
-    // This would normally fetch from a backend based on filters
-    // For now we'll simulate variations based on the filters
     const baseNetWorth = 14.2;
     const baseDivorceRate = 5.8;
     const baseLuxuryDensity = 6.2;
     const baseProtectionRate = 38;
 
-    // Adjust metrics based on state selection
     let stateMultiplier = 1.0;
     if (selectedState !== "All States") {
-      // Simulate different values for different states
       const stateHash = selectedState.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
       stateMultiplier = 0.85 + (stateHash % 30) / 100;
     }
     
-    // Adjust metrics based on net worth range
     let netWorthMultiplier = 1.0;
-    // Higher net worth ranges = higher metrics
     if (netWorthRange[0] > 10) {
       netWorthMultiplier = 1.15;
     } else if (netWorthRange[1] < 20) {
@@ -164,7 +157,6 @@ const Dashboard = () => {
     navigate("/location", { state: { fromDashboard: true } });
   };
 
-  // Export current dashboard as PDF or CSV
   const handleExport = (format: 'pdf' | 'csv') => {
     toast({
       title: `Exporting as ${format.toUpperCase()}`,
@@ -172,7 +164,6 @@ const Dashboard = () => {
       duration: 3000,
     });
     
-    // In a real implementation, this would trigger a backend export process
     setTimeout(() => {
       toast({
         title: "Export Complete",
@@ -182,7 +173,6 @@ const Dashboard = () => {
     }, 2000);
   };
 
-  // Save current view as a snapshot
   const handleSaveSnapshot = (name: string) => {
     const newSnapshot: DashboardSnapshot = {
       id: Date.now().toString(),
@@ -205,7 +195,6 @@ const Dashboard = () => {
     });
   };
 
-  // Load a saved snapshot
   const loadSnapshot = (snapshot: DashboardSnapshot) => {
     setSelectedState(snapshot.filters.selectedState);
     setSelectedCity(snapshot.filters.selectedCity);
@@ -218,7 +207,6 @@ const Dashboard = () => {
     });
   };
   
-  // Delete a saved snapshot
   const deleteSnapshot = (snapshotId: string) => {
     setSavedSnapshots(snapshots => snapshots.filter(s => s.id !== snapshotId));
     
@@ -229,7 +217,6 @@ const Dashboard = () => {
     });
   };
 
-  // Handler for adding new AI insights
   const handleAddInsight = async (prompt: string) => {
     try {
       const currentFilters = {
@@ -249,6 +236,31 @@ const Dashboard = () => {
     }
   };
 
+  const handleAddCustomMetric = () => {
+    setIsAIChatOpen(true);
+  };
+
+  const handleAIAction = (actionType: string, data: any) => {
+    console.log("AI Action:", actionType, data);
+    
+    const newMetric: CustomMetric = {
+      id: Date.now().toString(),
+      title: "Custom AI Metric",
+      value: "42%",
+      change: 8.5,
+      description: "AI-generated metric based on your parameters"
+    };
+    
+    setCustomMetrics(prev => [...prev, newMetric]);
+    setIsAIChatOpen(false);
+    
+    toast({
+      title: "Custom Metric Added",
+      description: "Your AI-generated metric has been added to the dashboard.",
+      duration: 3000,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -260,7 +272,6 @@ const Dashboard = () => {
         </div>
         
         <div className="flex space-x-2 mt-4 sm:mt-0">
-          {/* Export Options */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -280,7 +291,6 @@ const Dashboard = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          {/* Save View Button */}
           <Button 
             variant="outline" 
             size="sm" 
@@ -290,7 +300,6 @@ const Dashboard = () => {
             Save View
           </Button>
           
-          {/* Saved Snapshots */}
           {savedSnapshots.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -333,7 +342,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <DashboardFilters 
         selectedState={selectedState}
         selectedCity={selectedCity}
@@ -345,20 +353,52 @@ const Dashboard = () => {
         usStates={US_STATES}
       />
 
-      {/* KPI Cards */}
       <KPICards 
         isLoading={isDataLoading}
         metrics={metrics}
       />
+      
+      {customMetrics.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {customMetrics.map(metric => (
+            <Card key={metric.id} className="shadow-sm">
+              <CardContent className="p-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
+                  <div className="flex items-baseline justify-between">
+                    <h3 className="text-2xl font-bold">{metric.value}</h3>
+                    <span className={`text-sm font-medium ${metric.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {metric.change >= 0 ? '+' : ''}{metric.change}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{metric.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          
+          <Card 
+            className="flex flex-col items-center justify-center cursor-pointer border-dashed hover:border-primary hover:bg-primary/5 transition-colors shadow-sm"
+            onClick={handleAddCustomMetric}
+          >
+            <CardContent className="flex flex-col items-center justify-center h-full py-6">
+              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-muted mb-3">
+                <Plus className="h-7 w-7 text-primary" />
+              </div>
+              <p className="text-center font-medium">Add Custom Metric</p>
+              <p className="text-center text-muted-foreground text-xs mt-1">
+                Use AI to generate a custom metric card
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      {/* Main content area - first row (66/33 split) */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mb-6">
-        {/* Regional Metrics (66%) */}
         <div className="md:col-span-2">
           <RegionalMetricsChart regionData={regionData} isLoading={isDataLoading} />
         </div>
 
-        {/* Top Luxury Locations (33%) */}
         <div className="md:col-span-1">
           <LuxuryLocationsCard 
             luxuryLocations={filteredLuxuryLocations.slice(0, 5)} 
@@ -368,9 +408,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Second row - AI Insights and Map (33/66 split) */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* AI Insights (33%) */}
         <div className="md:col-span-1">
           <AIInsightsCard 
             insights={insights}
@@ -379,7 +417,6 @@ const Dashboard = () => {
           />
         </div>
         
-        {/* Interactive Map Card (66%) */}
         <div className="md:col-span-2">
           <InteractiveMapCard 
             selectedState={selectedState !== "All States" ? selectedState : null} 
@@ -388,7 +425,25 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Snapshot Dialog */}
+      {customMetrics.length === 0 && (
+        <div className="mt-6">
+          <Card 
+            className="flex flex-col items-center justify-center cursor-pointer border-dashed hover:border-primary hover:bg-primary/5 transition-colors shadow-sm"
+            onClick={handleAddCustomMetric}
+          >
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-muted mb-4">
+                <Plus className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-center font-medium">Add Custom Metric</p>
+              <p className="text-center text-muted-foreground text-sm mt-2">
+                Use AI to generate a custom metric card
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
       <SnapshotDialog
         isOpen={isSnapshotDialogOpen}
         onClose={() => setIsSnapshotDialogOpen(false)}
@@ -399,6 +454,40 @@ const Dashboard = () => {
           netWorthRange: netWorthRange
         }}
       />
+      
+      <Dialog open={isAIChatOpen} onOpenChange={setIsAIChatOpen}>
+        <DialogContent className="sm:max-w-[500px] h-[500px] p-0 flex flex-col">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>AI Metric Generator</DialogTitle>
+            <DialogDescription>
+              Describe what kind of custom metric you'd like to create
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <AIChatbot 
+              initialMessage="I'm ready to help you create a custom metric for your dashboard. What type of data would you like to visualize? For example, divorce rates by age group, asset transfers over time, or something else?"
+              title="Metric Creator"
+              onAction={handleAIAction}
+              availableActions={[
+                {
+                  name: "Divorce by Age Group",
+                  description: "Show divorce rates segmented by age",
+                  handler: () => {
+                    console.log("Selected: Divorce by Age Group");
+                  }
+                },
+                {
+                  name: "Asset Transfers",
+                  description: "Visualize asset transfers over time",
+                  handler: () => {
+                    console.log("Selected: Asset Transfers");
+                  }
+                }
+              ]}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
