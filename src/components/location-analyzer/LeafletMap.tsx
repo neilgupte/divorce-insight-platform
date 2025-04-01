@@ -136,17 +136,16 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   return (
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
-        center={center}
-        zoom={defaultZoom}
-        zoomControl={false}
         style={{ height: '100%', width: '100%' }}
+        defaultZoom={defaultZoom}
+        zoomControl={false}
+        defaultCenter={center}
         whenCreated={(map) => {
           mapRef.current = map;
           setMapReady(true);
         }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomControl position="bottomleft" />
@@ -169,7 +168,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             <Marker
               key={`zip-${index}`}
               position={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
-              icon={zipMarker}
               eventHandlers={{
                 click: () => {
                   onZipClick(zip);
@@ -191,7 +189,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           <Marker
             key={`office-${index}`}
             position={office.position}
-            icon={officeIcon}
           >
             <Popup>
               <div>

@@ -83,18 +83,6 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
     });
   };
 
-  // Style function for GeoJSON features using properties from the data
-  const geoJSONStyle = (feature: any) => {
-    // Use the pre-styled properties from the GeoJSON
-    return {
-      fillColor: feature.properties.fill || "#3388ff",
-      weight: 1,
-      opacity: feature.properties["stroke-opacity"] || 0.5,
-      color: feature.properties.stroke || "#999",
-      fillOpacity: feature.properties["fill-opacity"] || 0.2,
-    };
-  };
-
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 flex flex-col">
@@ -143,12 +131,11 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           
           <MapContainer
             style={{ height: "100%", width: "100%" }}
-            zoom={defaultZoom}
+            defaultZoom={defaultZoom}
             zoomControl={false}
-            center={center}
+            defaultCenter={center}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <ZoomControl position="bottomleft" />
@@ -160,10 +147,10 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
                 data={geoJSONData}
                 pathOptions={(feature) => ({
                   fillColor: feature.properties.fill || "#3388ff",
-                  weight: 1,
+                  weight: feature.properties["stroke-width"] || 1,
                   opacity: feature.properties["stroke-opacity"] || 0.5,
                   color: feature.properties.stroke || "#999",
-                  fillOpacity: feature.properties["fill-opacity"] || 0.2,
+                  fillOpacity: feature.properties["fill-opacity"] || 0.7,
                 })}
               />
             )}
