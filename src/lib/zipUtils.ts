@@ -67,6 +67,13 @@ const stateAbbreviations: Record<string, string> = {
   "Wyoming": "WY"
 };
 
+export { stateAbbreviations };
+
+// Get state abbreviation 
+export const getStateAbbreviation = (state: string): string => {
+  return stateAbbreviations[state] || state;
+};
+
 // Map of states to major cities (simplified)
 const stateCities: Record<string, string[]> = {
   "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento"],
@@ -179,4 +186,148 @@ export const generateMockZIPData = (
   }
   
   return result;
+};
+
+// Generate simulated competitor data
+export interface CompetitorData {
+  name: string;
+  address: string;
+  principal: string;
+  rating?: number;
+  yearsInOperation?: number;
+  size?: string;
+}
+
+export const generateMockCompetitors = (zipCode: string, count: number = 5): CompetitorData[] => {
+  const competitorNames = [
+    "Elite Divorce Law",
+    "Prestige Family Legal",
+    "Diamond Separation Services",
+    "Executive Divorce Counsel",
+    "Platinum Family Law",
+    "Sovereign Legal Partners",
+    "Legacy Divorce Group",
+    "Premier Family Attorneys",
+    "Apex Dissolution Law",
+    "Crown Separation Counsel"
+  ];
+  
+  const streetNames = [
+    "Main Street",
+    "Oak Avenue",
+    "Maple Boulevard",
+    "Washington Street",
+    "Park Avenue",
+    "Broadway",
+    "Central Avenue",
+    "Highland Drive",
+    "Lexington Avenue",
+    "Wilshire Boulevard"
+  ];
+  
+  const principals = [
+    "Alexandra Wilson",
+    "Jonathan Hughes",
+    "Victoria Reynolds",
+    "Maxwell Bennett",
+    "Elizabeth Montgomery",
+    "Richard Blackwell",
+    "Sophia Harrington",
+    "Theodore Chandler",
+    "Olivia Remington",
+    "Benjamin Sterling"
+  ];
+  
+  const result: CompetitorData[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const nameIndex = Math.floor(Math.random() * competitorNames.length);
+    const streetIndex = Math.floor(Math.random() * streetNames.length);
+    const principalIndex = Math.floor(Math.random() * principals.length);
+    
+    // Building number
+    const buildingNumber = Math.floor(Math.random() * 999) + 100;
+    
+    // Suite number
+    const suiteNumber = Math.floor(Math.random() * 300) + 100;
+    
+    // Rating between 3.0 and 5.0
+    const rating = parseFloat((3 + Math.random() * 2).toFixed(1));
+    
+    // Years in operation between 2 and 25
+    const yearsInOperation = Math.floor(Math.random() * 23) + 2;
+    
+    // Firm size
+    const sizes = ["Small (2-5 attorneys)", "Medium (6-15 attorneys)", "Large (16+ attorneys)"];
+    const size = sizes[Math.floor(Math.random() * sizes.length)];
+    
+    result.push({
+      name: competitorNames[nameIndex],
+      address: `${buildingNumber} ${streetNames[streetIndex]}, Suite ${suiteNumber}, ZIP ${zipCode}`,
+      principal: principals[principalIndex],
+      rating,
+      yearsInOperation,
+      size
+    });
+  }
+  
+  return result;
+};
+
+// Generate simulated HNW household stats
+export interface HNWHouseholdStats {
+  count: number;
+  averageNetWorth: string;
+  multiPropertyPercentage: number;
+}
+
+export const generateHNWHouseholdStats = (zipCode: string, urbanicity: "Urban" | "Suburban" | "Rural"): HNWHouseholdStats => {
+  // Base count depending on urbanicity
+  let baseCount: number;
+  if (urbanicity === "Urban") {
+    baseCount = Math.floor(Math.random() * 300) + 200; // 200-500
+  } else if (urbanicity === "Suburban") {
+    baseCount = Math.floor(Math.random() * 200) + 100; // 100-300
+  } else {
+    baseCount = Math.floor(Math.random() * 100) + 50; // 50-150
+  }
+  
+  // Average net worth in millions
+  const avgNetWorth = parseFloat((2 + Math.random() * 18).toFixed(1));
+  
+  // Percentage with 2+ properties
+  const multiPropertyPercentage = Math.floor(Math.random() * 40) + 20; // 20-60%
+  
+  return {
+    count: baseCount,
+    averageNetWorth: `$${avgNetWorth}M`,
+    multiPropertyPercentage
+  };
+};
+
+// Generate simulated nearby luxury infrastructure
+export interface LuxuryInfrastructure {
+  privateAirstrips: number;
+  luxuryClubs: number;
+  fiveStarHotels: number;
+  highEndRetail: number;
+}
+
+export const generateLuxuryInfrastructure = (zipCode: string, urbanicity: "Urban" | "Suburban" | "Rural"): LuxuryInfrastructure => {
+  // Base multiplier depending on urbanicity
+  let multiplier: number;
+  if (urbanicity === "Urban") {
+    multiplier = 1.5;
+  } else if (urbanicity === "Suburban") {
+    multiplier = 1.0;
+  } else {
+    multiplier = 0.5;
+  }
+  
+  return {
+    privateAirstrips: Math.floor(Math.random() * 3 * multiplier),
+    luxuryClubs: Math.floor(Math.random() * 5 * multiplier) + 1,
+    fiveStarHotels: Math.floor(Math.random() * 6 * multiplier),
+    highEndRetail: Math.floor(Math.random() * 8 * multiplier) + 1
+  };
 };

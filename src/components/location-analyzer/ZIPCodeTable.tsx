@@ -18,9 +18,7 @@ import {
   ChevronDown, 
   Printer, 
   Download, 
-  Share2,
-  Check,
-  X
+  Share2
 } from "lucide-react";
 import { 
   Select, 
@@ -29,13 +27,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { generateMockZIPData, ZIPCodeData } from "@/lib/zipUtils";
+import { generateMockZIPData, ZIPCodeData, getStateAbbreviation } from "@/lib/zipUtils";
 
 interface ZIPCodeTableProps {
   selectedState: string;
@@ -46,6 +41,7 @@ interface ZIPCodeTableProps {
   onToggleExpand: () => void;
   usStates: string[];
   availableCities: string[];
+  onZipCodeSelect: (zipData: ZIPCodeData) => void;
 }
 
 const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
@@ -56,7 +52,8 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
   expanded,
   onToggleExpand,
   usStates,
-  availableCities
+  availableCities,
+  onZipCodeSelect
 }) => {
   const [urbanicity, setUrbanicity] = useState<string>("All");
   const [sortConfig, setSortConfig] = useState<{
@@ -218,14 +215,17 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                       $ Opportunity {getSortIcon("opportunity")}
                     </div>
                   </TableHead>
-                  <TableHead className="text-center">Has Office?</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedData.map((item) => (
-                  <TableRow key={item.zipCode}>
+                  <TableRow 
+                    key={item.zipCode}
+                    className="cursor-pointer hover:bg-muted/80"
+                    onClick={() => onZipCodeSelect(item)}
+                  >
                     <TableCell className="font-medium">{item.zipCode}</TableCell>
-                    <TableCell>{item.state}</TableCell>
+                    <TableCell>{getStateAbbreviation(item.state)}</TableCell>
                     <TableCell>{item.city}</TableCell>
                     <TableCell className="text-right">
                       <Badge variant="outline">${item.tam}M</Badge>
@@ -239,20 +239,11 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
                         ${item.opportunity}M
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Switch 
-                        checked={item.hasOffice}
-                        onCheckedChange={(checked) => {
-                          // In a real app, you'd update the data here
-                          console.log(`Office for ${item.zipCode} set to ${checked}`);
-                        }} 
-                      />
-                    </TableCell>
                   </TableRow>
                 ))}
                 {sortedData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       No results found.
                     </TableCell>
                   </TableRow>

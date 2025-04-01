@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import ZIPCodeHeatmap from "./ZIPCodeHeatmap";
 import ZIPCodeTable from "./ZIPCodeTable";
+import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
+import { ZIPCodeData } from "@/lib/zipUtils";
 
 interface ZIPCodeAnalysisProps {
   selectedState: string;
@@ -22,6 +24,7 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
 }) => {
   const [heatmapExpanded, setHeatmapExpanded] = useState(false);
   const [tableExpanded, setTableExpanded] = useState(false);
+  const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
   
   // Only one view can be expanded at a time
   const toggleHeatmapExpand = () => {
@@ -32,6 +35,14 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
   const toggleTableExpand = () => {
     setTableExpanded(!tableExpanded);
     if (!tableExpanded) setHeatmapExpanded(false);
+  };
+
+  const handleZipCodeSelect = (zipData: ZIPCodeData) => {
+    setSelectedZipCode(zipData);
+  };
+
+  const handleCloseOverlay = () => {
+    setSelectedZipCode(null);
   };
   
   return (
@@ -57,8 +68,16 @@ const ZIPCodeAnalysis: React.FC<ZIPCodeAnalysisProps> = ({
           onToggleExpand={toggleTableExpand}
           usStates={usStates}
           availableCities={availableCities}
+          onZipCodeSelect={handleZipCodeSelect}
         />
       </div>
+
+      {selectedZipCode && (
+        <ZIPCodeDetailOverlay
+          zipCodeData={selectedZipCode}
+          onClose={handleCloseOverlay}
+        />
+      )}
     </div>
   );
 };
