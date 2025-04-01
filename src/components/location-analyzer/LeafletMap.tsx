@@ -41,6 +41,17 @@ interface LeafletMapProps {
   fullscreen?: boolean;
 }
 
+// Get the opportunity size label from the opportunity value
+const getOpportunitySize = (opportunityValue: number): 'Low' | 'Medium' | 'High' => {
+  if (opportunityValue >= 10) {
+    return 'High';
+  } else if (opportunityValue >= 5) {
+    return 'Medium';
+  } else {
+    return 'Low';
+  }
+};
+
 // Function to filter the data based on filters
 const filterData = (
   data: ZIPCodeData[],
@@ -50,7 +61,8 @@ const filterData = (
   return data.filter(item => {
     // Filter by opportunity
     if (opportunityFilter !== 'All') {
-      if (item.opportunitySize !== opportunityFilter) return false;
+      const itemOpportunitySize = getOpportunitySize(item.opportunity);
+      if (itemOpportunitySize !== opportunityFilter) return false;
     }
     
     // Filter by urbanicity
@@ -121,6 +133,12 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   }, [mapRef.current]);
 
+  // Define the map ready callback
+  const handleMapReady = (map: L.Map) => {
+    mapRef.current = map;
+    setMapReady(true);
+  };
+
   return (
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
@@ -128,10 +146,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         zoom={defaultZoom}
         zoomControl={false}
         style={{ height: '100%', width: '100%' }}
-        whenReady={(map) => {
-          mapRef.current = map.target;
-          setMapReady(true);
-        }}
+        whenReady={(map) => handleMapReady(map.target)}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -142,7 +157,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         
         {/* Render ZIP code data as markers */}
         {mapReady && filteredData.map((zip, index) => {
-          const opportunityColor = opportunityColors[zip.opportunitySize] || opportunityColors.Default;
+          const opportunitySize = getOpportunitySize(zip.opportunity);
+          const opportunityColor = opportunityColors[opportunitySize] || opportunityColors.Default;
           
           // Create custom icon with color based on opportunity size
           const zipMarker = new L.DivIcon({
@@ -155,7 +171,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           return (
             <Marker
               key={`zip-${index}`}
-              position={[zip.latitude, zip.longitude]}
+              position={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
               icon={zipMarker}
               eventHandlers={{
                 click: () => {
@@ -166,7 +182,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
               <Tooltip>
                 <div>
                   <div className="font-semibold">{zip.zipCode} - {zip.city}</div>
-                  <div>Opportunity: ${zip.opportunityValue}M</div>
+                  <div>Opportunity: ${zip.opportunity}M</div>
                 </div>
               </Tooltip>
             </Marker>

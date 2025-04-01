@@ -11,6 +11,8 @@ export interface ZIPCodeData {
   hasOffice: boolean;
   urbanicity: "Urban" | "Suburban" | "Rural";
   divorceRate?: number; // Added divorceRate property as optional
+  latitude?: string; // Added latitude property
+  longitude?: string; // Added longitude property
 }
 
 // States with their abbreviations for reference
@@ -178,6 +180,17 @@ export const generateMockZIPData = (
     // Random office presence
     const hasOffice = Math.random() > 0.7;
     
+    // Generate latitude and longitude for the ZIP code (simplified for mock data)
+    const baseLat = state === "Alaska" ? 61.2 : state === "Hawaii" ? 19.9 : 38.0;
+    const baseLng = state === "Alaska" ? -149.9 : state === "Hawaii" ? -155.5 : -98.0;
+    
+    // Random offset for visual distribution
+    const latOffset = (Math.random() - 0.5) * 10;
+    const lngOffset = (Math.random() - 0.5) * 20;
+    
+    const latitude = (baseLat + latOffset).toString();
+    const longitude = (baseLng + lngOffset).toString();
+    
     result.push({
       zipCode: generateZipForState(state),
       state,
@@ -188,7 +201,9 @@ export const generateMockZIPData = (
       opportunity,
       hasOffice,
       urbanicity: urbanType,
-      divorceRate: parseFloat((divorceRate * 100).toFixed(1)) // Convert to percentage and store
+      divorceRate: parseFloat((divorceRate * 100).toFixed(1)), // Convert to percentage and store
+      latitude,
+      longitude
     });
   }
   
