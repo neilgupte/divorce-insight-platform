@@ -35,12 +35,14 @@ import {
   Plus, 
   Save,
   DollarSign,
-  Info
+  Info,
+  MessageSquare
 } from "lucide-react";
 import { US_STATES, TOP_CITIES } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import DummyMapOverlay from "@/components/map/DummyMapOverlay";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import AIChatbot from "@/components/common/AIChatbot";
 
 interface Amenity {
   id: number;
@@ -104,6 +106,8 @@ const LocationAnalyzer = () => {
   });
   const [view, setView] = useState<"standard" | "comparison">("standard");
   const [competitorCount, setCompetitorCount] = useState<number>(3);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [aiChatPrompt, setAiChatPrompt] = useState("");
   
   const availableCities = state !== "All States" && TOP_CITIES[state] 
     ? ["All Cities", ...TOP_CITIES[state]] 
@@ -177,6 +181,21 @@ const LocationAnalyzer = () => {
       title: "Profile saved",
       description: "Your scoring profile has been saved as 'Attorney View'.",
     });
+  };
+
+  const handleAddCustomMetric = () => {
+    setAiChatPrompt("I'd like to add a custom metric to my dashboard. For example, can you show me divorce rates by age group, or add a chart for rising asset transfers?");
+    setIsAIChatOpen(true);
+  };
+
+  const handleAIAction = (actionType: string, data: any) => {
+    console.log("AI Action:", actionType, data);
+    // Future implementation: Handle the AI-generated custom metric
+    toast({
+      title: "Custom Metric Added",
+      description: "Your custom metric has been added to the dashboard.",
+    });
+    setIsAIChatOpen(false);
   };
 
   return (
@@ -573,7 +592,56 @@ const LocationAnalyzer = () => {
             </Button>
           </CardContent>
         </Card>
+
+        <Card 
+          className="flex flex-col items-center justify-center cursor-pointer border-dashed hover:border-primary hover:bg-primary/5 transition-colors"
+          onClick={handleAddCustomMetric}
+        >
+          <CardContent className="flex flex-col items-center justify-center h-full py-10">
+            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-muted mb-4">
+              <Plus className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-center font-medium">Add Custom Metric</p>
+            <p className="text-center text-muted-foreground text-sm mt-2">
+              Use AI to generate a custom metric card
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      <Dialog open={isAIChatOpen} onOpenChange={setIsAIChatOpen}>
+        <DialogContent className="sm:max-w-[500px] h-[500px] p-0 flex flex-col">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>AI Metric Generator</DialogTitle>
+            <DialogDescription>
+              Describe what kind of custom metric you'd like to create
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <AIChatbot 
+              initialMessage="I'm ready to help you create a custom metric for your dashboard. What type of data would you like to visualize? For example, divorce rates by age group, asset transfers over time, or something else?"
+              title="Metric Creator"
+              onAction={handleAIAction}
+              availableActions={[
+                {
+                  name: "Divorce by Age Group",
+                  description: "Show divorce rates segmented by age",
+                  handler: () => {
+                    setAiChatPrompt("Show me divorce rates by age group");
+                  }
+                },
+                {
+                  name: "Asset Transfers",
+                  description: "Visualize asset transfers over time",
+                  handler: () => {
+                    setAiChatPrompt("Add a chart for rising asset transfers");
+                  }
+                }
+              ]}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <DummyMapOverlay
         open={isAdvancedMapOpen}
