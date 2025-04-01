@@ -131,9 +131,9 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           
           <MapContainer
             style={{ height: "100%", width: "100%" }}
-            defaultZoom={defaultZoom}
+            zoom={defaultZoom}
             zoomControl={false}
-            defaultCenter={center}
+            center={center}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
