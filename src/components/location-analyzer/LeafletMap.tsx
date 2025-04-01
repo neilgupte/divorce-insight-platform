@@ -133,12 +133,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   }, [mapRef.current]);
 
-  // Define the map ready callback
-  const handleMapReady = (map: L.Map) => {
-    mapRef.current = map;
-    setMapReady(true);
-  };
-
   return (
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
@@ -146,11 +140,14 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         zoom={defaultZoom}
         zoomControl={false}
         style={{ height: '100%', width: '100%' }}
-        whenReady={(map) => handleMapReady(map.target)}
+        whenReady={e => {
+          mapRef.current = e.target;
+          setMapReady(true);
+        }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         <ZoomControl position="bottomleft" />
         <MapViewUpdater center={center} zoom={defaultZoom} />

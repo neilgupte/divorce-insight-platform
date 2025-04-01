@@ -44,6 +44,7 @@ import DummyMapOverlay from "@/components/map/DummyMapOverlay";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AIChatbot from "@/components/common/AIChatbot";
 import ZIPCodeAnalysis from "@/components/location-analyzer/ZIPCodeAnalysis";
+import GeoJSONMapOverlay from "@/components/location-analyzer/GeoJSONMapOverlay";
 
 interface Amenity {
   id: number;
@@ -96,6 +97,7 @@ const LocationAnalyzer = () => {
   const [city, setCity] = useState<string>("All Cities");
   const [isAmenityModalOpen, setIsAmenityModalOpen] = useState(false);
   const [isAdvancedMapOpen, setIsAdvancedMapOpen] = useState(false);
+  const [isGeoJSONMapOpen, setIsGeoJSONMapOpen] = useState(false);
   const [amenities, setAmenities] = useState<Amenity[]>(initialAmenities);
   const [newAmenity, setNewAmenity] = useState<Partial<Amenity>>({});
   const [scoringWeights, setScoringWeights] = useState({
@@ -202,11 +204,22 @@ const LocationAnalyzer = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Location Analyzer</h1>
-        <p className="text-muted-foreground">
-          Analyze and compare locations based on key divorce and wealth metrics
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Location Analyzer</h1>
+          <p className="text-muted-foreground">
+            Analyze and compare locations based on key divorce and wealth metrics
+          </p>
+        </div>
+        
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => setIsGeoJSONMapOpen(true)}
+        >
+          <Map className="h-4 w-4" />
+          Map Demo
+        </Button>
       </div>
       
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
@@ -652,6 +665,11 @@ const LocationAnalyzer = () => {
         onClose={() => setIsAdvancedMapOpen(false)}
         initialState={state !== "All States" ? state : null}
         initialCity={city !== "All Cities" ? city : null}
+      />
+
+      <GeoJSONMapOverlay 
+        open={isGeoJSONMapOpen}
+        onClose={() => setIsGeoJSONMapOpen(false)}
       />
 
       <Dialog open={isAmenityModalOpen} onOpenChange={setIsAmenityModalOpen}>
