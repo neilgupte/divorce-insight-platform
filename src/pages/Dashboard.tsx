@@ -38,6 +38,13 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import AIChatbot from "@/components/common/AIChatbot";
+import DashboardFilters from "@/components/dashboard/DashboardFilters";
+import KPICards from "@/components/dashboard/KPICards";
+import RegionalMetricsChart from "@/components/dashboard/RegionalMetricsChart";
+import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
+import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
+import InteractiveMapCard from "@/components/dashboard/InteractiveMapCard";
+import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
 
 interface DashboardSnapshot {
   id: string;
@@ -376,21 +383,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ))}
-          
-          <Card 
-            className="flex flex-col items-center justify-center cursor-pointer border-dashed hover:border-primary hover:bg-primary/5 transition-colors shadow-sm"
-            onClick={handleAddCustomMetric}
-          >
-            <CardContent className="flex flex-col items-center justify-center h-full py-6">
-              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-muted mb-3">
-                <Plus className="h-7 w-7 text-primary" />
-              </div>
-              <p className="text-center font-medium">Add Custom Metric</p>
-              <p className="text-center text-muted-foreground text-xs mt-1">
-                Use AI to generate a custom metric card
-              </p>
-            </CardContent>
-          </Card>
         </div>
       )}
 
@@ -424,25 +416,6 @@ const Dashboard = () => {
           />
         </div>
       </div>
-      
-      {customMetrics.length === 0 && (
-        <div className="mt-6">
-          <Card 
-            className="flex flex-col items-center justify-center cursor-pointer border-dashed hover:border-primary hover:bg-primary/5 transition-colors shadow-sm"
-            onClick={handleAddCustomMetric}
-          >
-            <CardContent className="flex flex-col items-center justify-center py-8">
-              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-muted mb-4">
-                <Plus className="h-8 w-8 text-primary" />
-              </div>
-              <p className="text-center font-medium">Add Custom Metric</p>
-              <p className="text-center text-muted-foreground text-sm mt-2">
-                Use AI to generate a custom metric card
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
       
       <SnapshotDialog
         isOpen={isSnapshotDialogOpen}
