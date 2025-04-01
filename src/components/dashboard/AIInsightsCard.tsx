@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Lightbulb, ArrowUpRight, Info, Plus, User, Printer, Download, Share, X, Tag, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -305,9 +305,9 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="flex-grow px-2 overflow-hidden">
+      <CardContent className="flex-grow overflow-hidden px-2 py-0">
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-4 p-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="p-3 space-y-2">
                 <div className="flex justify-between">
@@ -321,178 +321,180 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
             ))}
           </div>
         ) : (
-          <div className="space-y-3 max-h-[300px] overflow-auto pr-2">
-            {getFilteredInsights().length === 0 ? (
-              <div className="flex items-center justify-center h-full py-8">
-                <p className="text-sm text-muted-foreground">No insights found. Try changing the filter or adding a new insight.</p>
-              </div>
-            ) : (
-              getFilteredInsights().map((insight) => (
-                <Sheet key={insight.id}>
-                  <SheetTrigger asChild>
-                    <div
-                      className="p-3 border border-border rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => setActiveInsight(insight)}
-                    >
-                      <div className="flex justify-between items-start mb-1.5">
-                        <Badge
-                          variant="outline"
-                          className={`${getCategoryColor(insight)} text-xs px-2 py-0 h-5`}
-                        >
-                          {getCategoryName(insight)}
-                        </Badge>
-                        <div className="flex items-center">
-                          {insight.userGenerated && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <User className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="text-xs">User-generated insight</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                          <Lightbulb className="h-4 w-4 text-amber-400" />
-                        </div>
-                      </div>
-                      <p className="text-sm">{getInsightText(insight)}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {getTags(insight).map((tag, idx) => (
-                          <Badge key={`${insight.id}-tag-${idx}`} variant="secondary" className="text-xs">
-                            {tag}
+          <ScrollArea className="h-[calc(100%-16px)] pb-2 pr-4">
+            <div className="space-y-3 p-2">
+              {getFilteredInsights().length === 0 ? (
+                <div className="flex items-center justify-center h-32 py-8">
+                  <p className="text-sm text-muted-foreground">No insights found. Try changing the filter or adding a new insight.</p>
+                </div>
+              ) : (
+                getFilteredInsights().map((insight) => (
+                  <Sheet key={insight.id}>
+                    <SheetTrigger asChild>
+                      <div
+                        className="p-3 border border-border rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => setActiveInsight(insight)}
+                      >
+                        <div className="flex justify-between items-start mb-1.5">
+                          <Badge
+                            variant="outline"
+                            className={`${getCategoryColor(insight)} text-xs px-2 py-0 h-5`}
+                          >
+                            {getCategoryName(insight)}
                           </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </SheetTrigger>
-                  
-                  <SheetContent className="w-full sm:max-w-md overflow-auto">
-                    <SheetHeader className="text-left">
-                      <SheetTitle>
-                        <div className="flex items-center justify-between">
                           <div className="flex items-center">
-                            <Badge
-                              variant="outline"
-                              className={`${getCategoryColor(insight)} text-xs px-2 py-0 h-5 mr-2`}
-                            >
-                              {getCategoryName(insight)}
-                            </Badge>
-                            {insight.title || "Insight Details"}
-                          </div>
-                          {insight.userGenerated && (
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              User-created
-                            </Badge>
-                          )}
-                        </div>
-                      </SheetTitle>
-                      <SheetDescription>
-                        {insight.createdAt && (
-                          <p className="text-xs text-muted-foreground">
-                            Generated on {new Date(insight.createdAt).toLocaleDateString()} 
-                            {insight.createdBy && ` by ${insight.createdBy}`}
-                          </p>
-                        )}
-                      </SheetDescription>
-                    </SheetHeader>
-                    
-                    <div className="py-6 space-y-6">
-                      <p className="text-sm">{getInsightText(insight)}</p>
-                      
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Data Points:</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="p-3 bg-muted/30 rounded-md">
-                            <p className="text-xs text-muted-foreground">Asset Growth</p>
-                            <p className="text-lg font-medium">+12.4%</p>
-                          </div>
-                          <div className="p-3 bg-muted/30 rounded-md">
-                            <p className="text-xs text-muted-foreground">Anomaly Score</p>
-                            <p className="text-lg font-medium">0.87</p>
-                          </div>
-                          <div className="p-3 bg-muted/30 rounded-md">
-                            <p className="text-xs text-muted-foreground">Confidence</p>
-                            <p className="text-lg font-medium">High</p>
-                          </div>
-                          <div className="p-3 bg-muted/30 rounded-md">
-                            <p className="text-xs text-muted-foreground">Trend Period</p>
-                            <p className="text-lg font-medium">6 mo</p>
+                            {insight.userGenerated && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <User className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">User-generated insight</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            <Lightbulb className="h-4 w-4 text-amber-400" />
                           </div>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Related Tags:</h4>
-                        <div className="flex flex-wrap gap-1">
+                        <p className="text-sm line-clamp-3">{getInsightText(insight)}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
                           {getTags(insight).map((tag, idx) => (
-                            <Badge key={`detail-${insight.id}-tag-${idx}`} variant="secondary">
+                            <Badge key={`${insight.id}-tag-${idx}`} variant="secondary" className="text-xs">
                               {tag}
                             </Badge>
                           ))}
                         </div>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Data Sources:</h4>
-                        <ul className="text-sm space-y-1">
-                          <li className="text-muted-foreground">• HNW Demographics Dataset (2023)</li>
-                          <li className="text-muted-foreground">• Divorce Rate Trends (Q2 2023)</li>
-                          <li className="text-muted-foreground">• Asset Protection Analysis</li>
-                        </ul>
-                      </div>
-                    </div>
+                    </SheetTrigger>
                     
-                    <div className="absolute top-4 right-12 flex space-x-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrint}>
-                              <Printer className="h-4 w-4" />
-                              <span className="sr-only">Print</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Print insight</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                    <SheetContent className="w-full sm:max-w-md overflow-auto">
+                      <SheetHeader className="text-left">
+                        <SheetTitle>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Badge
+                                variant="outline"
+                                className={`${getCategoryColor(insight)} text-xs px-2 py-0 h-5 mr-2`}
+                              >
+                                {getCategoryName(insight)}
+                              </Badge>
+                              {insight.title || "Insight Details"}
+                            </div>
+                            {insight.userGenerated && (
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                User-created
+                              </Badge>
+                            )}
+                          </div>
+                        </SheetTitle>
+                        <SheetDescription>
+                          {insight.createdAt && (
+                            <p className="text-xs text-muted-foreground">
+                              Generated on {new Date(insight.createdAt).toLocaleDateString()} 
+                              {insight.createdBy && ` by ${insight.createdBy}`}
+                            </p>
+                          )}
+                        </SheetDescription>
+                      </SheetHeader>
                       
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleExport('pdf')}>
-                              <Download className="h-4 w-4" />
-                              <span className="sr-only">Download</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Download as PDF</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <div className="py-6 space-y-6">
+                        <p className="text-sm">{getInsightText(insight)}</p>
+                        
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">Data Points:</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 bg-muted/30 rounded-md">
+                              <p className="text-xs text-muted-foreground">Asset Growth</p>
+                              <p className="text-lg font-medium">+12.4%</p>
+                            </div>
+                            <div className="p-3 bg-muted/30 rounded-md">
+                              <p className="text-xs text-muted-foreground">Anomaly Score</p>
+                              <p className="text-lg font-medium">0.87</p>
+                            </div>
+                            <div className="p-3 bg-muted/30 rounded-md">
+                              <p className="text-xs text-muted-foreground">Confidence</p>
+                              <p className="text-lg font-medium">High</p>
+                            </div>
+                            <div className="p-3 bg-muted/30 rounded-md">
+                              <p className="text-xs text-muted-foreground">Trend Period</p>
+                              <p className="text-lg font-medium">6 mo</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">Related Tags:</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {getTags(insight).map((tag, idx) => (
+                              <Badge key={`detail-${insight.id}-tag-${idx}`} variant="secondary">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">Data Sources:</h4>
+                          <ul className="text-sm space-y-1">
+                            <li className="text-muted-foreground">• HNW Demographics Dataset (2023)</li>
+                            <li className="text-muted-foreground">• Divorce Rate Trends (Q2 2023)</li>
+                            <li className="text-muted-foreground">• Asset Protection Analysis</li>
+                          </ul>
+                        </div>
+                      </div>
                       
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
-                              <Share className="h-4 w-4" />
-                              <span className="sr-only">Share</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Share insight</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              ))
-            )}
-          </div>
+                      <div className="absolute top-4 right-12 flex space-x-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrint}>
+                                <Printer className="h-4 w-4" />
+                                <span className="sr-only">Print</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Print insight</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleExport('pdf')}>
+                                <Download className="h-4 w-4" />
+                                <span className="sr-only">Download</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Download as PDF</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
+                                <Share className="h-4 w-4" />
+                                <span className="sr-only">Share</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Share insight</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                ))
+              )}
+            </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>
