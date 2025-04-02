@@ -47,6 +47,7 @@ import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 import InteractiveMapCard from "@/components/dashboard/InteractiveMapCard";
 import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
+import "@/lib/types/tableau-typings";
 
 interface DashboardSnapshot {
   id: string;
@@ -88,6 +89,7 @@ const Dashboard = () => {
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [customMetrics, setCustomMetrics] = useState<CustomMetric[]>([]);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
+  const [showTableau, setShowTableau] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -289,7 +291,7 @@ const Dashboard = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsMapDialogOpen(true)}
+            onClick={() => setShowTableau(true)}
           >
             <Map className="h-4 w-4 mr-2" />
             Map View
@@ -508,6 +510,28 @@ const Dashboard = () => {
           </DialogClose>
         </DialogContent>
       </Dialog>
+      
+      {showTableau && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
+          <div className="flex justify-between items-center p-4 bg-zinc-900 text-white">
+            <div>
+              <h2 className="text-lg font-bold">Interactive Tableau Map</h2>
+              <p className="text-sm text-zinc-400">Explore high-net-worth divorce trends across the U.S.</p>
+            </div>
+            <button onClick={() => setShowTableau(false)} className="text-white text-xl rounded-full hover:bg-zinc-800 w-8 h-8 flex items-center justify-center">&times;</button>
+          </div>
+          <div className="flex-1">
+            <tableau-viz
+              id="tableauViz"
+              src="https://public.tableau.com/views/DivorceIQ/Dashboard1"
+              width="100%"
+              height="100%"
+              toolbar="bottom"
+              hide-tabs
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
