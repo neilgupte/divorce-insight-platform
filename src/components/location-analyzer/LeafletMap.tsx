@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -43,7 +42,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, []);
 
   useEffect(() => {
-    fetch("https://raw.githubusercontent.com/spiratech/public/main/zcta_06_halfsize.geojson")
+    fetch("https://raw.githubusercontent.com/spiratech/public/main/zcta_06_halfsize.geojson?raw=true")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Network response was not ok: ${res.status}`);
@@ -125,8 +124,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   };
 
-  const handleMapReady = (map: L.Map) => {
-    setMap(map);
+  const handleMapReady = (mapInstance: L.Map) => {
+    setMap(mapInstance);
   };
 
   const onEachFeature = (feature: any, layer: L.Layer) => {
