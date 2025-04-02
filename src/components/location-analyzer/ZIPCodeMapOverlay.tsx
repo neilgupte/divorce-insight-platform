@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -89,41 +90,39 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           <MapHeaderControls onClose={onClose} />
         </DialogHeader>
         
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex">
-            <MapFilterPanel
+        <div className="flex-1 flex overflow-hidden">
+          <MapFilterPanel
+            opportunityFilter={opportunityFilter}
+            setOpportunityFilter={setOpportunityFilter}
+            urbanicityFilter={urbanicityFilter}
+            setUrbanicityFilter={setUrbanicityFilter}
+            netWorthRange={netWorthRange}
+            setNetWorthRange={setNetWorthRange}
+            divorceRateThreshold={divorceRateThreshold}
+            setDivorceRateThreshold={setDivorceRateThreshold}
+            showExistingOffices={showExistingOffices}
+            setShowExistingOffices={setShowExistingOffices}
+            isCollapsed={filterPanelCollapsed}
+            toggleCollapse={toggleFilterPanel}
+          />
+          
+          <div className="flex-1 relative">
+            <LeafletMap 
+              zipData={zipData}
+              onZipClick={handleZipClick}
               opportunityFilter={opportunityFilter}
-              setOpportunityFilter={setOpportunityFilter}
               urbanicityFilter={urbanicityFilter}
-              setUrbanicityFilter={setUrbanicityFilter}
-              netWorthRange={netWorthRange}
-              setNetWorthRange={setNetWorthRange}
-              divorceRateThreshold={divorceRateThreshold}
-              setDivorceRateThreshold={setDivorceRateThreshold}
-              showExistingOffices={showExistingOffices}
-              setShowExistingOffices={setShowExistingOffices}
-              isCollapsed={filterPanelCollapsed}
-              toggleCollapse={toggleFilterPanel}
+              showOfficeLocations={showExistingOffices}
+              officeLocations={officeLocations}
+              fullscreen={true}
             />
             
-            <div className="flex-1 relative">
-              <LeafletMap 
-                zipData={zipData}
-                onZipClick={handleZipClick}
-                opportunityFilter={opportunityFilter}
-                urbanicityFilter={urbanicityFilter}
-                showOfficeLocations={showExistingOffices}
-                officeLocations={officeLocations}
-                fullscreen={true}
+            {selectedZipCode && (
+              <ZIPCodeDetailOverlay
+                zipCodeData={selectedZipCode}
+                onClose={handleCloseZipDetail}
               />
-              
-              {selectedZipCode && (
-                <ZIPCodeDetailOverlay
-                  zipCodeData={selectedZipCode}
-                  onClose={handleCloseZipDetail}
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
       </DialogContent>
