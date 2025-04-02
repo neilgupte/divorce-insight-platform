@@ -17,6 +17,9 @@ interface LeafletMapProps {
   fullscreen?: boolean;
 }
 
+// Mapbox access token from the mapboxUtils file
+const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
+
 const LeafletMap: React.FC<LeafletMapProps> = ({
   zipData,
   onZipClick,
@@ -60,17 +63,17 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(map) => {
-          handleMapInit(map.target);
+        whenReady={(e) => {
+          handleMapInit(e.target);
         }}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
         
-        {/* Add a tile layer to provide the map with visual data */}
+        {/* Add the Mapbox tile layer with the custom style */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
+          attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
         />
         
         {/* Render ZIP code markers */}
@@ -91,7 +94,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             }}
           >
             <Tooltip 
-              permanent 
               className="custom-tooltip"
             >
               <div>
