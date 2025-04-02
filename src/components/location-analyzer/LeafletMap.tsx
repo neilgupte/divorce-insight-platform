@@ -42,7 +42,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, []);
 
   useEffect(() => {
-    fetch("https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_06_halfsize.geojson")
+    fetch("https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_06_halfsize.geojson?raw=true")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Network response was not ok: ${res.status}`);
@@ -165,7 +165,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => handleMapReady(e.target)}
+        whenReady={handleMapReady}
       >
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}

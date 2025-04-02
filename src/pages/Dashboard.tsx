@@ -17,7 +17,8 @@ import {
   Filter,
   X,
   Plus,
-  MessageSquare
+  MessageSquare,
+  Map
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -35,6 +36,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogClose
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import AIChatbot from "@/components/common/AIChatbot";
@@ -85,6 +87,7 @@ const Dashboard = () => {
   const [insights, setInsights] = useState(normalizeAIInsights(AI_INSIGHTS));
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [customMetrics, setCustomMetrics] = useState<CustomMetric[]>([]);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -283,6 +286,15 @@ const Dashboard = () => {
         </div>
         
         <div className="flex space-x-2 mt-4 sm:mt-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsMapDialogOpen(true)}
+          >
+            <Map className="h-4 w-4 mr-2" />
+            Map View
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -463,6 +475,29 @@ const Dashboard = () => {
               ]}
             />
           </div>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
+        <DialogContent className="max-w-7xl w-full h-[90vh] p-0">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>Interactive Tableau Map</DialogTitle>
+            <DialogDescription>
+              Explore high-net-worth divorce data geographically
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 h-full">
+            <iframe 
+              src="https://public.tableau.com/views/DivorceIQ/Dashboard1?:embed=yes&:display_count=yes&:origin=viz_share_link"
+              className="w-full h-full border-0"
+              title="Tableau Divorce Map"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          </div>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
         </DialogContent>
       </Dialog>
     </div>
