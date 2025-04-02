@@ -21,18 +21,6 @@ interface LeafletMapProps {
 // Mapbox access token from the mapboxUtils file
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
 
-// Fix for Leaflet icon issues
-useEffect(() => {
-  // This is needed to fix Leaflet marker icon issues
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  });
-}, []);
-
 const LeafletMap: React.FC<LeafletMapProps> = ({
   zipData,
   onZipClick,
@@ -45,6 +33,18 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const defaultCenter: [number, number] = [37.0902, -95.7129]; // USA center
   const defaultZoom = 4;
   const [mapError, setMapError] = useState<string | null>(null);
+
+  // Initialize Leaflet icons - moved inside the component
+  useEffect(() => {
+    // This is needed to fix Leaflet marker icon issues
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+    });
+  }, []);
 
   // Filtered ZIP data based on opportunity and urbanicity
   const filteredZipData = zipData.filter(zip => {
@@ -76,7 +76,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e: L.LeafletEvent) => handleMapInit(e.target)}
+        whenReady={(e) => handleMapInit(e.target)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
