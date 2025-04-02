@@ -1,25 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
-import { ZIPCodeData } from '@/lib/zipUtils';
+import { ZIPCodeData } from "@/lib/zipUtils";
+import { getOpportunityColor, getOpportunityTier } from "@/lib/mapUtils";
 
-// Fix for marker icons in Leaflet with React
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Define colors for opportunity levels
-const opportunityColors = {
-  Low: '#3b82f6', // Blue
-  Medium: '#8b5cf6', // Purple
-  High: '#ef4444', // Red
-  Default: '#6b7280', // Gray
-};
-
+// Define the component properties
 interface LeafletMapProps {
   zipData: ZIPCodeData[];
   onZipClick: (data: ZIPCodeData) => void;
@@ -30,75 +16,6 @@ interface LeafletMapProps {
   fullscreen?: boolean;
 }
 
-// Get the opportunity size label from the opportunity value
-const getOpportunitySize = (opportunityValue: number): 'Low' | 'Medium' | 'High' => {
-  if (opportunityValue >= 10) {
-    return 'High';
-  } else if (opportunityValue >= 5) {
-    return 'Medium';
-  } else {
-    return 'Low';
-  }
-};
-
-// Function to filter the data based on filters
-const filterData = (
-  data: ZIPCodeData[],
-  opportunityFilter: 'Low' | 'Medium' | 'High' | 'All',
-  urbanicityFilter: 'Urban' | 'Suburban' | 'Rural' | 'All'
-) => {
-  return data.filter(item => {
-    // Filter by opportunity
-    if (opportunityFilter !== 'All') {
-      const itemOpportunitySize = getOpportunitySize(item.opportunity);
-      if (itemOpportunitySize !== opportunityFilter) return false;
-    }
-    
-    // Filter by urbanicity
-    if (urbanicityFilter !== 'All') {
-      if (item.urbanicity !== urbanicityFilter) return false;
-    }
-    
-    return true;
-  });
-};
-
-// Map view updater component
-const MapViewUpdater: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-  
-  return null;
-};
-
-// Legend component
-const Legend: React.FC = () => {
-  return (
-    <div className="leaflet-bottom leaflet-right">
-      <div className="leaflet-control leaflet-bar bg-white dark:bg-gray-800 p-2 m-2 rounded-md shadow-md">
-        <h4 className="text-sm font-semibold mb-1">Opportunity</h4>
-        <div className="space-y-1">
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.High }}></div>
-            <span className="text-xs">High ($10M+)</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.Medium }}></div>
-            <span className="text-xs">Medium ($5-10M)</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: opportunityColors.Low }}></div>
-            <span className="text-xs">Low ($0-5M)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const LeafletMap: React.FC<LeafletMapProps> = ({
   zipData,
   onZipClick,
@@ -108,90 +25,107 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   officeLocations,
   fullscreen = false
 }) => {
-  const [mapReady, setMapReady] = useState(false);
-  const mapRef = useRef<L.Map | null>(null);
-  const filteredData = filterData(zipData, opportunityFilter, urbanicityFilter);
-  
-  // USA center coordinates and default zoom
-  const center: [number, number] = [39.8283, -98.5795];
-  const zoom = 4;
-  
-  useEffect(() => {
-    if (mapRef.current) {
-      setMapReady(true);
+  const defaultCenter: [number, number] = [37.0902, -95.7129]; // USA center
+  const defaultZoom = 4;
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  // Filtered ZIP data based on opportunity and urbanicity
+  const filteredZipData = zipData.filter(zip => {
+    const opportunityTier = getOpportunityTier(zip.opportunity);
+    const opportunityMatch = opportunityFilter === 'All' || opportunityTier === opportunityFilter;
+    const urbanicityMatch = urbanicityFilter === 'All' || zip.urbanicity === urbanicityFilter;
+    return opportunityMatch && urbanicityMatch;
+  });
+
+  // Function to handle map initialization
+  const handleMapInit = (map: L.Map) => {
+    // Check for Leaflet's map object
+    if (!map) {
+      setMapError("Failed to initialize Leaflet map.");
+      return;
     }
-  }, [mapRef.current]);
+  };
 
   return (
-    <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
-      <MapContainer
-        style={{ height: '100%', width: '100%' }}
-        center={center}
-        zoom={zoom}
+    <div style={{ height: fullscreen ? "100%" : "400px", width: "100%" }}>
+      {mapError && (
+        <div className="absolute top-0 left-0 right-0 p-2 bg-destructive/10 text-destructive text-sm text-center z-50">
+          {mapError}
+        </div>
+      )}
+      
+      <MapContainer 
+        style={{ height: "100%", width: "100%" }} 
+        zoom={defaultZoom} 
         zoomControl={false}
         whenCreated={(map) => {
-          mapRef.current = map;
-          setMapReady(true);
+          handleMapInit(map);
         }}
       >
+        {/* Position the map on the center point */}
+        <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
+        
+        {/* Add a tile layer to provide the map with visual data */}
         <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ZoomControl position="bottomleft" />
         
-        {/* Render ZIP code data as markers */}
-        {mapReady && filteredData.map((zip, index) => {
-          const opportunitySize = getOpportunitySize(zip.opportunity);
-          const opportunityColor = opportunityColors[opportunitySize] || opportunityColors.Default;
-          
-          // Create custom icon with color based on opportunity size
-          const zipMarker = new L.DivIcon({
-            className: 'custom-zip-marker',
-            html: `<div style="background-color: ${opportunityColor}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
-          });
-          
-          return (
-            <Marker
-              key={`zip-${index}`}
-              position={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
-              eventHandlers={{
-                click: () => {
-                  onZipClick(zip);
-                },
-              }}
-            >
-              <Tooltip>
-                <div>
-                  <div className="font-semibold">{zip.zipCode} - {zip.city}</div>
-                  <div>Opportunity: ${zip.opportunity}M</div>
-                </div>
-              </Tooltip>
-            </Marker>
-          );
-        })}
+        {/* Render ZIP code markers */}
+        {filteredZipData.map((zip, index) => (
+          <Circle
+            key={index}
+            center={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")] as [number, number]}
+            radius={5000} // Adjust the radius as needed
+            fillColor={getOpportunityColor(zip.opportunity)}
+            fillOpacity={0.5}
+            stroke={false}
+            eventHandlers={{
+              click: () => {
+                onZipClick(zip);
+              }
+            }}
+          >
+            <Tooltip direction="top" offset={[0, 20]} opacity={1} permanent>
+              <div>
+                ZIP: {zip.zipCode}
+                <br />
+                Opportunity: ${zip.opportunity}M
+              </div>
+            </Tooltip>
+            <Popup>
+              <h2>ZIP Code: {zip.zipCode}</h2>
+              <p>Opportunity: ${zip.opportunity}M</p>
+            </Popup>
+          </Circle>
+        ))}
         
-        {/* Office locations */}
+        {/* Render office location markers */}
         {showOfficeLocations && officeLocations.map((office, index) => (
           <Marker
-            key={`office-${index}`}
+            key={index}
             position={office.position}
           >
             <Popup>
-              <div>
-                <div className="font-semibold">{office.city} Office</div>
-                <div className="text-sm">Existing office location</div>
-              </div>
+              <h2>{office.city} Office</h2>
+              <p>Office Location</p>
             </Popup>
           </Marker>
         ))}
-        
-        {/* Map Legend */}
-        <Legend />
       </MapContainer>
     </div>
   );
+};
+
+// Helper component to set map view
+const SetViewOnUpdate = ({ center, zoom }: { center: [number, number], zoom: number }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  
+  return null;
 };
 
 export default LeafletMap;
