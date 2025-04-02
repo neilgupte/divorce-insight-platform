@@ -42,7 +42,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, []);
 
   useEffect(() => {
-    fetch("https://raw.githubusercontent.com/spiratech/public/main/zcta_06_halfsize.geojson?raw=true")
+    fetch("https://raw.githubusercontent.com/neilgupte/public/main/zcta_06_halfsize.geojson?raw=true")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Network response was not ok: ${res.status}`);
