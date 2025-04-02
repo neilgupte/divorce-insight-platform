@@ -487,13 +487,14 @@ const Dashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 h-[calc(100vh-70px)]">
-            <iframe 
-              src="https://public.tableau.com/views/DivorceIQ/Dashboard1?:embed=y&:display_count=yes&:origin=viz_share_link"
-              className="w-full h-full border-0"
-              title="Tableau Divorce Map"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              style={{ display: 'block' }}
-            />
+            <tableau-viz
+              id="tableauViz"
+              src="https://public.tableau.com/views/DivorceIQ/Dashboard1"
+              width="100%"
+              height="100%"
+              hide-tabs
+              toolbar="bottom"
+            ></tableau-viz>
           </div>
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-transparent data-[state=open]:text-white">
             <X className="h-5 w-5" />
