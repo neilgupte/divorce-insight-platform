@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Filter, BarChart3, Buildings, MapPin } from "lucide-react";
+import { Filter, BarChart3, Building, MapPin } from "lucide-react";
 
 interface OpportunityFilterPanelProps {
   opportunityFilter: 'Low' | 'Medium' | 'High' | 'All';
@@ -57,7 +57,7 @@ const OpportunityFilterPanel: React.FC<OpportunityFilterPanelProps> = ({
       
       <div className="space-y-2">
         <Label htmlFor="urbanicity-filter" className="flex items-center text-sm font-medium">
-          <Buildings className="h-4 w-4 mr-2 text-muted-foreground" />
+          <Building className="h-4 w-4 mr-2 text-muted-foreground" />
           Urbanicity Type
         </Label>
         <Select 
