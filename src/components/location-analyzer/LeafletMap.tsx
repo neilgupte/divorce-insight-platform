@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -114,8 +113,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const filteredData = filterData(zipData, opportunityFilter, urbanicityFilter);
   
   // USA center coordinates and default zoom
-  const defaultCenter: [number, number] = [39.8283, -98.5795];
-  const defaultZoom = 4;
+  const center: [number, number] = [39.8283, -98.5795];
+  const zoom = 4;
   
   useEffect(() => {
     if (mapRef.current) {
@@ -127,8 +126,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        defaultCenter={defaultCenter}
-        defaultZoom={defaultZoom}
+        center={center}
+        zoom={zoom}
         zoomControl={false}
         whenCreated={(map) => {
           mapRef.current = map;
