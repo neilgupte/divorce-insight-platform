@@ -55,7 +55,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   });
 
   // Function to handle map initialization
-  const handleMapInit = (map: L.Map) => {
+  const handleMapInit = (map: L.Map): => {
     // Check for Leaflet's map object
     if (!map) {
       setMapError("Failed to initialize Leaflet map.");
@@ -76,7 +76,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => handleMapInit(e.target)}
+        whenCreated={(map) => handleMapInit(map)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
