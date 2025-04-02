@@ -13,16 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom icon for office locations
-const officeIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
 // Define colors for opportunity levels
 const opportunityColors = {
   Low: '#3b82f6', // Blue
@@ -137,8 +127,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        center={defaultCenter}
-        zoom={defaultZoom}
+        defaultCenter={defaultCenter}
+        defaultZoom={defaultZoom}
         zoomControl={false}
         whenCreated={(map) => {
           mapRef.current = map;
@@ -149,7 +139,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomControl position="bottomleft" />
-        <MapViewUpdater center={defaultCenter} zoom={defaultZoom} />
         
         {/* Render ZIP code data as markers */}
         {mapReady && filteredData.map((zip, index) => {

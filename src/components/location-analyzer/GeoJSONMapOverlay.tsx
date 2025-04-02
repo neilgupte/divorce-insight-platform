@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { Printer, Download, Share2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,8 +25,6 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
   const [geoJSONData, setGeoJSONData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>("");
-  const [showTokenInput, setShowTokenInput] = useState<boolean>(true);
   
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -34,15 +32,6 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
   // California center coordinates
   const center: [number, number] = [36.7783, -119.4179];
   const defaultZoom = 6;
-
-  useEffect(() => {
-    // Try to load token from localStorage
-    const savedToken = localStorage.getItem("mapbox-token");
-    if (savedToken) {
-      setMapboxToken(savedToken);
-      setShowTokenInput(false);
-    }
-  }, []);
 
   useEffect(() => {
     const fetchGeoJSON = async () => {
@@ -74,11 +63,10 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
   }, [open]);
 
   useEffect(() => {
-    // Initialize map when token is set, container is ready, and dialog is open
-    if (mapboxToken && mapContainer.current && open && !showTokenInput) {
-      if (map.current) return; // Map already initialized
-      
-      mapboxgl.accessToken = mapboxToken;
+    // Initialize map when container is ready, dialog is open, and token is set
+    if (mapContainer.current && open && !map.current) {
+      // Set the Mapbox access token
+      mapboxgl.accessToken = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
       
       try {
         map.current = new mapboxgl.Map({
@@ -86,6 +74,7 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
           style: "mapbox://styles/mapbox/light-v11",
           center: center,
           zoom: defaultZoom,
+          projection: 'mercator'
         });
 
         // Add navigation controls
@@ -100,7 +89,7 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
               data: geoJSONData,
             });
 
-            // Add the layer
+            // Add the fill layer
             map.current.addLayer({
               id: "zip-boundaries-fill",
               type: "fill",
@@ -121,6 +110,36 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
                 "line-width": 1,
               },
             });
+            
+            // Add popup on click
+            map.current.on('click', 'zip-boundaries-fill', (e) => {
+              if (e.features && e.features[0] && e.lngLat) {
+                const feature = e.features[0];
+                const zipCode = feature.properties.ZCTA5CE20;
+                const county = feature.properties.COUNTYFP20 || "Unknown";
+                
+                new mapboxgl.Popup()
+                  .setLngLat(e.lngLat)
+                  .setHTML(`
+                    <h3 class="text-sm font-bold">ZIP Code: ${zipCode}</h3>
+                    <p class="text-xs mt-1">County: ${county}</p>
+                  `)
+                  .addTo(map.current!);
+              }
+            });
+            
+            // Change cursor on hover
+            map.current.on('mouseenter', 'zip-boundaries-fill', () => {
+              if (map.current) {
+                map.current.getCanvas().style.cursor = 'pointer';
+              }
+            });
+            
+            map.current.on('mouseleave', 'zip-boundaries-fill', () => {
+              if (map.current) {
+                map.current.getCanvas().style.cursor = '';
+              }
+            });
           }
         });
       } catch (error) {
@@ -136,7 +155,7 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
         map.current = null;
       }
     };
-  }, [mapboxToken, open, geoJSONData, showTokenInput]);
+  }, [open, geoJSONData]);
 
   const handleExport = () => {
     toast({
@@ -159,14 +178,6 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
       title: "Link Copied",
       description: "Shareable link has been copied to your clipboard.",
     });
-  };
-
-  const handleTokenSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mapboxToken.trim()) {
-      localStorage.setItem("mapbox-token", mapboxToken);
-      setShowTokenInput(false);
-    }
   };
 
   return (
@@ -214,39 +225,28 @@ const GeoJSONMapOverlay: React.FC<GeoJSONMapOverlayProps> = ({
               </div>
             </div>
           )}
+
+          {/* Mapbox Map Container */}
+          <div ref={mapContainer} className="h-full w-full" />
           
-          {showTokenInput ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-              <div className="w-full max-w-md p-6 bg-card rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium mb-4">Enter Mapbox Access Token</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  To display the map, please enter your Mapbox public access token. You can find this in your Mapbox account dashboard.
-                </p>
-                <form onSubmit={handleTokenSubmit} className="space-y-4">
-                  <div>
-                    <input
-                      type="text"
-                      value={mapboxToken}
-                      onChange={(e) => setMapboxToken(e.target.value)}
-                      placeholder="pk.eyJ1IjoieW91..."
-                      className="w-full p-2 border rounded-md"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Button type="submit" className="w-full">
-                      Submit Token
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Your token will be saved in your browser for future use.
-                  </p>
-                </form>
+          {/* Map Legend */}
+          <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-gray-800/90 p-3 rounded-md shadow-md z-10">
+            <h3 className="text-sm font-semibold mb-2">ZIP Code Data</h3>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <div className="w-4 h-4 rounded-sm mr-2 bg-red-700 opacity-70"></div>
+                <span className="text-xs">High Density</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 rounded-sm mr-2 bg-red-500 opacity-70"></div>
+                <span className="text-xs">Medium Density</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 rounded-sm mr-2 bg-red-300 opacity-70"></div>
+                <span className="text-xs">Low Density</span>
               </div>
             </div>
-          ) : (
-            <div ref={mapContainer} className="h-full w-full" />
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
