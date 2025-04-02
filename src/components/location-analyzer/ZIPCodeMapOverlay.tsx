@@ -11,10 +11,13 @@ import { ZIPCodeData, generateMockZIPData } from "@/lib/zipUtils";
 import LeafletMap from "./LeafletMap";
 import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
 import MapHeaderControls from "./map-controls/MapHeaderControls";
-import MapFilterPanel from "./map-filters/MapFilterPanel";
+import OpportunityFilterPanel from "./map-filters/OpportunityFilterPanel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import 'leaflet/dist/leaflet.css';
 import "@/styles/leaflet-fixes.css";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ZIPCodeMapOverlayProps {
   open: boolean;
@@ -91,39 +94,56 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
         </DialogHeader>
         
         <div className="flex-1 flex overflow-hidden">
-          <MapFilterPanel
-            opportunityFilter={opportunityFilter}
-            setOpportunityFilter={setOpportunityFilter}
-            urbanicityFilter={urbanicityFilter}
-            setUrbanicityFilter={setUrbanicityFilter}
-            netWorthRange={netWorthRange}
-            setNetWorthRange={setNetWorthRange}
-            divorceRateThreshold={divorceRateThreshold}
-            setDivorceRateThreshold={setDivorceRateThreshold}
-            showExistingOffices={showExistingOffices}
-            setShowExistingOffices={setShowExistingOffices}
-            isCollapsed={filterPanelCollapsed}
-            toggleCollapse={toggleFilterPanel}
-          />
-          
-          <div className="flex-1 relative">
-            <LeafletMap 
-              zipData={zipData}
-              onZipClick={handleZipClick}
-              opportunityFilter={opportunityFilter}
-              urbanicityFilter={urbanicityFilter}
-              showOfficeLocations={showExistingOffices}
-              officeLocations={officeLocations}
-              fullscreen={true}
-            />
-            
-            {selectedZipCode && (
-              <ZIPCodeDetailOverlay
-                zipCodeData={selectedZipCode}
-                onClose={handleCloseZipDetail}
-              />
+          <ResizablePanelGroup direction="horizontal" className="flex-1">
+            {!filterPanelCollapsed && (
+              <>
+                <ResizablePanel 
+                  defaultSize={20} 
+                  minSize={15} 
+                  maxSize={30}
+                  className="bg-background border-r"
+                >
+                  <OpportunityFilterPanel
+                    opportunityFilter={opportunityFilter}
+                    setOpportunityFilter={setOpportunityFilter}
+                    urbanicityFilter={urbanicityFilter}
+                    setUrbanicityFilter={setUrbanicityFilter}
+                  />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+              </>
             )}
-          </div>
+            
+            <ResizablePanel defaultSize={filterPanelCollapsed ? 100 : 80}>
+              <div className="relative h-full">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute top-4 left-4 z-10 bg-background shadow-md"
+                  onClick={toggleFilterPanel}
+                >
+                  {filterPanelCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </Button>
+                
+                <LeafletMap 
+                  zipData={zipData}
+                  onZipClick={handleZipClick}
+                  opportunityFilter={opportunityFilter}
+                  urbanicityFilter={urbanicityFilter}
+                  showOfficeLocations={showExistingOffices}
+                  officeLocations={officeLocations}
+                  fullscreen={true}
+                />
+                
+                {selectedZipCode && (
+                  <ZIPCodeDetailOverlay
+                    zipCodeData={selectedZipCode}
+                    onClose={handleCloseZipDetail}
+                  />
+                )}
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </DialogContent>
     </Dialog>

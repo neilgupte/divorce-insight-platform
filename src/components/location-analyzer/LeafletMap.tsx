@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -81,7 +82,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         if (feature.properties.opportunity !== undefined) {
           const value = parseFloat(feature.properties.opportunity);
           if (value < 10) opportunityTier = 'Low';
-          else if (value > 25) opportunityTier = 'High';
+          else if (value > 50) opportunityTier = 'High';
         }
         
         const urbanicity = feature.properties.urbanicity || 'Suburban';
@@ -102,7 +103,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     if (feature.properties.opportunity !== undefined) {
       const value = parseFloat(feature.properties.opportunity);
       if (value < 10) opportunity = 'Low';
-      else if (value > 25) opportunity = 'High';
+      else if (value > 50) opportunity = 'High';
     }
     
     return {
