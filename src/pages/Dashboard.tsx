@@ -479,23 +479,24 @@ const Dashboard = () => {
       </Dialog>
       
       <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
-        <DialogContent className="max-w-7xl w-full h-[90vh] p-0">
-          <DialogHeader className="p-4 border-b">
-            <DialogTitle>Interactive Tableau Map</DialogTitle>
-            <DialogDescription>
-              Explore high-net-worth divorce data geographically
+        <DialogContent className="max-w-full w-full h-[100vh] p-0 border-none bg-background/95 backdrop-blur-sm">
+          <DialogHeader className="p-4 border-b bg-black/90 text-white">
+            <DialogTitle className="text-xl">Interactive Tableau Map</DialogTitle>
+            <DialogDescription className="text-white/80">
+              Explore high-net-worth divorce trends across the U.S.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-1 h-full">
+          <div className="flex-1 h-[calc(100vh-70px)]">
             <iframe 
-              src="https://public.tableau.com/views/DivorceIQ/Dashboard1?:embed=yes&:display_count=yes&:origin=viz_share_link"
+              src="https://public.tableau.com/views/DivorceIQ/Dashboard1?:embed=y&:display_count=yes&:origin=viz_share_link"
               className="w-full h-full border-0"
               title="Tableau Divorce Map"
               sandbox="allow-scripts allow-same-origin allow-popups"
+              style={{ display: 'block' }}
             />
           </div>
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-transparent data-[state=open]:text-white">
+            <X className="h-5 w-5" />
             <span className="sr-only">Close</span>
           </DialogClose>
         </DialogContent>
