@@ -63,9 +63,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => {
-          handleMapInit(e.target);
-        }}
+        whenReady={(e) => handleMapInit(e.target)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
@@ -80,7 +78,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         {filteredZipData.map((zip, index) => (
           <Circle
             key={index}
-            center={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")] as [number, number]}
+            center={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
             pathOptions={{
               fillColor: getOpportunityColor(zip.opportunity),
               fillOpacity: 0.5,
@@ -93,9 +91,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
               }
             }}
           >
-            <Tooltip 
-              className="custom-tooltip"
-            >
+            <Tooltip>
               <div>
                 ZIP: {zip.zipCode}
                 <br />
