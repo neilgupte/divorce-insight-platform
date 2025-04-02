@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -123,7 +124,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const filteredData = filterData(zipData, opportunityFilter, urbanicityFilter);
   
   // USA center coordinates and default zoom
-  const center: [number, number] = [39.8283, -98.5795];
+  const defaultCenter: [number, number] = [39.8283, -98.5795];
   const defaultZoom = 4;
   
   useEffect(() => {
@@ -136,8 +137,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     <div className={`w-full ${fullscreen ? 'h-full' : 'h-[400px]'} relative z-10`}>
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        center={[39.8283, -98.5795]}
-        zoom={4}
+        center={defaultCenter}
+        zoom={defaultZoom}
         zoomControl={false}
         whenCreated={(map) => {
           mapRef.current = map;
@@ -148,7 +149,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomControl position="bottomleft" />
-        <MapViewUpdater center={center} zoom={defaultZoom} />
+        <MapViewUpdater center={defaultCenter} zoom={defaultZoom} />
         
         {/* Render ZIP code data as markers */}
         {mapReady && filteredData.map((zip, index) => {
@@ -167,7 +168,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             <Marker
               key={`zip-${index}`}
               position={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")]}
-              icon={zipMarker}
               eventHandlers={{
                 click: () => {
                   onZipClick(zip);
@@ -189,7 +189,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           <Marker
             key={`office-${index}`}
             position={office.position}
-            icon={officeIcon}
           >
             <Popup>
               <div>
