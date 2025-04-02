@@ -55,7 +55,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   });
 
   // Function to handle map initialization
-  const handleMapInit = (map: L.Map): => {
+  const handleMapInit = (map: L.Map): void => {
     // Check for Leaflet's map object
     if (!map) {
       setMapError("Failed to initialize Leaflet map.");
