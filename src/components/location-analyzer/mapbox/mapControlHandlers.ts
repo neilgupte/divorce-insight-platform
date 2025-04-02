@@ -1,7 +1,7 @@
 
-import { UseToastReturn } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
-export const createMapControlHandlers = (toast: UseToastReturn["toast"]) => {
+export const createMapControlHandlers = (toast: any) => {
   const handleExport = () => {
     toast({
       title: "Map Exported",

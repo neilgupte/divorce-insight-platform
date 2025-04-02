@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -56,10 +57,11 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       
       <MapContainer 
         style={{ height: "100%", width: "100%" }} 
-        zoom={defaultZoom} 
+        center={defaultCenter}
+        zoom={defaultZoom}
         zoomControl={false}
-        whenCreated={(map) => {
-          handleMapInit(map);
+        whenReady={(map) => {
+          handleMapInit(map.target);
         }}
       >
         {/* Position the map on the center point */}
@@ -76,17 +78,22 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           <Circle
             key={index}
             center={[parseFloat(zip.latitude || "0"), parseFloat(zip.longitude || "0")] as [number, number]}
+            pathOptions={{
+              fillColor: getOpportunityColor(zip.opportunity),
+              fillOpacity: 0.5,
+              stroke: false
+            }}
             radius={5000} // Adjust the radius as needed
-            fillColor={getOpportunityColor(zip.opportunity)}
-            fillOpacity={0.5}
-            stroke={false}
             eventHandlers={{
               click: () => {
                 onZipClick(zip);
               }
             }}
           >
-            <Tooltip direction="top" offset={[0, 20]} opacity={1} permanent>
+            <Tooltip 
+              permanent 
+              className="custom-tooltip"
+            >
               <div>
                 ZIP: {zip.zipCode}
                 <br />
