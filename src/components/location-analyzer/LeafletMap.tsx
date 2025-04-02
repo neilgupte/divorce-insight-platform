@@ -66,7 +66,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => handleMapInit(e.target)}
+        whenReady={() => {}}
       >
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
 
@@ -126,6 +126,7 @@ const SetViewOnUpdate = ({ center, zoom }: { center: [number, number]; zoom: num
 
   useEffect(() => {
     map.setView(center, zoom);
+    handleMapInit(map); // <-- call your custom handler here
   }, [center, zoom, map]);
 
   return null;
