@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -7,7 +6,6 @@ import { ZIPCodeData } from "@/lib/zipUtils";
 import { getOpportunityColor, getOpportunityTier } from "@/lib/mapUtils";
 import "@/styles/leaflet-fixes.css";
 
-// Define the component properties
 interface LeafletMapProps {
   zipData: ZIPCodeData[];
   onZipClick: (data: ZIPCodeData) => void;
@@ -18,7 +16,6 @@ interface LeafletMapProps {
   fullscreen?: boolean;
 }
 
-// Mapbox access token from the mapboxUtils file
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
 
 const LeafletMap: React.FC<LeafletMapProps> = ({
@@ -30,15 +27,12 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   officeLocations,
   fullscreen = false
 }) => {
-  const defaultCenter: [number, number] = [37.0902, -95.7129]; // USA center
+  const defaultCenter: [number, number] = [37.0902, -95.7129];
   const defaultZoom = 4;
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Initialize Leaflet icons - moved inside the component
   useEffect(() => {
-    // This is needed to fix Leaflet marker icon issues
     delete (L.Icon.Default.prototype as any)._getIconUrl;
-    
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
       iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -46,7 +40,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     });
   }, []);
 
-  // Filtered ZIP data based on opportunity and urbanicity
   const filteredZipData = zipData.filter(zip => {
     const opportunityTier = getOpportunityTier(zip.opportunity);
     const opportunityMatch = opportunityFilter === 'All' || opportunityTier === opportunityFilter;
@@ -54,12 +47,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     return opportunityMatch && urbanicityMatch;
   });
 
-  // Function to handle map initialization
   const handleMapInit = (map: L.Map): void => {
-    // Check for Leaflet's map object
     if (!map) {
       setMapError("Failed to initialize Leaflet map.");
-      return;
     }
   };
 
@@ -70,24 +60,21 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           {mapError}
         </div>
       )}
-      
-      <MapContainer 
-        style={{ height: "100%", width: "100%" }} 
+
+      <MapContainer
+        style={{ height: "100%", width: "100%" }}
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        
+        whenReady={(e) => handleMapInit(e.target)}
       >
-        {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
-        
-        {/* Add the Mapbox tile layer with the custom style */}
+
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
           attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
         />
-        
-        {/* Render ZIP code markers */}
+
         {filteredZipData.map((zip, index) => (
           <Circle
             key={index}
@@ -97,7 +84,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
               fillOpacity: 0.5,
               stroke: false
             }}
-            radius={5000} // Adjust the radius as needed
+            radius={5000}
             eventHandlers={{
               click: () => {
                 onZipClick(zip);
@@ -117,8 +104,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             </Popup>
           </Circle>
         ))}
-        
-        {/* Render office location markers */}
+
         {showOfficeLocations && officeLocations.map((office, index) => (
           <Marker
             key={index}
@@ -135,14 +121,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   );
 };
 
-// Helper component to set map view
-const SetViewOnUpdate = ({ center, zoom }: { center: [number, number], zoom: number }) => {
+const SetViewOnUpdate = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
   const map = useMap();
-  
+
   useEffect(() => {
     map.setView(center, zoom);
   }, [center, zoom, map]);
-  
+
   return null;
 };
 
