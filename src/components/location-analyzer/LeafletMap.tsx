@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap, Marker, Popup } from "react-leaflet";
+import React, { useState, useEffect, useMemo } from "react";
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@/styles/leaflet-fixes.css";
@@ -33,6 +33,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const [geoJsonData, setGeoJsonData] = useState<any>(null);
   const [map, setMap] = useState<L.Map | null>(null);
 
+  // Set up Leaflet icons
   useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -42,12 +43,68 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     });
   }, []);
 
+  // Fetch GeoJSON data
   useEffect(() => {
     fetch("https://raw.githubusercontent.com/spiratech/public/main/zcta_06_halfsize.geojson")
-      .then((res) => res.json())
-      .then((data) => setGeoJsonData(data))
-      .catch(() => setMapError("Failed to load GeoJSON map data."));
-  }, []);
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Network response was not ok: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setGeoJsonData(data);
+        // Set bounds if map is available
+        if (map && data?.features?.length) {
+          try {
+            const geoLayer = L.geoJSON(data);
+            const bounds = geoLayer.getBounds();
+            map.fitBounds(bounds, { padding: [50, 50] });
+          } catch (e) {
+            console.error("Error setting map bounds:", e);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching GeoJSON:", error);
+        setMapError("Failed to load GeoJSON map data.");
+      });
+  }, [map]);
+
+  // Filter GeoJSON features based on opportunity and urbanicity filters
+  const filteredGeoJsonData = useMemo(() => {
+    if (!geoJsonData) return null;
+    
+    // If both filters are set to 'All', return the original data
+    if (opportunityFilter === 'All' && urbanicityFilter === 'All') {
+      return geoJsonData;
+    }
+    
+    // Create a deep copy of the geoJsonData to avoid mutating the original
+    const filteredData = {
+      ...geoJsonData,
+      features: geoJsonData.features.filter((feature: any) => {
+        // Get opportunity tier from feature properties
+        let opportunityTier = 'Medium';
+        if (feature.properties.opportunity) {
+          const value = feature.properties.opportunity;
+          if (value < 10) opportunityTier = 'Low';
+          else if (value > 25) opportunityTier = 'High';
+        }
+        
+        // Get urbanicity from feature properties (default to 'Suburban' if not specified)
+        const urbanicity = feature.properties.urbanicity || 'Suburban';
+        
+        // Filter based on opportunity and urbanicity
+        const matchesOpportunity = opportunityFilter === 'All' || opportunityTier === opportunityFilter;
+        const matchesUrbanicity = urbanicityFilter === 'All' || urbanicity === urbanicityFilter;
+        
+        return matchesOpportunity && matchesUrbanicity;
+      })
+    };
+    
+    return filteredData;
+  }, [geoJsonData, opportunityFilter, urbanicityFilter]);
 
   const getStyle = (feature: any) => {
     let opportunity = 'Medium';
@@ -59,11 +116,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       else if (value > 25) opportunity = 'High';
     }
     
-    // Filter based on opportunity level if not set to 'All'
-    if (opportunityFilter !== 'All' && opportunity !== opportunityFilter) {
-      return { opacity: 0, fillOpacity: 0 };
-    }
-
     return {
       fillColor: getOpportunityColor(opportunity),
       weight: 1,
@@ -82,6 +134,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   };
 
+  // Handle map ready event
   const handleMapReady = (e: L.LeafletEvent) => {
     setMap(e.target);
   };
@@ -103,7 +156,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       layer.on('click', () => {
         if (onZipClick && zipData) {
           // Find matching ZIP in our data array if available
-          const matchingZip = zipData.find(z => z.zipCode === parseInt(zipCode));
+          const matchingZip = zipData.find(z => z.zipCode === parseInt(zipCode, 10));
           if (matchingZip) {
             onZipClick(matchingZip);
           }
@@ -125,14 +178,19 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={handleMapReady}
+        whenReady={handleMapReady as any} // Type assertion to fix TypeScript error
       >
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
           attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
         />
-        {geoJsonData && (
-          <GeoJSON data={geoJsonData} style={getStyle} onEachFeature={onEachFeature} />
+        {filteredGeoJsonData && filteredGeoJsonData.features && filteredGeoJsonData.features.length > 0 && (
+          <GeoJSON 
+            key={`geo-json-${opportunityFilter}-${urbanicityFilter}`} // Force re-render when filters change
+            data={filteredGeoJsonData} 
+            style={getStyle} 
+            onEachFeature={onEachFeature} 
+          />
         )}
 
         {showOfficeLocations && officeLocations.map((office, index) => (
