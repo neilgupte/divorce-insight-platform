@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -17,8 +18,7 @@ import {
   Filter,
   X,
   Plus,
-  MessageSquare,
-  Map
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -47,7 +47,6 @@ import LuxuryLocationsCard from "@/components/dashboard/LuxuryLocationsCard";
 import AIInsightsCard from "@/components/dashboard/AIInsightsCard";
 import InteractiveMapCard from "@/components/dashboard/InteractiveMapCard";
 import SnapshotDialog from "@/components/dashboard/SnapshotDialog";
-import "@/lib/types/tableau-typings";
 
 interface DashboardSnapshot {
   id: string;
@@ -89,7 +88,6 @@ const Dashboard = () => {
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [customMetrics, setCustomMetrics] = useState<CustomMetric[]>([]);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
-  const [showTableau, setShowTableau] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -288,15 +286,6 @@ const Dashboard = () => {
         </div>
         
         <div className="flex space-x-2 mt-4 sm:mt-0">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowTableau(true)}
-          >
-            <Map className="h-4 w-4 mr-2" />
-            Map View
-          </Button>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -479,59 +468,6 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
-        <DialogContent className="max-w-full w-full h-[100vh] p-0 border-none bg-background/95 backdrop-blur-sm">
-          <DialogHeader className="p-4 border-b bg-black/90 text-white">
-            <DialogTitle className="text-xl">Interactive Tableau Map</DialogTitle>
-            <DialogDescription className="text-white/80">
-              Explore high-net-worth divorce trends across the U.S.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 h-[calc(100vh-70px)]">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `
-                  <tableau-viz
-                    id="tableauViz"
-                    src="https://public.tableau.com/views/DivorceIQ/Dashboard1"
-                    width="100%"
-                    height="100%"
-                    hide-tabs
-                    toolbar="bottom"
-                  ></tableau-viz>
-                `
-              }}
-            />
-          </div>
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-transparent data-[state=open]:text-white">
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
-        </DialogContent>
-      </Dialog>
-      
-      {showTableau && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
-          <div className="flex justify-between items-center p-4 bg-zinc-900 text-white">
-            <div>
-              <h2 className="text-lg font-bold">Interactive Tableau Map</h2>
-              <p className="text-sm text-zinc-400">Explore high-net-worth divorce trends across the U.S.</p>
-            </div>
-            <button onClick={() => setShowTableau(false)} className="text-white text-xl rounded-full hover:bg-zinc-800 w-8 h-8 flex items-center justify-center">&times;</button>
-          </div>
-          <div className="flex-1">
-            <tableau-viz
-              id="tableauViz"
-              src="https://public.tableau.com/views/DivorceIQ/Dashboard1"
-              width="100%"
-              height="100%"
-              toolbar="bottom"
-              hide-tabs
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
