@@ -76,7 +76,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(map) => handleMapInit(map.target)}
+        whenReady={e => handleMapInit(e.target)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
