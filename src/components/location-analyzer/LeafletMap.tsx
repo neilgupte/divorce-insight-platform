@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -30,6 +31,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const defaultCenter: [number, number] = [37.0902, -95.7129];
   const defaultZoom = 4;
   const [mapError, setMapError] = useState<string | null>(null);
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
   useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -48,6 +50,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   });
 
   const handleMapInit = (map: L.Map): void => {
+    setMapInstance(map);
     if (!map) {
       setMapError("Failed to initialize Leaflet map.");
     }
@@ -66,7 +69,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={() => {}}
+        whenReady={(e) => handleMapInit(e.target)}
       >
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
 
@@ -126,7 +129,6 @@ const SetViewOnUpdate = ({ center, zoom }: { center: [number, number]; zoom: num
 
   useEffect(() => {
     map.setView(center, zoom);
-    handleMapInit(map); // <-- call your custom handler here
   }, [center, zoom, map]);
 
   return null;
