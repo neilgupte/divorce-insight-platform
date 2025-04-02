@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -33,7 +32,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const [geoJsonData, setGeoJsonData] = useState<any>(null);
   const [map, setMap] = useState<L.Map | null>(null);
 
-  // Set up Leaflet icons
   useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -43,7 +41,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     });
   }, []);
 
-  // Fetch GeoJSON data
   useEffect(() => {
     fetch("https://raw.githubusercontent.com/spiratech/public/main/zcta_06_halfsize.geojson")
       .then((res) => {
@@ -54,7 +51,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       })
       .then((data) => {
         setGeoJsonData(data);
-        // Set bounds if map is available
         if (map && data?.features?.length) {
           try {
             const geoLayer = L.geoJSON(data);
@@ -71,31 +67,25 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       });
   }, [map]);
 
-  // Filter GeoJSON features based on opportunity and urbanicity filters
   const filteredGeoJsonData = useMemo(() => {
     if (!geoJsonData) return null;
     
-    // If both filters are set to 'All', return the original data
     if (opportunityFilter === 'All' && urbanicityFilter === 'All') {
       return geoJsonData;
     }
     
-    // Create a deep copy of the geoJsonData to avoid mutating the original
     const filteredData = {
       ...geoJsonData,
       features: geoJsonData.features.filter((feature: any) => {
-        // Get opportunity tier from feature properties
         let opportunityTier = 'Medium';
-        if (feature.properties.opportunity) {
-          const value = feature.properties.opportunity;
+        if (feature.properties.opportunity !== undefined) {
+          const value = parseFloat(feature.properties.opportunity);
           if (value < 10) opportunityTier = 'Low';
           else if (value > 25) opportunityTier = 'High';
         }
         
-        // Get urbanicity from feature properties (default to 'Suburban' if not specified)
         const urbanicity = feature.properties.urbanicity || 'Suburban';
         
-        // Filter based on opportunity and urbanicity
         const matchesOpportunity = opportunityFilter === 'All' || opportunityTier === opportunityFilter;
         const matchesUrbanicity = urbanicityFilter === 'All' || urbanicity === urbanicityFilter;
         
@@ -109,9 +99,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const getStyle = (feature: any) => {
     let opportunity = 'Medium';
 
-    // If we have a property with opportunity data, use it
-    if (feature.properties.opportunity) {
-      const value = feature.properties.opportunity;
+    if (feature.properties.opportunity !== undefined) {
+      const value = parseFloat(feature.properties.opportunity);
       if (value < 10) opportunity = 'Low';
       else if (value > 25) opportunity = 'High';
     }
@@ -134,9 +123,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   };
 
-  // Handle map ready event
-  const handleMapReady = (e: L.LeafletEvent) => {
-    setMap(e.target);
+  const handleMapReady = (map: L.Map) => {
+    setMap(map);
   };
 
   const onEachFeature = (feature: any, layer: L.Layer) => {
@@ -144,7 +132,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       const zipCode = feature.properties.GEOID20 || 'Unknown';
       const county = feature.properties.COUNTY || 'Unknown';
       const opportunityValue = feature.properties.opportunity ? 
-        `$${feature.properties.opportunity.toFixed(2)}M` : 'Unknown';
+        `$${parseFloat(feature.properties.opportunity).toFixed(2)}M` : 'Unknown';
 
       layer.bindPopup(`
         <strong>ZIP Code:</strong> ${zipCode}<br/>
@@ -152,11 +140,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         <strong>Opportunity:</strong> ${opportunityValue}
       `);
 
-      // Add click handling
       layer.on('click', () => {
         if (onZipClick && zipData) {
-          // Find matching ZIP in our data array if available
-          const matchingZip = zipData.find(z => z.zipCode === parseInt(zipCode, 10));
+          const matchingZip = zipData.find(z => z.zipCode === zipCode);
           if (matchingZip) {
             onZipClick(matchingZip);
           }
@@ -178,7 +164,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={handleMapReady as any} // Type assertion to fix TypeScript error
+        whenReady={(e) => handleMapReady(e.target)}
       >
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
@@ -186,7 +172,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         />
         {filteredGeoJsonData && filteredGeoJsonData.features && filteredGeoJsonData.features.length > 0 && (
           <GeoJSON 
-            key={`geo-json-${opportunityFilter}-${urbanicityFilter}`} // Force re-render when filters change
+            key={`geo-json-${opportunityFilter}-${urbanicityFilter}`}
             data={filteredGeoJsonData} 
             style={getStyle} 
             onEachFeature={onEachFeature} 
