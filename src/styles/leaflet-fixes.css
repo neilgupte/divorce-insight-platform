@@ -87,3 +87,15 @@
 .leaflet-control {
   z-index: 1000 !important;
 }
+
+/* Map attribution styling */
+.leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6rem !important;
+}
+
+.leaflet-control-attribution a {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
