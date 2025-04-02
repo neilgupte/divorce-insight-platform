@@ -76,15 +76,15 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => handleMapInit(e.target)}
+        whenReady={(e: L.LeafletEvent) => handleMapInit(e.target)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
         
         {/* Add the Mapbox tile layer with the custom style */}
         <TileLayer
-          attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
+          attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
         />
         
         {/* Render ZIP code markers */}
