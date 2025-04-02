@@ -10,7 +10,8 @@ import { ZIPCodeData, generateMockZIPData } from "@/lib/zipUtils";
 import LeafletMap from "./LeafletMap";
 import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
 import MapHeaderControls from "./map-controls/MapHeaderControls";
-import FilterBar from "./map-controls/FilterBar";
+import MapFilterPanel from "./map-filters/MapFilterPanel";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import 'leaflet/dist/leaflet.css';
 import "@/styles/leaflet-fixes.css";
 
@@ -34,6 +35,12 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
   const [showExistingOffices, setShowExistingOffices] = useState<boolean>(false);
   const [zipData, setZipData] = useState<ZIPCodeData[]>([]);
   const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
+  const [filterPanelCollapsed, setFilterPanelCollapsed] = useState<boolean>(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  useEffect(() => {
+    setFilterPanelCollapsed(isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     const mockData = generateMockZIPData(
@@ -54,6 +61,10 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
 
   const handleCloseZipDetail = () => {
     setSelectedZipCode(null);
+  };
+
+  const toggleFilterPanel = () => {
+    setFilterPanelCollapsed(!filterPanelCollapsed);
   };
 
   const officeLocations = [
@@ -78,36 +89,42 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           <MapHeaderControls onClose={onClose} />
         </DialogHeader>
         
-        <FilterBar 
-          urbanicityFilter={urbanicityFilter}
-          setUrbanicityFilter={setUrbanicityFilter}
-          opportunityFilter={opportunityFilter}
-          setOpportunityFilter={setOpportunityFilter}
-          netWorthRange={netWorthRange}
-          setNetWorthRange={setNetWorthRange}
-          divorceRateThreshold={divorceRateThreshold}
-          setDivorceRateThreshold={setDivorceRateThreshold}
-          showExistingOffices={showExistingOffices}
-          setShowExistingOffices={setShowExistingOffices}
-        />
-        
-        <div className="flex-1 relative">
-          <LeafletMap 
-            zipData={zipData}
-            onZipClick={handleZipClick}
-            opportunityFilter={opportunityFilter}
-            urbanicityFilter={urbanicityFilter}
-            showOfficeLocations={showExistingOffices}
-            officeLocations={officeLocations}
-            fullscreen={true}
-          />
-          
-          {selectedZipCode && (
-            <ZIPCodeDetailOverlay
-              zipCodeData={selectedZipCode}
-              onClose={handleCloseZipDetail}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex">
+            <MapFilterPanel
+              opportunityFilter={opportunityFilter}
+              setOpportunityFilter={setOpportunityFilter}
+              urbanicityFilter={urbanicityFilter}
+              setUrbanicityFilter={setUrbanicityFilter}
+              netWorthRange={netWorthRange}
+              setNetWorthRange={setNetWorthRange}
+              divorceRateThreshold={divorceRateThreshold}
+              setDivorceRateThreshold={setDivorceRateThreshold}
+              showExistingOffices={showExistingOffices}
+              setShowExistingOffices={setShowExistingOffices}
+              isCollapsed={filterPanelCollapsed}
+              toggleCollapse={toggleFilterPanel}
             />
-          )}
+            
+            <div className="flex-1 relative">
+              <LeafletMap 
+                zipData={zipData}
+                onZipClick={handleZipClick}
+                opportunityFilter={opportunityFilter}
+                urbanicityFilter={urbanicityFilter}
+                showOfficeLocations={showExistingOffices}
+                officeLocations={officeLocations}
+                fullscreen={true}
+              />
+              
+              {selectedZipCode && (
+                <ZIPCodeDetailOverlay
+                  zipCodeData={selectedZipCode}
+                  onClose={handleCloseZipDetail}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
