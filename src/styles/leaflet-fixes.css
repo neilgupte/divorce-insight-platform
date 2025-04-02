@@ -76,3 +76,14 @@
 .leaflet-marker-icon {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
 }
+
+/* Force map layers to be properly displayed */
+.leaflet-tile-container img {
+  width: 256px !important;
+  height: 256px !important;
+}
+
+/* Ensure proper z-index for controls */
+.leaflet-control {
+  z-index: 1000 !important;
+}
