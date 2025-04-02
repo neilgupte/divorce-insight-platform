@@ -82,7 +82,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         if (feature.properties.opportunity !== undefined) {
           const value = parseFloat(feature.properties.opportunity);
           if (value < 10) opportunityTier = 'Low';
-          else if (value > 50) opportunityTier = 'High';
+else if (value <= 50) opportunityTier = 'Medium';
+else opportunityTier = 'High';
         }
         
         const urbanicity = feature.properties.urbanicity || 'Suburban';
