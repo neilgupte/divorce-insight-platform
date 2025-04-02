@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ZIPCodeData } from "@/lib/zipUtils";
 import { getOpportunityColor, getOpportunityTier } from "@/lib/mapUtils";
+import "@/styles/leaflet-fixes.css";
 
 // Define the component properties
 interface LeafletMapProps {
@@ -19,6 +20,18 @@ interface LeafletMapProps {
 
 // Mapbox access token from the mapboxUtils file
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
+
+// Fix for Leaflet icon issues
+useEffect(() => {
+  // This is needed to fix Leaflet marker icon issues
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  });
+}, []);
 
 const LeafletMap: React.FC<LeafletMapProps> = ({
   zipData,
@@ -63,15 +76,15 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={(e) => handleMapInit(e.target)}
+        whenReady={(e: L.LeafletEvent) => handleMapInit(e.target)}
       >
         {/* Position the map on the center point */}
         <SetViewOnUpdate center={defaultCenter} zoom={defaultZoom} />
         
         {/* Add the Mapbox tile layer with the custom style */}
         <TileLayer
-          url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
           attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+          url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
         />
         
         {/* Render ZIP code markers */}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -12,6 +11,8 @@ import LeafletMap from "./LeafletMap";
 import ZIPCodeDetailOverlay from "./ZIPCodeDetailOverlay";
 import MapHeaderControls from "./map-controls/MapHeaderControls";
 import FilterBar from "./map-controls/FilterBar";
+import 'leaflet/dist/leaflet.css';
+import "@/styles/leaflet-fixes.css";
 
 interface ZIPCodeMapOverlayProps {
   open: boolean;
@@ -34,17 +35,15 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
   const [zipData, setZipData] = useState<ZIPCodeData[]>([]);
   const [selectedZipCode, setSelectedZipCode] = useState<ZIPCodeData | null>(null);
 
-  // Generate mock data for demonstration
   useEffect(() => {
-    // Default values for the mock data generator
     const mockData = generateMockZIPData(
       initialState,
       initialCity,
       urbanicityFilter,
       netWorthRange,
       divorceRateThreshold,
-      3, // competitorCount
-      50 // Generate 50 records for a richer map experience
+      3,
+      50
     );
     setZipData(mockData);
   }, [initialState, initialCity, urbanicityFilter, netWorthRange, divorceRateThreshold]);
@@ -57,7 +56,6 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
     setSelectedZipCode(null);
   };
 
-  // Office locations to show when enabled
   const officeLocations = [
     { city: "New York", position: [40.7128, -74.0060] as [number, number] },
     { city: "Los Angeles", position: [34.0522, -118.2437] as [number, number] },
@@ -80,7 +78,6 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
           <MapHeaderControls onClose={onClose} />
         </DialogHeader>
         
-        {/* Horizontal Filter Bar */}
         <FilterBar 
           urbanicityFilter={urbanicityFilter}
           setUrbanicityFilter={setUrbanicityFilter}
@@ -95,7 +92,6 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
         />
         
         <div className="flex-1 relative">
-          {/* Main map */}
           <LeafletMap 
             zipData={zipData}
             onZipClick={handleZipClick}
@@ -106,7 +102,6 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
             fullscreen={true}
           />
           
-          {/* ZIP Code detail overlay */}
           {selectedZipCode && (
             <ZIPCodeDetailOverlay
               zipCodeData={selectedZipCode}
