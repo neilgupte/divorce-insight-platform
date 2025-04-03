@@ -5,14 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Filter, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 // List of US states with abbreviations
 const US_STATES = [
-  { name: "All States", abbr: "ALL" }, // Added All States as the first option
+  { name: "All States", abbr: "ALL" },
   { name: "Alabama", abbr: "AL" },
   { name: "Alaska", abbr: "AK" },
   { name: "Arizona", abbr: "AZ" },
@@ -97,12 +96,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onToggleSidebar
 }) => {
   const resetFilters = () => {
-    onStateChange("All States"); // Reset to All States
+    onStateChange("All States");
     onUrbanicityFilterChange('All');
     onOpportunityFilterChange('All');
     onNetWorthRangeChange([0.5, 25]);
     onDivorceRateThresholdChange(0);
-    onShowExistingOfficesChange(true); // Default to showing offices
+    onShowExistingOfficesChange(true);
   };
 
   const handleOpportunityChange = (value: string) => {
@@ -112,8 +111,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-background/95 border-r w-[66%]">
-      <div className="sticky top-0 z-10 bg-background/95 border-b p-4 flex items-center justify-between">
+    <div className="h-full flex flex-col bg-[#0b1321] border-r w-[66%] text-white">
+      <div className="sticky top-0 z-10 bg-[#0b1321] border-b border-gray-800 p-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Filter className="h-5 w-5" />
           Map Filters
@@ -123,7 +122,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           variant="ghost" 
           size="icon" 
           onClick={onToggleSidebar}
-          className="h-8 w-8"
+          className="h-8 w-8 text-white hover:bg-gray-800"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Collapse sidebar</span>
@@ -132,17 +131,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
       <div className="p-4 space-y-6 flex-1 overflow-auto">
         <div className="space-y-2">
-          <Label htmlFor="state-select">Select State</Label>
+          <Label htmlFor="state-select" className="text-white text-sm font-medium">Select State</Label>
           <Select 
             value={selectedState} 
             onValueChange={onStateChange}
           >
-            <SelectTrigger id="state-select">
+            <SelectTrigger id="state-select" className="bg-[#141f2d] border-gray-700 text-white">
               <SelectValue placeholder="All States" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#141f2d] border-gray-700 text-white">
               {US_STATES.map((state) => (
-                <SelectItem key={state.abbr} value={state.name}>
+                <SelectItem key={state.abbr} value={state.name} className="hover:bg-gray-700">
                   {state.name} {state.abbr !== "ALL" ? `(${state.abbr})` : ""}
                 </SelectItem>
               ))}
@@ -150,48 +149,47 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </Select>
         </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Opportunity Size</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ToggleGroup 
-              type="single" 
-              value={opportunityFilter} 
-              onValueChange={handleOpportunityChange} 
-              className="justify-start"
-            >
-              <ToggleGroupItem value="Low" className="text-xs">Low (&lt;$1M)</ToggleGroupItem>
-              <ToggleGroupItem value="Medium" className="text-xs">Medium ($1M-$10M)</ToggleGroupItem>
-              <ToggleGroupItem value="High" className="text-xs">High ($10M+)</ToggleGroupItem>
-              <ToggleGroupItem value="All" className="text-xs">All</ToggleGroupItem>
-            </ToggleGroup>
-          </CardContent>
-        </Card>
+        <div className="bg-[#141f2d] p-4 rounded-md border border-gray-800">
+          <h4 className="text-white text-sm font-medium mb-3">Opportunity Size</h4>
+          <div className="grid grid-cols-3 gap-1">
+            <div className={`text-center py-2 px-1 rounded text-xs ${opportunityFilter === 'Low' ? 'bg-blue-800' : 'bg-[#1c2737]'} cursor-pointer`} 
+                 onClick={() => handleOpportunityChange('Low')}>
+              Low<br/>(&lt;$1M)
+            </div>
+            <div className={`text-center py-2 px-1 rounded text-xs ${opportunityFilter === 'Medium' ? 'bg-blue-800' : 'bg-[#1c2737]'} cursor-pointer`}
+                 onClick={() => handleOpportunityChange('Medium')}>
+              Medium<br/>($1M-$10M)
+            </div>
+            <div className={`text-center py-2 px-1 rounded text-xs ${opportunityFilter === 'High' ? 'bg-blue-800' : 'bg-[#1c2737]'} cursor-pointer`}
+                 onClick={() => handleOpportunityChange('High')}>
+              High<br/>($10M+)
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-2">
-          <Label htmlFor="urbanicity-filter">Urbanicity Type</Label>
+          <Label htmlFor="urbanicity-filter" className="text-white text-sm font-medium">Urbanicity Type</Label>
           <Select 
             value={urbanicityFilter} 
             onValueChange={(value) => onUrbanicityFilterChange(value as 'All' | 'Urban' | 'Suburban' | 'Rural')}
           >
-            <SelectTrigger id="urbanicity-filter">
+            <SelectTrigger id="urbanicity-filter" className="bg-[#141f2d] border-gray-700 text-white">
               <SelectValue placeholder="All Areas" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Areas</SelectItem>
-              <SelectItem value="Urban">Urban</SelectItem>
-              <SelectItem value="Suburban">Suburban</SelectItem>
-              <SelectItem value="Rural">Rural</SelectItem>
+            <SelectContent className="bg-[#141f2d] border-gray-700 text-white">
+              <SelectItem value="All" className="hover:bg-gray-700">All Areas</SelectItem>
+              <SelectItem value="Urban" className="hover:bg-gray-700">Urban</SelectItem>
+              <SelectItem value="Suburban" className="hover:bg-gray-700">Suburban</SelectItem>
+              <SelectItem value="Rural" className="hover:bg-gray-700">Rural</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
             <div className="flex justify-between">
-              <Label>Net Worth Range</Label>
-              <span className="text-xs text-muted-foreground">
+              <Label className="text-white text-sm font-medium">Net Worth Range</Label>
+              <span className="text-xs text-gray-400">
                 {formatCurrency(netWorthRange[0])}M - {formatCurrency(netWorthRange[1])}M
               </span>
             </div>
@@ -207,8 +205,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
           <div className="space-y-2">
             <div className="flex justify-between">
-              <Label>Divorce Rate Threshold</Label>
-              <span className="text-xs text-muted-foreground">{divorceRateThreshold}%+</span>
+              <Label className="text-white text-sm font-medium">Divorce Rate Threshold</Label>
+              <span className="text-xs text-gray-400">{divorceRateThreshold}%+</span>
             </div>
             <Slider
               value={[divorceRateThreshold]}
@@ -226,13 +224,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             id="office-filter"
             checked={showExistingOffices}
             onCheckedChange={onShowExistingOfficesChange}
+            className="data-[state=checked]:bg-blue-500"
           />
-          <Label htmlFor="office-filter">Show existing offices</Label>
+          <Label htmlFor="office-filter" className="text-white text-sm font-medium">Show existing offices</Label>
         </div>
 
         <Button 
           variant="outline" 
-          className="w-full mt-4 flex gap-2"
+          className="w-full mt-4 flex gap-2 bg-[#141f2d] border-gray-700 text-white hover:bg-gray-700"
           onClick={resetFilters}
         >
           <RefreshCw className="h-4 w-4" />
