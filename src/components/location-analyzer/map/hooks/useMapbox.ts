@@ -39,7 +39,7 @@ export function useMapbox({
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: MAP_SETTINGS.style,
-        center: MAP_SETTINGS.defaultCenter,
+        center: MAP_SETTINGS.defaultCenter as mapboxgl.LngLatLike, // Explicit type cast to LngLatLike
         zoom: MAP_SETTINGS.defaultZoom
       });
       
@@ -47,6 +47,7 @@ export function useMapbox({
       map.current.addControl(new mapboxgl.FullscreenControl(), "bottom-right");
       
       map.current.on('load', () => {
+        console.log("✅ Map initialized successfully");
         setMapInitialized(true);
       });
     }
@@ -70,6 +71,7 @@ export function useMapbox({
         
         // Format state name for file path (PascalCase, no spaces or dashes)
         const formattedStateName = MAP_UTILS.formatStateNameForFile(selectedState);
+        console.log("✅ Loading data for state:", formattedStateName);
         
         // Fetch the enriched GeoJSON file for the selected state
         const response = await fetch(`https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_${formattedStateName}_enriched.geojson`);
@@ -79,6 +81,7 @@ export function useMapbox({
         }
         
         const data = await response.json();
+        console.log("✅ Fetched GeoJSON successfully", data);
         
         // Add random mock data for demonstration purposes
         if (data.features && data.features.length > 0) {
@@ -103,7 +106,35 @@ export function useMapbox({
             if (feature.properties.hasOffice === undefined) {
               feature.properties.hasOffice = Math.random() > 0.8; // 20% chance of having an office
             }
+            
+            // Add opportunity tier based on opportunity value
+            feature.properties.opportunityTier = getOpportunityCategory(feature.properties.opportunity);
           });
+        } else {
+          console.log("⚠️ No features found in GeoJSON, creating mock data");
+          // Create mock data if the file has no features
+          data.features = Array.from({ length: 20 }, (_, i) => ({
+            type: "Feature",
+            properties: {
+              ZCTA5CE20: `9${i.toString().padStart(4, '0')}`,
+              COUNTY: "Mock County",
+              opportunity: parseFloat((Math.random() * 15).toFixed(1)),
+              netWorth: parseFloat((Math.random() * 25 + 0.5).toFixed(1)),
+              divorceRate: parseFloat((Math.random() * 0.1).toFixed(2)),
+              urbanicity: ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)],
+              hasOffice: Math.random() > 0.8,
+              opportunityTier: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                Array.from({ length: 5 }, () => [
+                  -122 + Math.random() * 10,
+                  37 + Math.random() * 5
+                ] as [number, number]) // Explicit tuple typing
+              ]
+            }
+          }));
         }
         
         setGeoJsonData(data);
@@ -154,6 +185,8 @@ export function useMapbox({
       })
     };
     
+    console.log("✅ Rendering features:", filteredData.features.length);
+    
     // Remove previous layers if they exist
     if (map.current.getLayer('zip-fills')) {
       map.current.removeLayer('zip-fills');
@@ -175,23 +208,24 @@ export function useMapbox({
         data: filteredData
       });
       
-      // Add fill layer
+      // Add fill layer using the match expression for opportunity colors
       map.current.addLayer({
         id: 'zip-fills',
         type: 'fill',
         source: 'zips',
         paint: {
           'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'opportunity'],
-            0, '#ef4444',  // Light red for low opportunity
-            1, '#b91c1c',  // Medium red for medium opportunity
-            10, '#7f1d1d'  // Dark red for high opportunity
+            'match',
+            ['get', 'opportunityTier'],
+            'Low', '#ef4444',
+            'Medium', '#b91c1c',
+            'High', '#7f1d1d',
+            '#cccccc' // default color if no match
           ],
           'fill-opacity': 0.7
         }
       });
+      console.log("✅ zip-fills layer added");
       
       // Add border layer
       map.current.addLayer({
@@ -204,6 +238,7 @@ export function useMapbox({
           'line-opacity': 0.6
         }
       });
+      console.log("✅ zip-borders layer added");
       
       // Add labels layer
       map.current.addLayer({
@@ -223,6 +258,7 @@ export function useMapbox({
           'text-halo-width': 1
         }
       });
+      console.log("✅ zip-labels layer added");
       
       // Fit map to state boundaries
       const bounds = new mapboxgl.LngLatBounds();
@@ -231,13 +267,13 @@ export function useMapbox({
           const coords = feature.geometry.coordinates;
           
           if (feature.geometry.type === 'Polygon') {
-            coords[0].forEach((coord: number[]) => {
-              bounds.extend([coord[0], coord[1]]);
+            coords[0].forEach((coord: [number, number]) => {
+              bounds.extend(coord as mapboxgl.LngLatLike);
             });
           } else if (feature.geometry.type === 'MultiPolygon') {
-            coords.forEach((polygon: number[][][]) => {
-              polygon[0].forEach((coord: number[]) => {
-                bounds.extend([coord[0], coord[1]]);
+            coords.forEach((polygon: [number, number][][]) => {
+              polygon[0].forEach((coord: [number, number]) => {
+                bounds.extend(coord as mapboxgl.LngLatLike);
               });
             });
           }
