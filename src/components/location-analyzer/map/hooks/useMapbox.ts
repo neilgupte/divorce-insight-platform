@@ -72,7 +72,7 @@ export function useMapbox({
         const formattedStateName = MAP_UTILS.formatStateNameForFile(selectedState);
         
         // Fetch the enriched GeoJSON file for the selected state
-        const response = await fetch(`/zcta_${formattedStateName}_enriched.geojson`);
+        const response = await fetch(`https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_${formattedStateName}_enriched.geojson`);
         
         if (!response.ok) {
           throw new Error(`Failed to load data for ${selectedState}`);
