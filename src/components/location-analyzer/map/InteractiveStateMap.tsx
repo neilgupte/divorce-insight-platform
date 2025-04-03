@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import "mapbox-gl/dist/mapbox.css";
 import { ZIPCodeDetail } from "../StateMapsOverlay";
-import { MAP_SETTINGS } from "./mapSettings";
+import { MAP_SETTINGS, MAP_UTILS } from "./mapSettings";
 
 // Function to determine opportunity color based on value
 function getOpportunityColor(value: number): string {
@@ -98,8 +98,11 @@ const InteractiveStateMap: React.FC<InteractiveStateMapProps> = ({
         setLoading(true);
         setError(null);
         
-        // Fetch the GeoJSON file for the selected state
-        const response = await fetch(`/zcta_${selectedState}.geojson`);
+        // Format state name for file path (PascalCase, no spaces or dashes)
+        const formattedStateName = MAP_UTILS.formatStateNameForFile(selectedState);
+        
+        // Fetch the enriched GeoJSON file for the selected state
+        const response = await fetch(`/zcta_${formattedStateName}_enriched.geojson`);
         
         if (!response.ok) {
           throw new Error(`Failed to load data for ${selectedState}`);
@@ -114,12 +117,22 @@ const InteractiveStateMap: React.FC<InteractiveStateMapProps> = ({
               feature.properties = {};
             }
             
-            // Add mock data
-            feature.properties.opportunity = parseFloat((Math.random() * 15).toFixed(1));
-            feature.properties.netWorth = parseFloat((Math.random() * 25 + 0.5).toFixed(1));
-            feature.properties.divorceRate = parseFloat((Math.random() * 0.1).toFixed(2));
-            feature.properties.urbanicity = ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)];
-            feature.properties.hasOffice = Math.random() > 0.8; // 20% chance of having an office
+            // Add mock data only if not already present in the enriched file
+            if (feature.properties.opportunity === undefined) {
+              feature.properties.opportunity = parseFloat((Math.random() * 15).toFixed(1));
+            }
+            if (feature.properties.netWorth === undefined) {
+              feature.properties.netWorth = parseFloat((Math.random() * 25 + 0.5).toFixed(1));
+            }
+            if (feature.properties.divorceRate === undefined) {
+              feature.properties.divorceRate = parseFloat((Math.random() * 0.1).toFixed(2));
+            }
+            if (feature.properties.urbanicity === undefined) {
+              feature.properties.urbanicity = ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)];
+            }
+            if (feature.properties.hasOffice === undefined) {
+              feature.properties.hasOffice = Math.random() > 0.8; // 20% chance of having an office
+            }
           });
         }
         

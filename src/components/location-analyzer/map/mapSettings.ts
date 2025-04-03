@@ -50,5 +50,20 @@ export const MAP_UTILS = {
     } else {
       return "Low";
     }
+  },
+  
+  // Convert state name to PascalCase format for GeoJSON file naming
+  formatStateNameForFile(stateName: string): string {
+    // Extract state name from dropdown format if needed (e.g., "Alaska (AK)" -> "Alaska")
+    const cleanStateName = stateName.includes('(') 
+      ? stateName.split('(')[0].trim() 
+      : stateName;
+    
+    // Convert to PascalCase with no spaces or dashes
+    return cleanStateName
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .split(/[\s-]+/) // Split by spaces or dashes
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('');
   }
 };

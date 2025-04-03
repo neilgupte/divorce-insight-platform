@@ -13,6 +13,7 @@ import InteractiveStateMap from "./map/InteractiveStateMap";
 import FilterSidebar from "./map/FilterSidebar";
 import ZIPDetailPanel from "./map/ZIPDetailPanel";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { getStateAbbreviation } from "@/lib/zipUtils";
 
 export interface ZIPCodeDetail {
   zipCode: string;
@@ -37,11 +38,74 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
   initialState = "CA" 
 }) => {
   const { toast } = useToast();
-  const [selectedState, setSelectedState] = useState<string>(initialState);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedZIPDetail, setSelectedZIPDetail] = useState<ZIPCodeDetail | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  
+  // Get initial state name from abbreviation
+  const getStateNameFromAbbreviation = (abbr: string): string => {
+    // Create a reverse mapping of state abbreviations to names
+    const stateMap: Record<string, string> = {};
+    Object.entries({
+      Alabama: "AL",
+      Alaska: "AK",
+      Arizona: "AZ",
+      Arkansas: "AR",
+      California: "CA",
+      Colorado: "CO",
+      Connecticut: "CT",
+      Delaware: "DE",
+      Florida: "FL",
+      Georgia: "GA",
+      Hawaii: "HI",
+      Idaho: "ID",
+      Illinois: "IL",
+      Indiana: "IN",
+      Iowa: "IA",
+      Kansas: "KS",
+      Kentucky: "KY",
+      Louisiana: "LA",
+      Maine: "ME",
+      Maryland: "MD",
+      Massachusetts: "MA",
+      Michigan: "MI",
+      Minnesota: "MN",
+      Mississippi: "MS",
+      Missouri: "MO",
+      Montana: "MT",
+      Nebraska: "NE",
+      Nevada: "NV",
+      "New Hampshire": "NH",
+      "New Jersey": "NJ",
+      "New Mexico": "NM",
+      "New York": "NY",
+      "North Carolina": "NC",
+      "North Dakota": "ND",
+      Ohio: "OH",
+      Oklahoma: "OK",
+      Oregon: "OR",
+      Pennsylvania: "PA",
+      "Rhode Island": "RI",
+      "South Carolina": "SC",
+      "South Dakota": "SD",
+      Tennessee: "TN",
+      Texas: "TX",
+      Utah: "UT",
+      Vermont: "VT",
+      Virginia: "VA",
+      Washington: "WA",
+      "West Virginia": "WV",
+      Wisconsin: "WI",
+      Wyoming: "WY",
+    }).forEach(([name, abbreviation]) => {
+      stateMap[abbreviation] = name;
+    });
+    
+    return stateMap[abbr] || "California";
+  };
+  
+  const [selectedState, setSelectedState] = useState<string>(getStateNameFromAbbreviation(initialState));
   
   // Filter states
   const [urbanicityFilter, setUrbanicityFilter] = useState<'All' | 'Urban' | 'Suburban' | 'Rural'>('All');
@@ -65,6 +129,12 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  // Handle state change
+  const handleStateChange = (newState: string) => {
+    setSelectedState(newState);
+    setSelectedZIPDetail(null); // Clear any selected ZIP details
+  };
+
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()} modal>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 flex flex-col">
@@ -84,7 +154,7 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
                 <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                   <FilterSidebar
                     selectedState={selectedState}
-                    onStateChange={setSelectedState}
+                    onStateChange={handleStateChange}
                     urbanicityFilter={urbanicityFilter}
                     onUrbanicityFilterChange={setUrbanicityFilter}
                     opportunityFilter={opportunityFilter}
