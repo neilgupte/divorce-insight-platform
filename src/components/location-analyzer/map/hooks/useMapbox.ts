@@ -81,7 +81,7 @@ export function useMapbox({
         }
         
         const data = await response.json();
-        console.log("✅ Fetched GeoJSON successfully", data);
+        console.log(`✅ Loaded ${data.features?.length || 0} ZIP features from ${selectedState}`);
         
         // Add random mock data for demonstration purposes
         if (data.features && data.features.length > 0) {
