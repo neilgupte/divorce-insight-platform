@@ -97,6 +97,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onToggleSidebar
 }) => {
   const resetFilters = () => {
+    onStateChange("All States"); // Reset to All States
     onUrbanicityFilterChange('All');
     onOpportunityFilterChange('All');
     onNetWorthRangeChange([0.5, 25]);
@@ -137,7 +138,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             onValueChange={onStateChange}
           >
             <SelectTrigger id="state-select">
-              <SelectValue placeholder="Select a state" />
+              <SelectValue placeholder="All States" />
             </SelectTrigger>
             <SelectContent>
               {US_STATES.map((state) => (
