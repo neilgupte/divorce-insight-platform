@@ -39,7 +39,7 @@ export function useMapbox({
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: MAP_SETTINGS.style,
-        center: MAP_SETTINGS.defaultCenter as mapboxgl.LngLatLike, // Explicit type cast to LngLatLike
+        center: MAP_SETTINGS.defaultCenter as [number, number], // Explicit type cast to ensure it's a tuple
         zoom: MAP_SETTINGS.defaultZoom
       });
       
