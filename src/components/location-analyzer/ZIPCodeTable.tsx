@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -103,7 +102,8 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               ...existingItem,
               opportunity: 10 + Math.floor(Math.random() * 5), // 10-15M
               tam: 20 + Math.floor(Math.random() * 10),
-              sam: 15 + Math.floor(Math.random() * 5)
+              sam: 15 + Math.floor(Math.random() * 5),
+              netWorth: 2.8 + Math.random() * 2
             };
           }
         }
@@ -118,7 +118,8 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
               ...existingItem,
               opportunity: 5 + Math.floor(Math.random() * 4) + Math.random(), // 5-9.9M
               tam: 10 + Math.floor(Math.random() * 10),
-              sam: 8 + Math.floor(Math.random() * 5)
+              sam: 8 + Math.floor(Math.random() * 5),
+              netWorth: 2 + Math.random() * 0.8
             };
           }
         }
@@ -127,10 +128,11 @@ const ZIPCodeTable: React.FC<ZIPCodeTableProps> = ({
       return enhancedData;
     }
     
-    // Ensure data includes divorce rates (updated to always provide a divorce rate)
+    // Ensure data includes divorce rates and net worth (updated to always provide these values)
     return baseData.map(item => ({
       ...item,
-      divorceRate: item.divorceRate !== undefined ? item.divorceRate : (3 + Math.random() * 7) // 3-10% range if not already present
+      divorceRate: item.divorceRate !== undefined ? item.divorceRate : (3 + Math.random() * 7) / 100, // 3-10% range if not already present
+      netWorth: item.netWorth !== undefined ? item.netWorth : 1 + Math.random() * 4 // 1-5M range if not already present
     }));
   }, [selectedState, selectedCity, urbanicity, netWorthRange, divorceRateThreshold]);
   

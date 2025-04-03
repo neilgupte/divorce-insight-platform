@@ -1,355 +1,265 @@
-// Mock data generator for ZIP code analysis
-
 export interface ZIPCodeData {
   zipCode: string;
-  state: string;
   city: string;
-  tam: number; // Total Addressable Market in $M
-  sam: number; // Serviceable Addressable Market in $M
-  competitorCount: number;
-  opportunity: number; // in $M
-  hasOffice: boolean;
-  urbanicity: "Urban" | "Suburban" | "Rural";
-  divorceRate?: number; // Added divorceRate property as optional
-  latitude?: string; // Added latitude property
-  longitude?: string; // Added longitude property
+  state: string;
+  urbanicity: 'Urban' | 'Suburban' | 'Rural';
+  divorceRate: number;
+  opportunity: number;
+  netWorth?: number;
+  tam?: number;
+  sam?: number;
 }
 
-// States with their abbreviations for reference
-const stateAbbreviations: Record<string, string> = {
-  "Alabama": "AL",
-  "Alaska": "AK",
-  "Arizona": "AZ",
-  "Arkansas": "AR",
-  "California": "CA",
-  "Colorado": "CO",
-  "Connecticut": "CT",
-  "Delaware": "DE",
-  "Florida": "FL",
-  "Georgia": "GA",
-  "Hawaii": "HI",
-  "Idaho": "ID",
-  "Illinois": "IL",
-  "Indiana": "IN",
-  "Iowa": "IA",
-  "Kansas": "KS",
-  "Kentucky": "KY",
-  "Louisiana": "LA",
-  "Maine": "ME",
-  "Maryland": "MD",
-  "Massachusetts": "MA",
-  "Michigan": "MI",
-  "Minnesota": "MN",
-  "Mississippi": "MS",
-  "Missouri": "MO",
-  "Montana": "MT",
-  "Nebraska": "NE",
-  "Nevada": "NV",
-  "New Hampshire": "NH",
-  "New Jersey": "NJ",
-  "New Mexico": "NM",
-  "New York": "NY",
-  "North Carolina": "NC",
-  "North Dakota": "ND",
-  "Ohio": "OH",
-  "Oklahoma": "OK",
-  "Oregon": "OR",
-  "Pennsylvania": "PA",
-  "Rhode Island": "RI",
-  "South Carolina": "SC",
-  "South Dakota": "SD",
-  "Tennessee": "TN",
-  "Texas": "TX",
-  "Utah": "UT",
-  "Vermont": "VT",
-  "Virginia": "VA",
-  "Washington": "WA",
-  "West Virginia": "WV",
-  "Wisconsin": "WI",
-  "Wyoming": "WY"
-};
-
-export { stateAbbreviations };
-
-// Get state abbreviation 
-export const getStateAbbreviation = (state: string): string => {
-  return stateAbbreviations[state] || state;
-};
-
-// Map of states to major cities (simplified)
-const stateCities: Record<string, string[]> = {
-  "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento"],
-  "New York": ["New York City", "Buffalo", "Rochester", "Albany"],
-  "Texas": ["Houston", "Dallas", "Austin", "San Antonio"],
-  "Florida": ["Miami", "Orlando", "Tampa", "Jacksonville"],
-  "Illinois": ["Chicago", "Springfield", "Peoria", "Rockford"],
-  "Arkansas": ["Little Rock", "Fayetteville", "Fort Smith", "Jonesboro"],
-  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville"],
-  "Alaska": ["Anchorage", "Fairbanks", "Juneau", "Sitka"],
-  "Arizona": ["Phoenix", "Tucson", "Mesa", "Scottsdale"],
-  "Colorado": ["Denver", "Boulder", "Colorado Springs", "Fort Collins"],
-  "Connecticut": ["Hartford", "New Haven", "Stamford", "Bridgeport"]
-};
-
-// Generate a random ZIP code for a given state
-const generateZipForState = (state: string): string => {
-  // Real ZIP code mapping would be more accurate, but this is a simplification
-  const zipRanges: Record<string, [number, number]> = {
-    "California": [90001, 96162],
-    "New York": [10001, 14975],
-    "Texas": [73301, 79999],
-    "Florida": [32003, 34997],
-    "Illinois": [60001, 62999],
-    "Arkansas": [71601, 72959],
-    "default": [10000, 99999],
-  };
-  
-  const range = zipRanges[state] || zipRanges["default"];
-  return String(Math.floor(range[0] + Math.random() * (range[1] - range[0])));
-};
-
-// Generate a city for a state
-const getCityForState = (state: string): string => {
-  if (state === "All States") {
-    const allStates = Object.keys(stateAbbreviations);
-    const randomState = allStates[Math.floor(Math.random() * allStates.length)];
-    return getCityForState(randomState);
-  }
-  
-  const cities = stateCities[state];
-  if (cities && cities.length > 0) {
-    return cities[Math.floor(Math.random() * cities.length)];
-  }
-  
-  return "Major City";
-};
-
-// Generate mock ZIP code data based on filters
-export const generateMockZIPData = (
-  selectedState: string,
-  selectedCity: string,
+export function generateMockZIPData(
+  stateName: string,
+  cityName: string,
   urbanicity: string,
   netWorthRange: [number, number],
   divorceRateThreshold: number,
   competitorCount: number,
-  count: number = 25 // Default number of records to generate
-): ZIPCodeData[] => {
-  const result: ZIPCodeData[] = [];
+  count: number,
+  baseSeed: number = 1000
+): ZIPCodeData[] {
+  const US_CITIES: { [state: string]: string[] } = {
+    "All States": ["All Cities"],
+    Alabama: ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+    Alaska: ["Anchorage", "Fairbanks", "Juneau", "Sitka", "Ketchikan"],
+    Arizona: ["Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale"],
+    Arkansas: ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"],
+    California: [
+      "Los Angeles",
+      "San Diego",
+      "San Jose",
+      "San Francisco",
+      "Fresno",
+    ],
+    Colorado: ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Lakewood"],
+    Connecticut: ["Bridgeport", "New Haven", "Stamford", "Hartford", "Waterbury"],
+    Delaware: ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
+    Florida: ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
+    Georgia: ["Atlanta", "Columbus", "Augusta", "Savannah", "Athens"],
+    Hawaii: ["Honolulu", "Hilo", "Kailua", "Pearl City", "Waipahu"],
+    Idaho: ["Boise", "Meridian", "Nampa", "Idaho Falls", "Pocatello"],
+    Illinois: ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
+    Indiana: ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Carmel"],
+    Iowa: ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Waterloo"],
+    Kansas: ["Wichita", "Overland Park", "Kansas City", "Topeka", "Olathe"],
+    Kentucky: ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington"],
+    Louisiana: ["New Orleans", "Baton Rouge", "Shreveport", "Lafayette", "Lake Charles"],
+    Maine: ["Portland", "Lewiston", "Bangor", "Auburn", "Biddeford"],
+    Maryland: ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Annapolis"],
+    Massachusetts: ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
+    Michigan: ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor"],
+    Minnesota: ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
+    Mississippi: ["Jackson", "Gulfport", "Hattiesburg", "Biloxi", "Meridian"],
+    Missouri: ["Kansas City", "St. Louis", "Springfield", "Columbia", "Independence"],
+    Montana: ["Billings", "Missoula", "Great Falls", "Bozeman", "Butte"],
+    Nebraska: ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
+    Nevada: ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
+    "New Hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Rochester"],
+    "New Jersey": ["Newark", "Jersey City", "Paterson", "Elizabeth", "Edison"],
+    "New Mexico": ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell"],
+    "New York": ["New York", "Buffalo", "Rochester", "Yonkers", "Syracuse"],
+    "North Carolina": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem"],
+    "North Dakota": ["Fargo", "Bismarck", "Grand Forks", "Minot", "West Fargo"],
+    Ohio: ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
+    Oklahoma: ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
+    Oregon: ["Portland", "Salem", "Eugene", "Gresham", "Hillsboro"],
+    Pennsylvania: ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
+    "Rhode Island": ["Providence", "Warwick", "Cranston", "Pawtucket", "East Providence"],
+    "South Carolina": ["Columbia", "Charleston", "North Charleston", "Mount Pleasant", "Rock Hill"],
+    "South Dakota": ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown"],
+    Tennessee: ["Memphis", "Nashville", "Knoxville", "Chattanooga", "Clarksville"],
+    Texas: ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
+    Utah: ["Salt Lake City", "West Valley City", "Provo", "West Jordan", "Orem"],
+    Vermont: ["Burlington", "South Burlington", "Colchester", "Rutland", "Essex"],
+    Virginia: ["Virginia Beach", "Norfolk", "Chesapeake", "Richmond", "Newport News"],
+    Washington: ["Seattle", "Spokane", "Tacoma", "Vancouver", "Bellevue"],
+    "West Virginia": ["Charleston", "Huntington", "Parkersburg", "Morgantown", "Wheeling"],
+    Wisconsin: ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
+    Wyoming: ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
+  };
+
+  const US_STATES = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+  ];
+
+  const randomCity = (randomValue: number, state: string): string => {
+    const cities = US_CITIES[state] || US_CITIES["California"];
+    return cities[Math.floor(randomValue * (cities.length - 1)) + 1];
+  };
+
+  const randomState = (randomValue: number): string => {
+    return US_STATES[Math.floor(randomValue * US_STATES.length)];
+  };
+
+  const getStateAbbreviation = (stateName: string): string => {
+    const stateAbbreviations: { [key: string]: string } = {
+      Alabama: "AL",
+      Alaska: "AK",
+      Arizona: "AZ",
+      Arkansas: "AR",
+      California: "CA",
+      Colorado: "CO",
+      Connecticut: "CT",
+      Delaware: "DE",
+      Florida: "FL",
+      Georgia: "GA",
+      Hawaii: "HI",
+      Idaho: "ID",
+      Illinois: "IL",
+      Indiana: "IN",
+      Iowa: "IA",
+      Kansas: "KS",
+      Kentucky: "KY",
+      Louisiana: "LA",
+      Maine: "ME",
+      Maryland: "MD",
+      Massachusetts: "MA",
+      Michigan: "MI",
+      Minnesota: "MN",
+      Mississippi: "MS",
+      Missouri: "MO",
+      Montana: "MT",
+      Nebraska: "NE",
+      Nevada: "NV",
+      "New Hampshire": "NH",
+      "New Jersey": "NJ",
+      "New Mexico": "NM",
+      "New York": "NY",
+      "North Carolina": "NC",
+      "North Dakota": "ND",
+      Ohio: "OH",
+      Oklahoma: "OK",
+      Oregon: "OR",
+      Pennsylvania: "PA",
+      "Rhode Island": "RI",
+      "South Carolina": "SC",
+      "South Dakota": "SD",
+      Tennessee: "TN",
+      Texas: "TX",
+      Utah: "UT",
+      Vermont: "VT",
+      Virginia: "VA",
+      Washington: "WA",
+      "West Virginia": "WV",
+      Wisconsin: "WI",
+      Wyoming: "WY",
+    };
+    return stateAbbreviations[stateName] || "CA";
+  };
   
-  // Determine which states to include
-  const states = selectedState !== "All States" 
-    ? [selectedState] 
-    : Object.keys(stateAbbreviations).slice(0, 15); // Limit to first 15 states for simplicity
-  
-  // Generate data
-  for (let i = 0; i < count; i++) {
-    const stateIdx = Math.floor(Math.random() * states.length);
-    const state = states[stateIdx];
-    const city = selectedCity !== "All Cities" ? selectedCity : getCityForState(state);
+  return Array.from({ length: count }).map((_, index) => {
+    const zipSeed = baseSeed + index;
+    const zipNum = 10000 + Math.floor(Math.random() * 89999);
     
-    // Determine urbanicity
-    const urbanTypes: Array<"Urban" | "Suburban" | "Rural"> = ["Urban", "Suburban", "Rural"];
-    const urbanType = urbanTypes[Math.floor(Math.random() * urbanTypes.length)] as "Urban" | "Suburban" | "Rural";
+    // Calculate a consistent random value based on the zip code
+    const consistentRandom = (zipNum % 10000) / 10000;
     
-    // Skip if urbanicity filter doesn't match
-    if (urbanicity !== "All" && urbanicity !== urbanType) {
-      // Generate another item to ensure we reach count
-      i--;
-      continue;
+    // Create urbanicity distribution (50% suburban, 30% urban, 20% rural)
+    let zipUrbanicity: 'Urban' | 'Suburban' | 'Rural' = 'Suburban';
+    if (consistentRandom < 0.3) {
+      zipUrbanicity = 'Urban';
+    } else if (consistentRandom > 0.8) {
+      zipUrbanicity = 'Rural';
     }
     
-    // Calculate financial metrics
-    // For simulation, higher net worth areas have higher TAM
-    const netWorthMultiplier = Math.random() * (netWorthRange[1] - netWorthRange[0]) + netWorthRange[0];
-    const tamBase = urbanType === "Urban" ? 12 : urbanType === "Suburban" ? 8 : 4;
-    const tam = parseFloat((tamBase * (netWorthMultiplier / 10)).toFixed(1));
+    // Filter by urbanicity if specified
+    if (urbanicity !== 'All' && zipUrbanicity !== urbanicity) {
+      // Skip this entry if it doesn't match the filter
+      return null as unknown as ZIPCodeData;
+    }
     
-    // SAM is a percentage of TAM based on urbanicity (urban areas have higher accessibility)
-    const samPercentage = urbanType === "Urban" ? 0.8 : urbanType === "Suburban" ? 0.6 : 0.4;
-    const sam = parseFloat((tam * samPercentage).toFixed(1));
+    // Base values that will be modified by filters
+    const baseNetWorth = 1 + Math.random() * 9; // 1M to 10M
+    const baseOpportunity = 1 + Math.random() * 14; // 1M to 15M
+    const baseDivorceRate = (2 + Math.random() * 8) / 100; // 2% to 10%
     
-    // Competitor count with some randomness around the user-set value
-    const competitors = Math.max(0, Math.floor(competitorCount + (Math.random() * 4 - 2)));
+    // Adjust values based on filter settings
+    let netWorth = baseNetWorth;
+    let opportunity = baseOpportunity;
+    let divorceRate = baseDivorceRate;
     
-    // Divorce rate influenced by the threshold (modified to always include divorce rate)
-    const divorceRate = (divorceRateThreshold + Math.random() * 3) / 100;
+    // Net worth filter
+    if (netWorth < netWorthRange[0] || netWorth > netWorthRange[1]) {
+      // Adjust to fit within range
+      netWorth = netWorthRange[0] + Math.random() * (netWorthRange[1] - netWorthRange[0]);
+    }
     
-    // Opportunity calculation: TAM × Divorce Rate ÷ (Competitors + 1)
-    const opportunity = parseFloat((tam * divorceRate / (competitors + 1)).toFixed(1));
+    // Divorce rate filter
+    if (divorceRate < divorceRateThreshold / 100) {
+      // Adjust to meet minimum threshold
+      divorceRate = divorceRateThreshold / 100 + Math.random() * 0.05; // Up to 5% above threshold
+    }
     
-    // Random office presence
-    const hasOffice = Math.random() > 0.7;
+    // Calculate total addressable market (TAM) as a function of net worth and divorce rate
+    const tam = Math.round((netWorth * 10) * (1 + divorceRate * 10));
     
-    // Generate latitude and longitude for the ZIP code (simplified for mock data)
-    const baseLat = state === "Alaska" ? 61.2 : state === "Hawaii" ? 19.9 : 38.0;
-    const baseLng = state === "Alaska" ? -149.9 : state === "Hawaii" ? -155.5 : -98.0;
+    // Calculate serviceable addressable market (SAM) as a subset of TAM
+    const sam = Math.round(tam * (0.5 + Math.random() * 0.3)); // 50-80% of TAM
     
-    // Random offset for visual distribution
-    const latOffset = (Math.random() - 0.5) * 10;
-    const lngOffset = (Math.random() - 0.5) * 20;
+    // Adjust opportunity based on competitors
+    opportunity = tam * divorceRate / (competitorCount + 1);
     
-    const latitude = (baseLat + latOffset).toString();
-    const longitude = (baseLng + lngOffset).toString();
-    
-    result.push({
-      zipCode: generateZipForState(state),
-      state,
-      city,
-      tam,
-      sam,
-      competitorCount: competitors,
+    return {
+      zipCode: zipNum.toString(),
+      city: cityName || randomCity(consistentRandom, stateName || 'CA'),
+      state: stateName || randomState(consistentRandom),
+      urbanicity: zipUrbanicity,
+      divorceRate,
+      netWorth,
       opportunity,
-      hasOffice,
-      urbanicity: urbanType,
-      divorceRate: parseFloat((divorceRate * 100).toFixed(1)), // Convert to percentage and store
-      latitude,
-      longitude
-    });
-  }
-  
-  return result;
-};
-
-// Generate simulated competitor data
-export interface CompetitorData {
-  name: string;
-  address: string;
-  principal: string;
-  rating?: number;
-  yearsInOperation?: number;
-  size?: string;
+      tam,
+      sam
+    };
+  }).filter(Boolean) as ZIPCodeData[];
 }
-
-export const generateMockCompetitors = (zipCode: string, count: number = 5): CompetitorData[] => {
-  const competitorNames = [
-    "Elite Divorce Law",
-    "Prestige Family Legal",
-    "Diamond Separation Services",
-    "Executive Divorce Counsel",
-    "Platinum Family Law",
-    "Sovereign Legal Partners",
-    "Legacy Divorce Group",
-    "Premier Family Attorneys",
-    "Apex Dissolution Law",
-    "Crown Separation Counsel"
-  ];
-  
-  const streetNames = [
-    "Main Street",
-    "Oak Avenue",
-    "Maple Boulevard",
-    "Washington Street",
-    "Park Avenue",
-    "Broadway",
-    "Central Avenue",
-    "Highland Drive",
-    "Lexington Avenue",
-    "Wilshire Boulevard"
-  ];
-  
-  const principals = [
-    "Alexandra Wilson",
-    "Jonathan Hughes",
-    "Victoria Reynolds",
-    "Maxwell Bennett",
-    "Elizabeth Montgomery",
-    "Richard Blackwell",
-    "Sophia Harrington",
-    "Theodore Chandler",
-    "Olivia Remington",
-    "Benjamin Sterling"
-  ];
-  
-  const result: CompetitorData[] = [];
-  
-  for (let i = 0; i < count; i++) {
-    const nameIndex = Math.floor(Math.random() * competitorNames.length);
-    const streetIndex = Math.floor(Math.random() * streetNames.length);
-    const principalIndex = Math.floor(Math.random() * principals.length);
-    
-    // Building number
-    const buildingNumber = Math.floor(Math.random() * 999) + 100;
-    
-    // Suite number
-    const suiteNumber = Math.floor(Math.random() * 300) + 100;
-    
-    // Rating between 3.0 and 5.0
-    const rating = parseFloat((3 + Math.random() * 2).toFixed(1));
-    
-    // Years in operation between 2 and 25
-    const yearsInOperation = Math.floor(Math.random() * 23) + 2;
-    
-    // Firm size
-    const sizes = ["Small (2-5 attorneys)", "Medium (6-15 attorneys)", "Large (16+ attorneys)"];
-    const size = sizes[Math.floor(Math.random() * sizes.length)];
-    
-    result.push({
-      name: competitorNames[nameIndex],
-      address: `${buildingNumber} ${streetNames[streetIndex]}, Suite ${suiteNumber}, ZIP ${zipCode}`,
-      principal: principals[principalIndex],
-      rating,
-      yearsInOperation,
-      size
-    });
-  }
-  
-  return result;
-};
-
-// Generate simulated HNW household stats
-export interface HNWHouseholdStats {
-  count: number;
-  averageNetWorth: string;
-  multiPropertyPercentage: number;
-}
-
-export const generateHNWHouseholdStats = (zipCode: string, urbanicity: "Urban" | "Suburban" | "Rural"): HNWHouseholdStats => {
-  // Base count depending on urbanicity
-  let baseCount: number;
-  if (urbanicity === "Urban") {
-    baseCount = Math.floor(Math.random() * 300) + 200; // 200-500
-  } else if (urbanicity === "Suburban") {
-    baseCount = Math.floor(Math.random() * 200) + 100; // 100-300
-  } else {
-    baseCount = Math.floor(Math.random() * 100) + 50; // 50-150
-  }
-  
-  // Average net worth in millions
-  const avgNetWorth = parseFloat((2 + Math.random() * 18).toFixed(1));
-  
-  // Percentage with 2+ properties
-  const multiPropertyPercentage = Math.floor(Math.random() * 40) + 20; // 20-60%
-  
-  return {
-    count: baseCount,
-    averageNetWorth: `$${avgNetWorth}M`,
-    multiPropertyPercentage
-  };
-};
-
-// Generate simulated nearby luxury infrastructure
-export interface LuxuryInfrastructure {
-  privateAirstrips: number;
-  luxuryClubs: number;
-  fiveStarHotels: number;
-  highEndRetail: number;
-}
-
-export const generateLuxuryInfrastructure = (zipCode: string, urbanicity: "Urban" | "Suburban" | "Rural"): LuxuryInfrastructure => {
-  // Base multiplier depending on urbanicity
-  let multiplier: number;
-  if (urbanicity === "Urban") {
-    multiplier = 1.5;
-  } else if (urbanicity === "Suburban") {
-    multiplier = 1.0;
-  } else {
-    multiplier = 0.5;
-  }
-  
-  return {
-    privateAirstrips: Math.floor(Math.random() * 3 * multiplier),
-    luxuryClubs: Math.floor(Math.random() * 5 * multiplier) + 1,
-    fiveStarHotels: Math.floor(Math.random() * 6 * multiplier),
-    highEndRetail: Math.floor(Math.random() * 8 * multiplier) + 1
-  };
-};

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@/styles/leaflet-fixes.css";
@@ -17,6 +17,17 @@ interface LeafletMapProps {
 }
 
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOHp6czZ1ZzBmNHcyanM4MnRkcHQ2dTUifQ.r4eSgGg09379mRWiUchnvg";
+
+// MapReady component to handle setting the map instance
+const MapReady = ({ setMap }: { setMap: (map: L.Map) => void }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    setMap(map);
+  }, [map, setMap]);
+  
+  return null;
+};
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ 
   fullscreen = false,
@@ -125,11 +136,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     }
   };
 
-  // Fix TypeScript error by using proper type declaration
-  const handleMapReady = (mapInstance: L.Map) => {
-    setMap(mapInstance);
-  };
-
   const onEachFeature = (feature: any, layer: L.Layer) => {
     if (feature.properties) {
       const zipCode = feature.properties.GEOID20 || 'Unknown';
@@ -156,18 +162,14 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
             
             const mockData: ZIPCodeData = {
               zipCode: zipCode,
-              city: county || 'Unknown City',
-              state: 'CA',
+              city: county || 'Major City',
+              state: feature.properties.STATE_ABBR || 'DE',
               urbanicity: ['Urban', 'Suburban', 'Rural'][zipSeed % 3] as 'Urban' | 'Suburban' | 'Rural',
-              population: Math.round(20000 * randomMultiplier),
-              avgIncome: Math.round(150000 * randomMultiplier),
-              avgNetWorth: Math.round(3000000 * randomMultiplier) / 1000000,
               divorceRate: (3 + (zipSeed % 8)) / 100,
-              highNetWorthRatio: 0.3 + (zipSeed % 7) / 10,
-              luxuryDensity: 2 + (zipSeed % 9),
+              netWorth: Math.round(28000000 * randomMultiplier) / 10000000,
               opportunity: parseFloat(feature.properties.opportunity || (10 + (zipSeed % 70)).toString()),
-              competitors: Math.floor(2 + (zipSeed % 8)),
-              opportunityRating: ['Low', 'Medium', 'High'][Math.floor(zipSeed % 3)] as 'Low' | 'Medium' | 'High'
+              tam: Math.round(20 + (zipSeed % 30)),
+              sam: Math.round(10 + (zipSeed % 20))
             };
             
             if (onZipClick) {
@@ -194,12 +196,14 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         center={defaultCenter}
         zoom={defaultZoom}
         zoomControl={false}
-        whenReady={handleMapReady}
       >
+        <MapReady setMap={setMap} />
+        
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/spiratech/cm900m0pi005z01s71vnefvq3/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
           attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
         />
+        
         {filteredGeoJsonData && filteredGeoJsonData.features && filteredGeoJsonData.features.length > 0 && (
           <GeoJSON 
             key={`geo-json-${opportunityFilter}-${urbanicityFilter}`}
