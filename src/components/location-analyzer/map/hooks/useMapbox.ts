@@ -211,12 +211,10 @@ export function useMapbox({
         source: 'zips',
         paint: {
           'fill-color': [
-            'match',
-            ['get', 'opportunityTier'],
-            'Low', '#ef4444',
-            'Medium', '#b91c1c',
-            'High', '#7f1d1d',
-            '#cccccc' // default color if no match
+            'case',
+            ['>=', ['get', 'opportunity'], 10], '#7f1d1d', // High opportunity (>=10M) - Dark red
+            ['>=', ['get', 'opportunity'], 1], '#b91c1c',  // Medium opportunity (1-10M) - Medium red
+            '#ef4444'  // Low opportunity (<1M) - Light red
           ],
           'fill-opacity': 0.7
         }
