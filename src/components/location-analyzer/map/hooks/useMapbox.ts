@@ -15,7 +15,7 @@ interface MapOptions {
     opportunity: 'All' | 'Low' | 'Medium' | 'High';
     netWorthRange: [number, number];
     divorceRateThreshold: number;
-    showExistingOffices: boolean; // Changed from hideExistingOffices to showExistingOffices
+    showExistingOffices: boolean;
   };
 }
 
@@ -39,7 +39,7 @@ export function useMapbox({
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: MAP_SETTINGS.style,
-        center: MAP_SETTINGS.defaultCenter as [number, number], // Explicit type cast to ensure it's a tuple
+        center: MAP_SETTINGS.defaultCenter as [number, number],
         zoom: MAP_SETTINGS.defaultZoom
       });
       
@@ -104,7 +104,7 @@ export function useMapbox({
               feature.properties.urbanicity = ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)];
             }
             if (feature.properties.hasOffice === undefined) {
-              feature.properties.hasOffice = Math.random() > 0.8; // 20% chance of having an office
+              feature.properties.hasOffice = Math.random() > 0.8;
             }
             
             // Add opportunity tier based on opportunity value
@@ -131,7 +131,7 @@ export function useMapbox({
                 Array.from({ length: 5 }, () => [
                   -122 + Math.random() * 10,
                   37 + Math.random() * 5
-                ] as [number, number]) // Explicitly set as tuple type
+                ] as [number, number])
               ]
             }
           }));
@@ -163,7 +163,7 @@ export function useMapbox({
                 Array.from({ length: 5 }, () => [
                   -122 + Math.random() * 10,
                   37 + Math.random() * 5
-                ] as [number, number]) // Explicitly set as tuple type
+                ] as [number, number])
               ]
             }
           }))
@@ -184,15 +184,17 @@ export function useMapbox({
     // Apply filters to GeoJSON data
     const filteredData = {
       ...geoJsonData,
-      // For debugging, we temporarily bypass filtering to confirm ZIPs render correctly
       features: geoJsonData.features.filter((feature: any) => {
-        const opportunity = feature.properties.opportunity;
-        const netWorth = feature.properties.netWorth;
-        const divorceRate = feature.properties.divorceRate;
-        const urbanicity = feature.properties.urbanicity;
-        const hasOffice = feature.properties.hasOffice;
+        const opportunity = feature.properties.opportunity || 0;
+        const netWorth = feature.properties.netWorth || 0;
+        const divorceRate = feature.properties.divorceRate || 0;
+        const urbanicity = feature.properties.urbanicity || 'Suburban';
+        const hasOffice = feature.properties.hasOffice || false;
         
-        // Filter by opportunity
+        // Console log to debug filter values
+        console.log(`ZIP: ${feature.properties.ZCTA5CE20}, Opportunity: ${opportunity}, NetWorth: ${netWorth}, DivorceRate: ${divorceRate}, Urbanicity: ${urbanicity}, HasOffice: ${hasOffice}`);
+        
+        // Filter by opportunity - fixed to use numeric values
         if (filters.opportunity !== 'All') {
           const category = getOpportunityCategory(opportunity);
           if (category !== filters.opportunity) return false;
@@ -201,11 +203,11 @@ export function useMapbox({
         // Filter by urbanicity
         if (filters.urbanicity !== 'All' && urbanicity !== filters.urbanicity) return false;
         
-        // Filter by net worth range
-        if (netWorth < filters.netWorthRange[0] || netWorth > filters.netWorthRange[1]) return false;
+        // Filter by net worth range - be more lenient
+        if (netWorth < filters.netWorthRange[0]) return false;
         
-        // Filter by divorce rate threshold
-        if (divorceRate * 100 < filters.divorceRateThreshold) return false;
+        // Filter by divorce rate threshold - convert from decimals to percentages for comparison
+        if ((divorceRate * 100) < filters.divorceRateThreshold) return false;
         
         // Filter by existing offices - changed logic to show offices when toggled
         if (!filters.showExistingOffices && hasOffice) return false;
@@ -351,10 +353,30 @@ export function useMapbox({
         }
       });
       
-      map.current.fitBounds(bounds, {
-        padding: 20,
-        maxZoom: 10
-      });
+      try {
+        // Only fit bounds if bounds are valid
+        if (!bounds.isEmpty()) {
+          map.current.fitBounds(bounds, {
+            padding: 20,
+            maxZoom: 10
+          });
+        } else {
+          // If bounds are empty, set default view
+          map.current.flyTo({
+            center: MAP_SETTINGS.defaultCenter as [number, number],
+            zoom: MAP_SETTINGS.defaultZoom,
+            essential: true
+          });
+        }
+      } catch (error) {
+        console.error("Error fitting map bounds:", error);
+        // Fallback to default view
+        map.current.flyTo({
+          center: MAP_SETTINGS.defaultCenter as [number, number],
+          zoom: MAP_SETTINGS.defaultZoom,
+          essential: true
+        });
+      }
       
       // Add click interaction
       map.current.on('click', 'zip-fills', (e) => {
@@ -363,14 +385,14 @@ export function useMapbox({
           const props = feature.properties;
           
           const zipDetail: ZIPCodeDetail = {
-            zipCode: props.ZCTA5CE20 || 'Unknown',
+            zipCode: props.ZCTA5CE20 || props.GEOID20 || 'Unknown',
             county: props.COUNTY || props.COUNTYFP20 || 'Unknown',
             state: selectedState,
-            opportunity: props.opportunity,
-            urbanicity: props.urbanicity,
-            netWorth: props.netWorth,
-            divorceRate: props.divorceRate,
-            hasOffice: props.hasOffice
+            opportunity: props.opportunity || 0,
+            urbanicity: props.urbanicity || 'Suburban',
+            netWorth: props.netWorth || 0,
+            divorceRate: props.divorceRate || 0,
+            hasOffice: props.hasOffice || false
           };
           
           onZIPSelect(zipDetail);
