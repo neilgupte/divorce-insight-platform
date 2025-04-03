@@ -3,12 +3,12 @@ import React, { useState, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { 
-  MAPBOX_ACCESS_TOKEN, 
-  GEOJSON_FILES,
   addGeoJSONLayer, 
   fetchGeoJSONData,
   addMultipleGeoJSONLayers
 } from "./mapboxUtils";
+import { MAPBOX_ACCESS_TOKEN, GEOJSON_FILES } from "./mapConstants";
+import StateSelector from "./StateSelector";
 
 interface MapboxMapProps {
   setLoading: (loading: boolean) => void;
@@ -165,46 +165,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ setLoading, setError }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-muted p-2 mb-2 rounded-md">
-        <div className="text-sm font-medium mb-1">Select States to Display:</div>
-        <div className="flex flex-wrap gap-1">
-          {GEOJSON_FILES.slice(0, 10).map(file => (
-            <button
-              key={file.id}
-              className={`text-xs px-2 py-1 rounded ${
-                selectedFiles.includes(file.id) 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary text-secondary-foreground'
-              }`}
-              onClick={() => toggleFileSelection(file.id)}
-            >
-              {file.name}
-            </button>
-          ))}
-          <div className="relative group">
-            <button className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground">
-              More...
-            </button>
-            <div className="absolute hidden group-hover:block z-10 bg-background shadow-lg rounded-md p-2 right-0 w-64">
-              <div className="grid grid-cols-2 gap-1">
-                {GEOJSON_FILES.slice(10).map(file => (
-                  <button
-                    key={file.id}
-                    className={`text-xs px-2 py-1 rounded ${
-                      selectedFiles.includes(file.id) 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-secondary text-secondary-foreground'
-                    }`}
-                    onClick={() => toggleFileSelection(file.id)}
-                  >
-                    {file.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StateSelector 
+        geoJSONFiles={GEOJSON_FILES}
+        selectedFiles={selectedFiles}
+        onToggleFile={toggleFileSelection}
+      />
       <div ref={mapContainer} className="h-full w-full rounded-md overflow-hidden" />
     </div>
   );
