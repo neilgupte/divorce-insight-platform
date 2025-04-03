@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MAP_SETTINGS } from "../mapSettings";
@@ -243,7 +242,7 @@ export function useMapbox({
         data: filteredData
       });
       
-      // Add fill layer using the match expression for opportunity colors
+      // First add the fill layer (bottom)
       map.current.addLayer({
         id: 'zip-fills',
         type: 'fill',
@@ -262,7 +261,7 @@ export function useMapbox({
       });
       console.log("✅ zip-fills layer added");
       
-      // Add border layer
+      // Then add border layer (middle)
       map.current.addLayer({
         id: 'zip-borders',
         type: 'line',
@@ -275,22 +274,25 @@ export function useMapbox({
       });
       console.log("✅ zip-borders layer added");
       
-      // Add labels layer
+      // Finally add labels layer (top) with improved visibility
       map.current.addLayer({
         id: 'zip-labels',
         type: 'symbol',
         source: 'zips',
         layout: {
           'text-field': ['get', 'ZCTA5CE20'],
-          'text-font': ['Open Sans Regular'],
+          'text-font': ['Open Sans Bold'],
           'text-size': 12,
-          'text-offset': [0, 0.5],
-          'text-anchor': 'center'
+          'text-offset': [0, 0],
+          'text-anchor': 'center',
+          'text-allow-overlap': true,
+          'text-ignore-placement': true
         },
         paint: {
           'text-color': '#000000',
           'text-halo-color': '#ffffff',
-          'text-halo-width': 1
+          'text-halo-width': 2,
+          'text-opacity': 1
         }
       });
       console.log("✅ zip-labels layer added");
