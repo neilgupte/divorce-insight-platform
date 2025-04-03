@@ -60,6 +60,7 @@ const ZIPCodeMapOverlay: React.FC<ZIPCodeMapOverlayProps> = ({
   }, [initialState, initialCity, urbanicityFilter, netWorthRange, divorceRateThreshold]);
 
   const handleZipClick = (data: ZIPCodeData) => {
+    console.log("ZIP Code clicked:", data);
     setSelectedZipCode(data);
   };
 
