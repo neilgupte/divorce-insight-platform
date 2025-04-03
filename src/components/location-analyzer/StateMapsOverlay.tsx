@@ -112,7 +112,7 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
   const [opportunityFilter, setOpportunityFilter] = useState<'All' | 'Low' | 'Medium' | 'High'>('All');
   const [netWorthRange, setNetWorthRange] = useState<[number, number]>([0.5, 25]); // $500k to $25M
   const [divorceRateThreshold, setDivorceRateThreshold] = useState<number>(0); // 0% to 100%
-  const [hideExistingOffices, setHideExistingOffices] = useState<boolean>(false);
+  const [showExistingOffices, setShowExistingOffices] = useState<boolean>(true); // Changed from hideExistingOffices
 
   // Handle ZIP selection
   const handleZIPSelect = (detail: ZIPCodeDetail) => {
@@ -134,6 +134,17 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
     setSelectedState(newState);
     setSelectedZIPDetail(null); // Clear any selected ZIP details
   };
+
+  // Show error toast if there's an error
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Map Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()} modal>
@@ -163,8 +174,8 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
                     onNetWorthRangeChange={setNetWorthRange}
                     divorceRateThreshold={divorceRateThreshold}
                     onDivorceRateThresholdChange={setDivorceRateThreshold}
-                    hideExistingOffices={hideExistingOffices}
-                    onHideExistingOfficesChange={setHideExistingOffices}
+                    showExistingOffices={showExistingOffices}
+                    onShowExistingOfficesChange={setShowExistingOffices}
                     onToggleSidebar={toggleSidebar}
                   />
                 </ResizablePanel>
@@ -209,7 +220,7 @@ const StateMapsOverlay: React.FC<StateMapsOverlayProps> = ({
                     opportunity: opportunityFilter,
                     netWorthRange,
                     divorceRateThreshold,
-                    hideExistingOffices
+                    showExistingOffices
                   }}
                 />
                 

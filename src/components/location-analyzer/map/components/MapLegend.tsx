@@ -1,25 +1,34 @@
 
 import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
-const MapLegend: React.FC = () => {
+const MapLegend = () => {
   return (
-    <div className="absolute bottom-4 left-4 z-10 bg-background/90 p-2 rounded-md shadow-md">
-      <div className="text-xs font-medium mb-1">Opportunity Level</div>
-      <div className="flex gap-2">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-          <span className="text-xs">Low</span>
+    <Card className="absolute bottom-4 left-4 shadow-md z-10 w-auto">
+      <CardContent className="p-3">
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">Opportunity Level</h4>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-[#7f1d1d] rounded mr-2" />
+              <span>High ($10M+)</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-[#b91c1c] rounded mr-2" />
+              <span>Medium ($1M-$10M)</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-[#ef4444] rounded mr-2" />
+              <span>Low (&lt;$1M)</span>
+            </div>
+            <div className="flex items-center mt-2">
+              <div className="w-4 h-4 bg-[#3b82f6] rounded-full border-2 border-white mr-2" />
+              <span>Existing Office</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-700 rounded-sm"></div>
-          <span className="text-xs">Med</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-900 rounded-sm"></div>
-          <span className="text-xs">High</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

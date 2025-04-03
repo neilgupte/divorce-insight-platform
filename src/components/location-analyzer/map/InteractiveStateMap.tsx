@@ -12,7 +12,7 @@ interface Filters {
   opportunity: 'All' | 'Low' | 'Medium' | 'High';
   netWorthRange: [number, number];
   divorceRateThreshold: number;
-  hideExistingOffices: boolean;
+  showExistingOffices: boolean; // Changed from hideExistingOffices to showExistingOffices
 }
 
 interface InteractiveStateMapProps {

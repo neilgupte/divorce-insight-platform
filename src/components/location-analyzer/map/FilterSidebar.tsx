@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Filter, Map, RefreshCw } from "lucide-react";
+import { ChevronLeft, Filter, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 // List of US states with abbreviations
@@ -75,8 +74,8 @@ interface FilterSidebarProps {
   onNetWorthRangeChange: (value: [number, number]) => void;
   divorceRateThreshold: number;
   onDivorceRateThresholdChange: (value: number) => void;
-  hideExistingOffices: boolean;
-  onHideExistingOfficesChange: (value: boolean) => void;
+  showExistingOffices: boolean; // Changed from hideExistingOffices to showExistingOffices
+  onShowExistingOfficesChange: (value: boolean) => void; // Changed from onHideExistingOfficesChange
   onToggleSidebar: () => void;
 }
 
@@ -91,8 +90,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onNetWorthRangeChange,
   divorceRateThreshold,
   onDivorceRateThresholdChange,
-  hideExistingOffices,
-  onHideExistingOfficesChange,
+  showExistingOffices, // Changed from hideExistingOffices
+  onShowExistingOfficesChange, // Changed from onHideExistingOfficesChange
   onToggleSidebar
 }) => {
   const resetFilters = () => {
@@ -100,7 +99,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     onOpportunityFilterChange('All');
     onNetWorthRangeChange([0.5, 25]);
     onDivorceRateThresholdChange(0);
-    onHideExistingOfficesChange(false);
+    onShowExistingOfficesChange(true); // Default to showing offices
   };
 
   const handleOpportunityChange = (value: string) => {
@@ -140,7 +139,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </SelectTrigger>
             <SelectContent>
               {US_STATES.map((state) => (
-                <SelectItem key={state.abbr} value={state.abbr}>
+                <SelectItem key={state.abbr} value={state.name}>
                   {state.name} ({state.abbr})
                 </SelectItem>
               ))}
@@ -222,10 +221,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="flex items-center space-x-2">
           <Switch
             id="office-filter"
-            checked={hideExistingOffices}
-            onCheckedChange={onHideExistingOfficesChange}
+            checked={showExistingOffices}
+            onCheckedChange={onShowExistingOfficesChange}
           />
-          <Label htmlFor="office-filter">Hide ZIPs with existing offices</Label>
+          <Label htmlFor="office-filter">Show existing offices</Label>
         </div>
 
         <Button 
