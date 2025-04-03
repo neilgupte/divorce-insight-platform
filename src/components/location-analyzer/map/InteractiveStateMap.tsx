@@ -1,8 +1,10 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { ZIPCodeDetail } from "../StateMapsOverlay";
 import { MAP_SETTINGS, MAP_UTILS } from "./mapSettings";
 
 // Function to determine opportunity color based on value
