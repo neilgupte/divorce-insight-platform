@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MAP_SETTINGS } from "../mapSettings";
@@ -61,82 +62,47 @@ export function useMapbox({
   
   // Load GeoJSON data when state changes
   useEffect(() => {
-    if (!mapInitialized || !selectedState) return;
+    if (!mapInitialized) return;
     
     const loadStateData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Format state name for file path (PascalCase, no spaces or dashes)
-        const formattedStateName = MAP_UTILS.formatStateNameForFile(selectedState);
-        console.log("✅ Loading data for state:", formattedStateName);
-        
-        // Fetch the enriched GeoJSON file for the selected state
-        const response = await fetch(`https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_${formattedStateName}_enriched.geojson`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load data for ${selectedState}`);
-        }
-        
-        const data = await response.json();
-        console.log(`✅ Loaded ${data.features?.length || 0} ZIP features from ${selectedState}`);
-        
-        // Add random mock data for demonstration purposes
-        if (data.features && data.features.length > 0) {
-          data.features.forEach((feature: any) => {
-            if (!feature.properties) {
-              feature.properties = {};
-            }
-            
-            // Add mock data only if not already present in the enriched file
-            if (feature.properties.opportunity === undefined) {
-              feature.properties.opportunity = parseFloat((Math.random() * 15).toFixed(1));
-            }
-            if (feature.properties.netWorth === undefined) {
-              feature.properties.netWorth = parseFloat((Math.random() * 25 + 0.5).toFixed(1));
-            }
-            if (feature.properties.divorceRate === undefined) {
-              feature.properties.divorceRate = parseFloat((Math.random() * 0.1).toFixed(2));
-            }
-            if (feature.properties.urbanicity === undefined) {
-              feature.properties.urbanicity = ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)];
-            }
-            if (feature.properties.hasOffice === undefined) {
-              feature.properties.hasOffice = Math.random() > 0.8;
-            }
-            
-            // Add opportunity tier based on opportunity value
-            feature.properties.opportunityTier = getOpportunityCategory(feature.properties.opportunity);
-          });
+        // Handle "All States" selection - either load a few key states or show a message
+        if (selectedState === "All States") {
+          console.log("✅ All States selected - loading selected sample states");
+          // For "All States", we'll load a sample of states (e.g., California, New York)
+          // This can be expanded to load multiple states in a production environment
+          // For now, we'll load California as a sample
+          const formattedStateName = MAP_UTILS.formatStateNameForFile("California");
+          
+          // Fetch the enriched GeoJSON file for the sample state
+          const response = await fetch(`https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_${formattedStateName}_enriched.geojson`);
+          
+          if (!response.ok) {
+            throw new Error("Failed to load sample state data");
+          }
+          
+          const data = await response.json();
+          console.log(`✅ Loaded ${data.features?.length || 0} ZIP features from sample state`);
+          setGeoJsonData(data);
         } else {
-          console.log("⚠️ No features found in GeoJSON, creating mock data");
-          // Create mock data if the file has no features
-          data.features = Array.from({ length: 20 }, (_, i) => ({
-            type: "Feature",
-            properties: {
-              ZCTA5CE20: `9${i.toString().padStart(4, '0')}`,
-              COUNTY: "Mock County",
-              opportunity: parseFloat((Math.random() * 15).toFixed(1)),
-              netWorth: parseFloat((Math.random() * 25 + 0.5).toFixed(1)),
-              divorceRate: parseFloat((Math.random() * 0.1).toFixed(2)),
-              urbanicity: ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)],
-              hasOffice: Math.random() > 0.8,
-              opportunityTier: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
-            },
-            geometry: {
-              type: "Polygon",
-              coordinates: [
-                Array.from({ length: 5 }, () => [
-                  -122 + Math.random() * 10,
-                  37 + Math.random() * 5
-                ] as [number, number])
-              ]
-            }
-          }));
+          // Format state name for file path (PascalCase, no spaces or dashes)
+          const formattedStateName = MAP_UTILS.formatStateNameForFile(selectedState);
+          console.log("✅ Loading data for state:", formattedStateName);
+          
+          // Fetch the enriched GeoJSON file for the selected state
+          const response = await fetch(`https://raw.githubusercontent.com/neilgupte/divorce-insight-platform/main/public/zcta_${formattedStateName}_enriched.geojson`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to load data for ${selectedState}`);
+          }
+          
+          const data = await response.json();
+          console.log(`✅ Loaded ${data.features?.length || 0} ZIP features from ${selectedState}`);
+          setGeoJsonData(data);
         }
-        
-        setGeoJsonData(data);
       } catch (error) {
         console.error("Error loading GeoJSON:", error);
         setError(`Failed to load map data for ${selectedState}. Please try another state.`);
@@ -188,10 +154,9 @@ export function useMapbox({
         const netWorth = feature.properties.netWorth || 0;
         const divorceRate = feature.properties.divorceRate || 0;
         const urbanicity = feature.properties.urbanicity || 'Suburban';
-        const hasOffice = feature.properties.hasOffice || false;
         
         // Console log to debug filter values
-        console.log(`ZIP: ${feature.properties.ZCTA5CE20}, Opportunity: ${opportunity}, NetWorth: ${netWorth}, DivorceRate: ${divorceRate}, Urbanicity: ${urbanicity}, HasOffice: ${hasOffice}`);
+        console.log(`ZIP: ${feature.properties.ZCTA5CE20}, Opportunity: ${opportunity}, NetWorth: ${netWorth}, DivorceRate: ${divorceRate}, Urbanicity: ${urbanicity}`);
         
         // Filter by opportunity - fixed to use numeric values
         if (filters.opportunity !== 'All') {
@@ -207,9 +172,6 @@ export function useMapbox({
         
         // Filter by divorce rate threshold - convert from decimals to percentages for comparison
         if ((divorceRate * 100) < filters.divorceRateThreshold) return false;
-        
-        // Filter by existing offices - changed logic to show offices when toggled
-        if (!filters.showExistingOffices && hasOffice) return false;
         
         return true;
       })
@@ -297,7 +259,7 @@ export function useMapbox({
       });
       console.log("✅ zip-labels layer added");
       
-      // Add major office markers (if showing offices is enabled)
+      // Add office markers if showExistingOffices is enabled - regardless of state selection
       if (filters.showExistingOffices) {
         // Sample office locations for major cities
         const majorOffices = {
@@ -308,30 +270,23 @@ export function useMapbox({
           "New York": [-73.9352, 40.7306]
         };
         
-        // Add markers for offices
+        // Add markers for all offices regardless of selected state
         Object.entries(majorOffices).forEach(([city, coordinates]) => {
-          // Only show offices for the current state or nearby states
-          if ((selectedState === "California" && (city === "Los Angeles" || city === "San Francisco")) ||
-              (selectedState === "Illinois" && city === "Chicago") ||
-              (selectedState === "Florida" && city === "Miami") ||
-              (selectedState === "New York" && city === "New York")) {
-            
-            const el = document.createElement('div');
-            el.className = 'office-marker';
-            el.style.width = '20px';
-            el.style.height = '20px';
-            el.style.borderRadius = '50%';
-            el.style.backgroundColor = '#3b82f6';
-            el.style.border = '2px solid white';
-            el.style.boxShadow = '0 0 0 2px rgba(0, 0, 0, 0.25)';
-            
-            // Create a tooltip on hover
-            el.title = `${city} Office`;
-            
-            new mapboxgl.Marker(el)
-              .setLngLat(coordinates as [number, number])
-              .addTo(map.current);
-          }
+          const el = document.createElement('div');
+          el.className = 'office-marker';
+          el.style.width = '20px';
+          el.style.height = '20px';
+          el.style.borderRadius = '50%';
+          el.style.backgroundColor = '#3b82f6';
+          el.style.border = '2px solid white';
+          el.style.boxShadow = '0 0 0 2px rgba(0, 0, 0, 0.25)';
+          
+          // Create a tooltip on hover
+          el.title = `${city} Office`;
+          
+          new mapboxgl.Marker(el)
+            .setLngLat(coordinates as [number, number])
+            .addTo(map.current as mapboxgl.Map);
         });
       }
       

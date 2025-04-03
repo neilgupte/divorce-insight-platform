@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +12,7 @@ import { formatCurrency } from "@/lib/utils";
 
 // List of US states with abbreviations
 const US_STATES = [
+  { name: "All States", abbr: "ALL" }, // Added All States as the first option
   { name: "Alabama", abbr: "AL" },
   { name: "Alaska", abbr: "AK" },
   { name: "Arizona", abbr: "AZ" },
@@ -74,8 +76,8 @@ interface FilterSidebarProps {
   onNetWorthRangeChange: (value: [number, number]) => void;
   divorceRateThreshold: number;
   onDivorceRateThresholdChange: (value: number) => void;
-  showExistingOffices: boolean; // Changed from hideExistingOffices to showExistingOffices
-  onShowExistingOfficesChange: (value: boolean) => void; // Changed from onHideExistingOfficesChange
+  showExistingOffices: boolean;
+  onShowExistingOfficesChange: (value: boolean) => void;
   onToggleSidebar: () => void;
 }
 
@@ -90,8 +92,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onNetWorthRangeChange,
   divorceRateThreshold,
   onDivorceRateThresholdChange,
-  showExistingOffices, // Changed from hideExistingOffices
-  onShowExistingOfficesChange, // Changed from onHideExistingOfficesChange
+  showExistingOffices,
+  onShowExistingOfficesChange,
   onToggleSidebar
 }) => {
   const resetFilters = () => {
@@ -109,7 +111,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-background/95 border-r">
+    <div className="h-full flex flex-col bg-background/95 border-r w-[66%]">
       <div className="sticky top-0 z-10 bg-background/95 border-b p-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Filter className="h-5 w-5" />
@@ -140,7 +142,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <SelectContent>
               {US_STATES.map((state) => (
                 <SelectItem key={state.abbr} value={state.name}>
-                  {state.name} ({state.abbr})
+                  {state.name} {state.abbr !== "ALL" ? `(${state.abbr})` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
