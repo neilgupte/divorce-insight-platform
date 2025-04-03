@@ -230,6 +230,10 @@ export function useMapbox({
       map.current.removeSource('zips');
     }
     
+    // Remove any existing office markers
+    const existingMarkers = document.querySelectorAll('.office-marker');
+    existingMarkers.forEach(marker => marker.remove());
+    
     // Add new data to map
     if (filteredData.features.length > 0) {
       map.current.addSource('zips', {
