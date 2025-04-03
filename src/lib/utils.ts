@@ -1,4 +1,3 @@
-
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -145,4 +144,20 @@ function generateInsightText(prompt: string, filters: any): string {
   
   // Default response if no specific keywords match
   return `Analysis of current trends ${locationText}${netWorthText} shows significant patterns worth monitoring. The data suggests a 12.8% change in activity compared to last year, which may indicate shifting behaviors among high-net-worth individuals.`;
+}
+
+/**
+ * Format a number as currency
+ * @param value The number to format
+ * @param options Formatting options
+ * @returns Formatted currency string
+ */
+export function formatCurrency(
+  value: number,
+  options: { minimumFractionDigits?: number; maximumFractionDigits?: number } = {}
+): string {
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: options.minimumFractionDigits ?? 1,
+    maximumFractionDigits: options.maximumFractionDigits ?? 1,
+  });
 }
