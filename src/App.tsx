@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +22,7 @@ import LuxuryLocations from "@/pages/LuxuryLocations";
 import Index from "@/pages/Index";
 import AuditLogs from "@/pages/AuditLogs";
 import HelpSupport from "@/pages/HelpSupport";
+import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,7 @@ const App = () => (
                       <MainLayout />
                     </ProtectedRoute>
                   }>
+                    {/* Real Estate IQ Module Routes */}
                     <Route path="dashboard" element={
                       <ProtectedRoute requiredPermission="dashboard:view">
                         <Dashboard />
@@ -109,13 +112,10 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    {/* New model routes - these will show placeholder content until implemented */}
+                    {/* Labour Planning Module Routes */}
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Labour Planning</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Workforce optimization and planning tools.</p>
-                        </div>
+                        <LabourPlanningDashboard />
                       </ProtectedRoute>
                     } />
                     <Route path="labour-potential" element={

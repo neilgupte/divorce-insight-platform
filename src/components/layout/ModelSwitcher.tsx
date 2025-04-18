@@ -1,4 +1,5 @@
 
+import { Link } from "react-router-dom";
 import { LayoutDashboard, Network, Brain, Users, GitBranch, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -7,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const models = [
   {
@@ -14,7 +16,7 @@ export const models = [
     name: "Real Estate IQ",
     description: "AI-powered real estate analysis and valuation platform",
     icon: Brain,
-    path: "/",
+    path: "/dashboard",
   },
   {
     id: "labour-planning",
@@ -47,6 +49,15 @@ export const models = [
 ];
 
 export function ModelSwitcher() {
+  // Get the current user to ensure they have access to the selected module
+  const { user } = useAuth();
+  const activeModel = "realestate"; // Default to Real Estate IQ
+  
+  // Filter models based on user's access
+  const availableModels = user ? models.filter(model => 
+    !user.modules || user.modules.includes(model.id)
+  ) : models;
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -55,7 +66,7 @@ export function ModelSwitcher() {
           className="h-auto w-full justify-start px-4 py-2 text-left text-xl font-bold text-white hover:bg-sidebar-accent group"
         >
           <span className="flex items-center">
-            Real Estate IQ
+            {models.find(m => m.id === activeModel)?.name || "Real Estate IQ"}
             <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
           </span>
         </Button>
@@ -66,10 +77,10 @@ export function ModelSwitcher() {
         sideOffset={8}
       >
         <div className="grid gap-3">
-          {models.map((model) => (
-            <a
+          {availableModels.map((model) => (
+            <Link
               key={model.name}
-              href={model.path}
+              to={model.path}
               className="flex items-start gap-3 rounded-lg p-3 text-sm transition-colors hover:bg-accent"
             >
               <model.icon className="h-5 w-5" />
@@ -79,7 +90,7 @@ export function ModelSwitcher() {
                   {model.description}
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </DropdownMenuContent>
