@@ -1,60 +1,31 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CompanyTable } from "@/components/admin/companies/CompanyTable";
 import { CompanySearch } from "@/components/admin/companies/CompanySearch";
-import { Company } from "@/components/admin/companies/types";
+import { getCompanies } from "@/services/companyService";
+import { useToast } from "@/hooks/use-toast";
 
 const Companies = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data for companies
-  const [companies] = useState<Company[]>([
-    {
-      id: 1,
-      name: "Acme Corporation",
-      industry: "Manufacturing",
-      dateOnboarded: "Jan 15, 2025",
-      modules: ["Labour Planning", "Real Estate IQ", "Divorce IQ"],
-      status: "active",
+  const { data: companies = [], isLoading, error } = useQuery({
+    queryKey: ['companies'],
+    queryFn: getCompanies,
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load companies. Please try again later.",
+      });
     },
-    {
-      id: 2,
-      name: "TechGiant Inc",
-      industry: "Technology",
-      dateOnboarded: "Feb 3, 2025",
-      modules: ["Labour Planning", "Real Estate IQ"],
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Small Business LLC",
-      industry: "Retail",
-      dateOnboarded: "Dec 10, 2024",
-      modules: ["Labour Planning"],
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Enterprise Solutions",
-      industry: "Consulting",
-      dateOnboarded: "Mar 22, 2025",
-      modules: ["Real Estate IQ", "Module 4", "Module 5"],
-      status: "active",
-    },
-    {
-      id: 5,
-      name: "Old Corp",
-      industry: "Finance",
-      dateOnboarded: "Nov 5, 2024",
-      modules: ["Divorce IQ"],
-      status: "suspended",
-    },
-  ]);
+  });
 
   const filteredCompanies = companies.filter(company =>
     company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -90,7 +61,10 @@ const Companies = () => {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
-          <CompanyTable companies={filteredCompanies} />
+          <CompanyTable 
+            companies={filteredCompanies} 
+            isLoading={isLoading} 
+          />
         </CardContent>
       </Card>
     </div>

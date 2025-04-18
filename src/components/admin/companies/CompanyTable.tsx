@@ -1,5 +1,5 @@
 
-import { Building, MoreHorizontal, CheckCircle, XCircle } from "lucide-react";
+import { Building, MoreHorizontal, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,14 +21,42 @@ import { Company } from "./types";
 
 interface CompanyTableProps {
   companies: Company[];
+  isLoading?: boolean;
 }
 
-export const CompanyTable = ({ companies }: CompanyTableProps) => {
+export const CompanyTable = ({ companies, isLoading }: CompanyTableProps) => {
   const navigate = useNavigate();
 
   const handleManageCompany = (companyId: number) => {
     navigate(`/admin/companies/${companyId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Company Name</TableHead>
+              <TableHead>Industry</TableHead>
+              <TableHead>Date Onboarded</TableHead>
+              <TableHead>Active Modules</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                <p className="mt-2 text-muted-foreground">Loading companies...</p>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">
