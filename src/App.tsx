@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -107,6 +106,40 @@ const App = () => (
                     <Route path="help" element={
                       <ProtectedRoute>
                         <HelpSupport />
+                      </ProtectedRoute>
+                    } />
+
+                    {/* New model routes - these will show placeholder content until implemented */}
+                    <Route path="labour-planning" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Workforce optimization and planning tools.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-potential" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Potential</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Workforce potential analysis tools.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="multivariate" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Multivariate Optimization</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Complex decision optimization tools.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="network" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Network Optimization</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Supply chain optimization tools.</p>
+                        </div>
                       </ProtectedRoute>
                     } />
                   </Route>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -6,10 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight, Brain } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ModelSwitcher } from "./ModelSwitcher";
 
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
@@ -114,8 +114,35 @@ const MainLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-4 py-4">
-            {!sidebarCollapsed && <h1 className="text-2xl font-bold text-white">DivorceIQ</h1>}
+          <div className="flex items-center justify-between px-2 py-4">
+            {!sidebarCollapsed ? (
+              <div className="flex-1">
+                <ModelSwitcher />
+              </div>
+            ) : (
+              <div className="w-full px-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-white"
+                    >
+                      <Brain className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[300px] p-3"
+                    sideOffset={8}
+                  >
+                    <div className="grid gap-3">
+                      
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             <div className="flex items-center">
               <Button
                 variant="ghost"
