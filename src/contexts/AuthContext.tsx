@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
 
-// Define the User interface with the modules property
+// Define the User interface with all required properties
 export interface User {
   id: string;
   name: string;
@@ -11,12 +11,15 @@ export interface User {
   avatar?: string;
   role: string;
   permissions: string[];
-  modules?: string[]; // Add modules property to User interface
+  modules?: string[];
+  status?: string;
+  lastLogin?: string;
+  createdAt?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  isLoading: boolean; // Add isLoading property to AuthContextType
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
@@ -34,6 +37,9 @@ const SAMPLE_USERS: User[] = [
     avatar: "/placeholder.svg",
     permissions: ["*"],
     modules: ["realestate", "labour", "multivariate", "network"], // Admin has access to all modules
+    status: "active",
+    lastLogin: "2023-12-02 09:34 AM",
+    createdAt: "2022-10-15",
   },
   {
     id: "2",
@@ -42,6 +48,9 @@ const SAMPLE_USERS: User[] = [
     role: "Manager",
     permissions: ["dashboard:view", "location:view", "reports:view"],
     modules: ["realestate", "labour"], // Manager has access to two modules
+    status: "active",
+    lastLogin: "2023-11-30 02:15 PM",
+    createdAt: "2022-11-05",
   },
   {
     id: "3",
@@ -50,6 +59,9 @@ const SAMPLE_USERS: User[] = [
     role: "Analyst",
     permissions: ["dashboard:view", "location:view"],
     modules: ["realestate"], // Analyst has access to one module
+    status: "active",
+    lastLogin: "2023-11-28 10:22 AM",
+    createdAt: "2023-01-15",
   },
 ];
 
