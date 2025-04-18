@@ -46,6 +46,7 @@ interface User {
   status: string;
   lastLogin: string;
   createdAt: string;
+  modules?: string[]; // Added modules property to the local User interface
 }
 
 interface ActivityLog {
