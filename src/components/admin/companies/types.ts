@@ -5,5 +5,7 @@ export interface Company {
   industry: string;
   dateOnboarded: string;
   modules: string[];
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "lead";
+  accountManager?: string;
 }
+

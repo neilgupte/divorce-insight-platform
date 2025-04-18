@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +14,27 @@ const Companies = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: companies = [], isLoading, error } = useQuery({
+  // Mock data to include a lead company
+  const mockCompanies = [
+    {
+      id: 1,
+      name: "Acme Corp",
+      industry: "Technology",
+      dateOnboarded: "2025-01-15",
+      modules: ["Labour Planning", "Real Estate IQ"],
+      status: "active"
+    },
+    {
+      id: 2,
+      name: "Startup Inc",
+      industry: "Software",
+      dateOnboarded: "2025-03-01",
+      modules: ["Labour Planning"],
+      status: "lead"
+    }
+  ];
+
+  const { data: companies = mockCompanies, isLoading, error } = useQuery({
     queryKey: ['companies'],
     queryFn: getCompanies,
   });

@@ -1,4 +1,3 @@
-
 import { Building, MoreHorizontal, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -100,11 +99,17 @@ export const CompanyTable = ({ companies, isLoading }: CompanyTableProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {company.status === "active" ? (
+                  {company.status === "active" && (
                     <Badge className="bg-green-600 hover:bg-green-700">
                       <CheckCircle className="h-3 w-3 mr-1" /> Active
                     </Badge>
-                  ) : (
+                  )}
+                  {company.status === "lead" && (
+                    <Badge className="bg-blue-500 hover:bg-blue-600">
+                      Lead
+                    </Badge>
+                  )}
+                  {company.status === "suspended" && (
                     <Badge variant="destructive">
                       <XCircle className="h-3 w-3 mr-1" /> Suspended
                     </Badge>

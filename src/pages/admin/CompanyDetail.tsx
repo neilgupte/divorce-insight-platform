@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -11,7 +10,8 @@ import {
   PlusCircle,
   Info,
   CheckCircle,
-  XCircle
+  XCircle,
+  UserRound
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ const CompanyDetail = () => {
     contactPhone: "555-123-4567",
     address: "123 Main St, Business City, 12345",
     notes: "Key enterprise customer with multiple locations",
+    accountManager: "John Doe",
     modules: [
       { id: 1, name: "Labour Planning", active: true },
       { id: 2, name: "Real Estate IQ", active: true },
@@ -121,6 +122,13 @@ const CompanyDetail = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Industry:</span>
                     <span className="font-medium">{company.industry}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Account Manager:</span>
+                    <span className="font-medium flex items-center gap-1">
+                      <UserRound className="h-3 w-3" />
+                      {company.accountManager}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Onboarded:</span>
