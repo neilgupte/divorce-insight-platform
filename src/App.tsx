@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,7 @@ import AuditLogs from "@/pages/AuditLogs";
 import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
+import AddCompany from "@/pages/admin/AddCompany";
 
 // Admin dashboard imports
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -72,6 +72,7 @@ const App = () => (
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="companies" element={<Companies />} />
+                    <Route path="companies/new" element={<AddCompany />} />
                     <Route path="companies/:companyId" element={<CompanyDetail />} />
                     <Route path="modules" element={<Modules />} />
                     <Route path="users" element={<Users />} />

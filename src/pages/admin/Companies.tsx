@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -95,7 +94,7 @@ const Companies = () => {
             Manage all companies using your platform
           </p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => navigate('/admin/companies/new')}>
           <Plus className="h-4 w-4" /> Add New Company
         </Button>
       </div>
