@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +51,7 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: "lead",
+      status: "active",
     },
   });
 
@@ -183,14 +182,13 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
           >
             Save as Lead
           </Button>
-          {status === "active" && (
-            <Button 
-              type="submit" 
-              onClick={() => form.setValue('status', 'active')}
-            >
-              Save & Continue
-            </Button>
-          )}
+          <Button 
+            type="submit" 
+            onClick={() => form.setValue('status', 'active')}
+            disabled={status === "lead" || status === "suspended"}
+          >
+            Save & Continue
+          </Button>
         </div>
       </form>
     </Form>
