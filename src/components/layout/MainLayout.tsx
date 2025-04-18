@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { useNavigate, Link, Outlet } from "react-router-dom";
+import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight, Brain } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight, Brain, MapPin } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ModelSwitcher } from "./ModelSwitcher";
+import { models } from "./ModelSwitcher";
 
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -104,6 +106,49 @@ const MainLayout = () => {
     hasPermission(item.permission) || user.role === 'superuser'
   );
 
+  const labourPlanningMenuItems = [
+    {
+      name: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/labour-planning",
+      permission: ""
+    },
+    {
+      name: "Reports",
+      icon: FileText,
+      path: "/labour-planning/reports",
+      permission: ""
+    },
+    {
+      name: "Labour Planning",
+      icon: Users,
+      path: "/labour-planning/schedule",
+      permission: ""
+    },
+    {
+      name: "Locations",
+      icon: MapPin,
+      path: "/labour-planning/locations",
+      permission: ""
+    },
+    {
+      name: "Settings",
+      icon: Settings,
+      path: "/labour-planning/settings",
+      permission: ""
+    }
+  ];
+
+  // Get active module from current path
+  const activeModule = models.find(model => 
+    location.pathname.startsWith(model.path)
+  )?.id;
+
+  // Choose menu items based on active module
+  const currentMenuItems = activeModule === 'labour-planning' 
+    ? labourPlanningMenuItems 
+    : menuItems;
+
   return (
     <div className="flex h-screen overflow-hidden">
       <div
@@ -165,7 +210,7 @@ const MainLayout = () => {
           </div>
 
           <nav className="flex-1 space-y-1 px-2 py-2">
-            {filteredMenuItems.map((item) => (
+            {(activeModule === 'labour-planning' ? labourPlanningMenuItems : filteredMenuItems).map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -177,26 +222,30 @@ const MainLayout = () => {
               </Link>
             ))}
 
-            {filteredAdminMenuItems.length > 0 && (
+            {activeModule !== 'labour-planning' && (
               <>
-                <div className="my-2 border-t border-sidebar-border"></div>
-                {!sidebarCollapsed && (
-                  <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
-                    Administration
-                  </div>
-                )}
+                {filteredAdminMenuItems.length > 0 && (
+                  <>
+                    <div className="my-2 border-t border-sidebar-border"></div>
+                    {!sidebarCollapsed && (
+                      <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
+                        Administration
+                      </div>
+                    )}
 
-                {filteredAdminMenuItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    title={sidebarCollapsed ? item.name : undefined}
-                  >
-                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {!sidebarCollapsed && <span>{item.name}</span>}
-                  </Link>
-                ))}
+                    {filteredAdminMenuItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.path}
+                        className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        title={sidebarCollapsed ? item.name : undefined}
+                      >
+                        <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                        {!sidebarCollapsed && <span>{item.name}</span>}
+                      </Link>
+                    ))}
+                  </>
+                )}
               </>
             )}
             

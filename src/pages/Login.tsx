@@ -50,9 +50,9 @@ const Login = () => {
       
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">DivorceIQ</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">TBD Corp</h1>
           <p className="mt-2 text-muted-foreground">
-            Intelligent divorce insights platform
+            Workforce Intelligent insights platform
           </p>
         </div>
 
