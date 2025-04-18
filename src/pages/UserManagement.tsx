@@ -35,18 +35,7 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  permissions: string[];
-  status: string;
-  lastLogin: string;
-  createdAt: string;
-}
+import { useAuth, User } from "@/contexts/AuthContext";
 
 interface ActivityLog {
   id: string;
