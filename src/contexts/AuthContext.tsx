@@ -1,46 +1,55 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
+// Define the User interface with the modules property
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'superuser' | 'user';
-  permissions: string[];
   avatar?: string;
-  modules?: string[]; // Added modules property to User interface
+  role: string;
+  permissions: string[];
+  modules?: string[]; // Add modules property to User interface
 }
 
 interface AuthContextType {
   user: User | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Sample users for demonstration
+// Sample user data with modules property
 const SAMPLE_USERS: User[] = [
   {
-    id: '1',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    role: 'superuser',
-    permissions: ['all'],
-    avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
-    modules: ['realestate', 'labour-planning', 'labour-potential', 'multivariate', 'network'], // Added modules for sample users
+    id: "1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "Administrator",
+    avatar: "/placeholder.svg",
+    permissions: ["*"],
+    modules: ["realestate", "labour", "multivariate", "network"], // Admin has access to all modules
   },
   {
-    id: '2',
-    name: 'Regular User',
-    email: 'user@example.com',
-    role: 'user',
-    permissions: ['dashboard:view', 'location:view', 'reports:view', 'documents:view', 'logs:view'],
-    avatar: 'https://ui-avatars.com/api/?name=Regular+User&background=0D8ABC&color=fff',
-    modules: ['realestate'], // Added modules for sample users
-  }
+    id: "2",
+    name: "Manager User",
+    email: "manager@example.com",
+    role: "Manager",
+    permissions: ["dashboard:view", "location:view", "reports:view"],
+    modules: ["realestate", "labour"], // Manager has access to two modules
+  },
+  {
+    id: "3",
+    name: "Analyst User",
+    email: "analyst@example.com",
+    role: "Analyst",
+    permissions: ["dashboard:view", "location:view"],
+    modules: ["realestate"], // Analyst has access to one module
+  },
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

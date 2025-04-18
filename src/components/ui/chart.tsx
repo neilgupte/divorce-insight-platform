@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -351,6 +352,153 @@ function getPayloadConfigFromPayload(
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config]
+}
+
+// New components to support AreaChart and BarChart
+export interface ChartProps {
+  data: any[];
+  index: string;
+  categories: string[];
+  colors?: string[];
+  valueFormatter?: (value: number) => string;
+  yAxisWidth?: number;
+  showLegend?: boolean;
+  stack?: boolean;
+}
+
+export function AreaChart({
+  data,
+  index,
+  categories,
+  colors = ["#2563eb", "#e11d48", "#8b5cf6", "#22c55e"],
+  valueFormatter = (value: number) => value.toString(),
+  yAxisWidth = 40,
+  showLegend = true,
+}: ChartProps) {
+  const config = React.useMemo(() => {
+    return categories.reduce<ChartConfig>((acc, category, i) => {
+      acc[category] = {
+        color: colors[i % colors.length],
+      };
+      return acc;
+    }, {});
+  }, [categories, colors]);
+
+  return (
+    <ChartContainer config={config}>
+      <RechartsPrimitive.ComposedChart data={data} margin={{ right: 10, left: 10 }}>
+        <RechartsPrimitive.XAxis
+          dataKey={index}
+          axisLine={false}
+          tickLine={false}
+          tick={{ transform: "translate(0, 6)" }}
+          tickMargin={6}
+          minTickGap={20}
+          tickFormatter={(value) => value}
+        />
+        <RechartsPrimitive.YAxis
+          width={yAxisWidth}
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={(value) => valueFormatter(value)}
+        />
+        <RechartsPrimitive.CartesianGrid vertical={false} strokeDasharray="3 3" />
+        <RechartsPrimitive.Tooltip 
+          content={
+            <ChartTooltipContent
+              formatter={(value) => [valueFormatter(value as number), null]}
+            />
+          } 
+        />
+        {showLegend && (
+          <RechartsPrimitive.Legend
+            content={<ChartLegendContent />}
+            verticalAlign="top"
+            height={60}
+          />
+        )}
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Area
+            key={category}
+            type="monotone"
+            dataKey={category}
+            fill={colors[i % colors.length]}
+            stroke={colors[i % colors.length]}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+            fillOpacity={0.2}
+          />
+        ))}
+      </RechartsPrimitive.ComposedChart>
+    </ChartContainer>
+  );
+}
+
+export function BarChart({
+  data,
+  index,
+  categories,
+  colors = ["#2563eb", "#e11d48", "#8b5cf6", "#22c55e"],
+  valueFormatter = (value: number) => value.toString(),
+  yAxisWidth = 40,
+  showLegend = true,
+  stack = false,
+}: ChartProps) {
+  const config = React.useMemo(() => {
+    return categories.reduce<ChartConfig>((acc, category, i) => {
+      acc[category] = {
+        color: colors[i % colors.length],
+      };
+      return acc;
+    }, {});
+  }, [categories, colors]);
+
+  return (
+    <ChartContainer config={config}>
+      <RechartsPrimitive.BarChart data={data} margin={{ right: 10, left: 10 }}>
+        <RechartsPrimitive.XAxis
+          dataKey={index}
+          axisLine={false}
+          tickLine={false}
+          tick={{ transform: "translate(0, 6)" }}
+          tickMargin={6}
+          minTickGap={20}
+          tickFormatter={(value) => value}
+        />
+        <RechartsPrimitive.YAxis
+          width={yAxisWidth}
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={(value) => valueFormatter(value)}
+        />
+        <RechartsPrimitive.CartesianGrid vertical={false} strokeDasharray="3 3" />
+        <RechartsPrimitive.Tooltip 
+          content={
+            <ChartTooltipContent
+              formatter={(value) => [valueFormatter(value as number), null]}
+            />
+          } 
+        />
+        {showLegend && (
+          <RechartsPrimitive.Legend
+            content={<ChartLegendContent />}
+            verticalAlign="top"
+            height={60}
+          />
+        )}
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Bar
+            key={category}
+            dataKey={category}
+            fill={colors[i % colors.length]}
+            radius={[4, 4, 0, 0]}
+            stackId={stack ? "stack" : undefined}
+          />
+        ))}
+      </RechartsPrimitive.BarChart>
+    </ChartContainer>
+  );
 }
 
 export {
