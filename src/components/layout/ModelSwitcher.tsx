@@ -8,32 +8,37 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-const models = [
+export const models = [
   {
+    id: "realestate",
     name: "Real Estate IQ",
     description: "AI-powered real estate analysis and valuation platform",
     icon: Brain,
     path: "/",
   },
   {
+    id: "labour-planning",
     name: "Labour Planning",
     description: "Optimize workforce allocation and scheduling",
     icon: Users,
     path: "/labour-planning",
   },
   {
+    id: "labour-potential",
     name: "Labour Potential",
     description: "Analyze and maximize workforce potential",
     icon: LayoutDashboard,
     path: "/labour-potential",
   },
   {
+    id: "multivariate",
     name: "Multivariate Optimization",
     description: "Complex decision optimization engine",
     icon: GitBranch,
     path: "/multivariate",
   },
   {
+    id: "network",
     name: "Network Optimization",
     description: "Supply chain and network flow optimization",
     icon: Network,

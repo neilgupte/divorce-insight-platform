@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface User {
@@ -7,6 +8,7 @@ export interface User {
   role: 'superuser' | 'user';
   permissions: string[];
   avatar?: string;
+  modules?: string[]; // Added modules property to User interface
 }
 
 interface AuthContextType {
@@ -28,6 +30,7 @@ const SAMPLE_USERS: User[] = [
     role: 'superuser',
     permissions: ['all'],
     avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
+    modules: ['realestate', 'labour-planning', 'labour-potential', 'multivariate', 'network'], // Added modules for sample users
   },
   {
     id: '2',
@@ -36,6 +39,7 @@ const SAMPLE_USERS: User[] = [
     role: 'user',
     permissions: ['dashboard:view', 'location:view', 'reports:view', 'documents:view', 'logs:view'],
     avatar: 'https://ui-avatars.com/api/?name=Regular+User&background=0D8ABC&color=fff',
+    modules: ['realestate'], // Added modules for sample users
   }
 ];
 
