@@ -176,12 +176,18 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
         />
 
         <div className="flex justify-end space-x-4">
-          {status === "lead" ? (
-            <Button type="submit" variant="secondary">
-              Save as Lead
-            </Button>
-          ) : (
-            <Button type="submit">
+          <Button 
+            type="submit" 
+            variant="secondary"
+            onClick={() => form.setValue('status', 'lead')}
+          >
+            Save as Lead
+          </Button>
+          {status === "active" && (
+            <Button 
+              type="submit" 
+              onClick={() => form.setValue('status', 'active')}
+            >
               Save & Continue
             </Button>
           )}
