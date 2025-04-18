@@ -12,7 +12,9 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -21,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
 import { useAuth } from "@/contexts/AuthContext";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -72,15 +75,25 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <div
         className={cn(
-          "w-full md:w-64 bg-purple-900 md:min-h-screen flex-shrink-0 border-r transition-all duration-300",
+          "w-full md:w-64 bg-purple-900 md:min-h-screen flex-shrink-0 border-r transition-all duration-300 relative",
           sidebarOpen ? "block" : "hidden md:block",
           sidebarCollapsed ? "md:w-16" : "md:w-64"
         )}
       >
         <div className="p-6 hidden md:block">
           <h1 className="text-xl font-bold text-white">TBD Corp Admin</h1>
-          <p className="text-sm text-purple-200">System Management</p>
+          <p className={cn("text-sm text-purple-200", sidebarCollapsed && "hidden")}>System Management</p>
         </div>
+
+        {/* Toggle collapse button */}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={toggleCollapse}
+          className="absolute -right-3 top-10 h-6 w-6 rounded-full border bg-background hidden md:flex items-center justify-center shadow-md"
+        >
+          {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </Button>
 
         <nav className="mt-2">
           <ul className="space-y-1 px-2">
@@ -100,7 +113,7 @@ const AdminLayout = () => {
                     "h-5 w-5",
                     sidebarCollapsed ? "mr-0" : "mr-3"
                   )} />
-                  {!sidebarCollapsed && item.name}
+                  {!sidebarCollapsed && <span>{item.name}</span>}
                 </NavLink>
               </li>
             ))}
@@ -127,7 +140,7 @@ const AdminLayout = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
