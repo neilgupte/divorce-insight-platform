@@ -20,10 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 const industries = [
@@ -64,94 +61,96 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="industry"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Industry</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Company Name</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select industry" />
-                  </SelectTrigger>
+                  <Input {...field} className="max-w-xs" />
                 </FormControl>
-                <SelectContent>
-                  {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry.toLowerCase()}>
-                      {industry}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="adminEmail"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Admin Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="industry"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Industry</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="max-w-xs">
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry} value={industry.toLowerCase()}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="emailDomain"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email Domain (Optional)</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="company.com" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="adminEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Admin Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} className="max-w-xs" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="emailDomain"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Domain (Optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="company.com" className="max-w-xs" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Company Status</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex flex-col space-y-1"
+                  className="flex space-x-4"
                 >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-2 space-y-0">
                     <RadioGroupItem value="lead" />
                     <FormLabel className="font-normal">Lead</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-2 space-y-0">
                     <RadioGroupItem value="active" />
                     <FormLabel className="font-normal">Active Client</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-2 space-y-0">
                     <RadioGroupItem value="suspended" />
                     <FormLabel className="font-normal">Suspended</FormLabel>
                   </FormItem>
@@ -169,7 +168,7 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} className="max-w-2xl" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,9 +176,15 @@ export function CompanyProfileForm({ onSubmit }: CompanyProfileFormProps) {
         />
 
         <div className="flex justify-end space-x-4">
-          <Button type="submit" variant={status === "lead" ? "secondary" : "default"}>
-            {status === "lead" ? "Save as Lead" : "Save & Continue"}
-          </Button>
+          {status === "lead" ? (
+            <Button type="submit" variant="secondary">
+              Save as Lead
+            </Button>
+          ) : (
+            <Button type="submit">
+              Save & Continue
+            </Button>
+          )}
         </div>
       </form>
     </Form>
