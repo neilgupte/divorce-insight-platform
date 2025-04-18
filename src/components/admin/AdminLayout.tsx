@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, 
@@ -161,7 +161,7 @@ const AdminLayout = () => {
         {/* Content */}
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
-            {children}
+            <Outlet />
           </div>
         </main>
       </div>
