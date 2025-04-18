@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Network, Brain, Users, GitBranch } from "lucide-react";
+import { LayoutDashboard, Network, Brain, Users, GitBranch, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 
 const models = [
   {
-    name: "DivorceIQ",
-    description: "AI-powered divorce settlement and analysis platform",
+    name: "Real Estate IQ",
+    description: "AI-powered real estate analysis and valuation platform",
     icon: Brain,
     path: "/",
   },
@@ -47,9 +47,12 @@ export function ModelSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto w-full justify-start px-4 py-2 text-left text-xl font-bold text-white hover:bg-sidebar-accent"
+          className="h-auto w-full justify-start px-4 py-2 text-left text-xl font-bold text-white hover:bg-sidebar-accent group"
         >
-          DivorceIQ
+          <span className="flex items-center">
+            Real Estate IQ
+            <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

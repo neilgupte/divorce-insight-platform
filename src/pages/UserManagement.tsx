@@ -72,6 +72,7 @@ const UserManagement = () => {
     email: "",
     role: "user",
     permissions: [] as string[],
+    modules: [] as string[],
   });
 
   const filteredUsers = users.filter(user => 
@@ -79,6 +80,14 @@ const UserManagement = () => {
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const moduleAccess = [
+    { id: "realestate", label: "Real Estate IQ" },
+    { id: "labour-planning", label: "Labour Planning" },
+    { id: "labour-potential", label: "Labour Potential" },
+    { id: "multivariate", label: "Multivariate Optimization" },
+    { id: "network", label: "Network Optimization" },
+  ];
 
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email) {
@@ -130,6 +139,7 @@ const UserManagement = () => {
       email: "",
       role: "user",
       permissions: [],
+      modules: [],
     });
     
     toast({
@@ -271,6 +281,35 @@ const UserManagement = () => {
         setNewUser({
           ...newUser,
           permissions: [...newUser.permissions, permission],
+        });
+      }
+    }
+  };
+
+  const toggleModule = (moduleId: string) => {
+    if (editingUser) {
+      const modules = editingUser.modules || [];
+      if (modules.includes(moduleId)) {
+        setEditingUser({
+          ...editingUser,
+          modules: modules.filter(m => m !== moduleId),
+        });
+      } else {
+        setEditingUser({
+          ...editingUser,
+          modules: [...modules, moduleId],
+        });
+      }
+    } else {
+      if (newUser.modules.includes(moduleId)) {
+        setNewUser({
+          ...newUser,
+          modules: newUser.modules.filter(m => m !== moduleId),
+        });
+      } else {
+        setNewUser({
+          ...newUser,
+          modules: [...newUser.modules, moduleId],
         });
       }
     }
@@ -585,6 +624,29 @@ const UserManagement = () => {
             </div>
             
             <div className="space-y-2">
+              <Label>Module Access</Label>
+              <div className="rounded-md border p-4">
+                <div className="grid grid-cols-2 gap-2">
+                  {moduleAccess.map((module) => (
+                    <div key={module.id} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`module-${module.id}`} 
+                        checked={newUser.modules.includes(module.id)}
+                        onCheckedChange={() => toggleModule(module.id)}
+                      />
+                      <label
+                        htmlFor={`module-${module.id}`}
+                        className="text-sm font-medium leading-none"
+                      >
+                        {module.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
               <div className="flex items-center">
                 <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
                 <Label>Invitation Email</Label>
@@ -718,6 +780,29 @@ const UserManagement = () => {
                     <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Module Access</Label>
+                <div className="rounded-md border p-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    {moduleAccess.map((module) => (
+                      <div key={module.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`edit-module-${module.id}`} 
+                          checked={editingUser.modules?.includes(module.id)}
+                          onCheckedChange={() => toggleModule(module.id)}
+                        />
+                        <label
+                          htmlFor={`edit-module-${module.id}`}
+                          className="text-sm font-medium leading-none"
+                        >
+                          {module.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
