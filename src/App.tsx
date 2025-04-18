@@ -23,6 +23,7 @@ import Index from "@/pages/Index";
 import AuditLogs from "@/pages/AuditLogs";
 import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
+import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,35 @@ const App = () => (
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
                         <LabourPlanningDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/locations" element={
+                      <ProtectedRoute>
+                        <LabourPlanningLocations />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/reports" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning Reports</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Report generation for labour planning.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/schedule" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning Schedule</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Schedule management tools.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/settings" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning Settings</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Configuration options for labour planning.</p>
+                        </div>
                       </ProtectedRoute>
                     } />
                     <Route path="labour-potential" element={

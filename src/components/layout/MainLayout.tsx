@@ -139,15 +139,13 @@ const MainLayout = () => {
     }
   ];
 
-  // Get active module from current path
   const activeModule = models.find(model => 
     location.pathname.startsWith(model.path)
   )?.id;
 
-  // Choose menu items based on active module
   const currentMenuItems = activeModule === 'labour-planning' 
     ? labourPlanningMenuItems 
-    : menuItems;
+    : filteredMenuItems;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -210,7 +208,7 @@ const MainLayout = () => {
           </div>
 
           <nav className="flex-1 space-y-1 px-2 py-2">
-            {(activeModule === 'labour-planning' ? labourPlanningMenuItems : filteredMenuItems).map((item) => (
+            {currentMenuItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -222,30 +220,26 @@ const MainLayout = () => {
               </Link>
             ))}
 
-            {activeModule !== 'labour-planning' && (
+            {filteredAdminMenuItems.length > 0 && (
               <>
-                {filteredAdminMenuItems.length > 0 && (
-                  <>
-                    <div className="my-2 border-t border-sidebar-border"></div>
-                    {!sidebarCollapsed && (
-                      <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
-                        Administration
-                      </div>
-                    )}
-
-                    {filteredAdminMenuItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        title={sidebarCollapsed ? item.name : undefined}
-                      >
-                        <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                        {!sidebarCollapsed && <span>{item.name}</span>}
-                      </Link>
-                    ))}
-                  </>
+                <div className="my-2 border-t border-sidebar-border"></div>
+                {!sidebarCollapsed && (
+                  <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
+                    Administration
+                  </div>
                 )}
+
+                {filteredAdminMenuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    title={sidebarCollapsed ? item.name : undefined}
+                  >
+                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                    {!sidebarCollapsed && <span>{item.name}</span>}
+                  </Link>
+                ))}
               </>
             )}
             
