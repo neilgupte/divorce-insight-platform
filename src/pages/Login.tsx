@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,10 +25,21 @@ const Login = () => {
     setError("");
 
     try {
+      // Special case for admin dashboard access
+      if (email === "tbdcorp@tbdcorp.com" && password === "password") {
+        toast({
+          title: "Admin login successful",
+          description: "Welcome to the TBD Corp Admin Dashboard",
+        });
+        navigate("/admin/dashboard");
+        setLoading(false);
+        return;
+      }
+
       await login(email, password);
       toast({
         title: "Login successful",
-        description: "Welcome back to DivorceIQ",
+        description: "Welcome back to TBD Corp",
       });
       navigate("/");
     } catch (err) {
@@ -100,6 +112,7 @@ const Login = () => {
                 <p className="mb-1">Demo Credentials:</p>
                 <p>Superuser: admin@example.com / password</p>
                 <p>Regular User: user@example.com / password</p>
+                <p>Admin Dashboard: tbdcorp@tbdcorp.com / password</p>
               </div>
             </CardContent>
             <CardFooter>

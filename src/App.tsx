@@ -25,6 +25,17 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 
+// Admin dashboard imports
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Companies from "@/pages/admin/Companies";
+import CompanyDetail from "@/pages/admin/CompanyDetail";
+import Modules from "@/pages/admin/Modules";
+import Users from "@/pages/admin/Users";
+import Billing from "@/pages/admin/Billing";
+import SystemLogs from "@/pages/admin/SystemLogs";
+import AdminSettings from "@/pages/admin/AdminSettings";
+
 const queryClient = new QueryClient();
 
 // Protected route component
@@ -55,6 +66,19 @@ const App = () => (
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="companies" element={<Companies />} />
+                    <Route path="companies/:companyId" element={<CompanyDetail />} />
+                    <Route path="modules" element={<Modules />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="billing" element={<Billing />} />
+                    <Route path="logs" element={<SystemLogs />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
                   
                   <Route path="/" element={
                     <ProtectedRoute>
