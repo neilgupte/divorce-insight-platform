@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -137,7 +138,7 @@ const MainLayout = () => {
                     sideOffset={8}
                   >
                     <div className="grid gap-3">
-                      
+                      {/* The model options will be rendered here */}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
