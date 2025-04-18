@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -75,6 +74,12 @@ export default {
 					800: '#243b53',
 					900: '#102a43'
 				},
+				admin: {
+					DEFAULT: 'hsl(var(--admin-background, 270 60% 30%))',
+					foreground: 'hsl(var(--admin-foreground, 270 60% 98%))',
+					muted: 'hsl(var(--admin-muted, 270 40% 40%))',
+					'muted-foreground': 'hsl(var(--admin-muted-foreground, 270 60% 90%))',
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

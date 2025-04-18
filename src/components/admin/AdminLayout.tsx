@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, 
@@ -16,13 +16,29 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
+import MessagingCenter from "@/components/messaging/MessagingCenter";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleLogout = () => {
+    logout();
     navigate("/login");
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const menuItems = [
@@ -35,10 +51,6 @@ const AdminLayout = () => {
     { name: "Settings", path: "/admin/settings", icon: Settings }
   ];
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">
       {/* Mobile menu button */}
@@ -47,10 +59,10 @@ const AdminLayout = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleMobileMenu}
+            onClick={toggleSidebar}
             className="mr-2"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </Button>
           <span className="font-bold text-lg">TBD Corp Admin</span>
         </div>
@@ -60,13 +72,14 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <div
         className={cn(
-          "w-full md:w-64 bg-card md:min-h-screen flex-shrink-0 border-r transition-all duration-300",
-          isMobileMenuOpen ? "block" : "hidden md:block"
+          "w-full md:w-64 bg-purple-900 md:min-h-screen flex-shrink-0 border-r transition-all duration-300",
+          sidebarOpen ? "block" : "hidden md:block",
+          sidebarCollapsed ? "md:w-16" : "md:w-64"
         )}
       >
         <div className="p-6 hidden md:block">
-          <h1 className="text-xl font-bold">TBD Corp Admin</h1>
-          <p className="text-sm text-muted-foreground">System Management</p>
+          <h1 className="text-xl font-bold text-white">TBD Corp Admin</h1>
+          <p className="text-sm text-purple-200">System Management</p>
         </div>
 
         <nav className="mt-2">
@@ -78,37 +91,79 @@ const AdminLayout = () => {
                   className={({ isActive }) => cn(
                     "flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-purple-800 text-white"
+                      : "text-purple-100 hover:bg-purple-800/50"
                   )}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="h-5 w-5 mr-3" />
-                  {item.name}
+                  <item.icon className={cn(
+                    "h-5 w-5",
+                    sidebarCollapsed ? "mr-0" : "mr-3"
+                  )} />
+                  {!sidebarCollapsed && item.name}
                 </NavLink>
               </li>
             ))}
           </ul>
-          
-          <div className="px-2 mt-6">
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start text-destructive" 
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-2" /> Logout
-            </Button>
-          </div>
         </nav>
-        
-        <div className="absolute bottom-4 left-4 hidden md:block">
-          <ThemeToggle />
+
+        {/* User profile at bottom */}
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start px-2 text-white hover:bg-purple-800/50">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback>AD</AvatarFallback>
+                </Avatar>
+                {!sidebarCollapsed && (
+                  <div className="flex flex-col items-start text-left">
+                    <span className="text-sm font-medium">{user?.name || "Admin User"}</span>
+                    <span className="text-xs text-purple-200">{user?.role || "Administrator"}</span>
+                  </div>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 overflow-auto">
-        <Outlet />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="border-b bg-card/80 backdrop-blur-sm">
+          <div className="flex h-14 items-center justify-between px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+
+            <div className="flex items-center space-x-2 ml-auto">
+              <ThemeToggle />
+              <NotificationCenter />
+              <MessagingCenter />
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
