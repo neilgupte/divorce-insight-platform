@@ -16,6 +16,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  isLoading: boolean; // Add isLoading property to AuthContextType
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
@@ -65,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     // Simulate API call
@@ -75,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (!foundUser) {
       setIsLoading(false);
-      throw new Error('Invalid credentials');
+      return false; // Return false for failed login
     }
     
     // In a real app, you would verify the password here
@@ -83,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(foundUser);
     localStorage.setItem('user', JSON.stringify(foundUser));
     setIsLoading(false);
+    return true; // Return true for successful login
   };
 
   const logout = () => {
