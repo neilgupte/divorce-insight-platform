@@ -1,68 +1,46 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { toast } from "sonner";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Define the User interface with all required properties
 export interface User {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
-  role: string;
+  role: 'superuser' | 'user';
   permissions: string[];
-  modules?: string[];
-  status?: string;
-  lastLogin?: string;
-  createdAt?: string;
+  avatar?: string;
+  modules?: string[]; // Added modules property to User interface
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Sample user data with modules property
+// Sample users for demonstration
 const SAMPLE_USERS: User[] = [
   {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "Administrator",
-    avatar: "/placeholder.svg",
-    permissions: ["*"],
-    modules: ["realestate", "labour", "multivariate", "network"], // Admin has access to all modules
-    status: "active",
-    lastLogin: "2023-12-02 09:34 AM",
-    createdAt: "2022-10-15",
+    id: '1',
+    name: 'Admin User',
+    email: 'admin@example.com',
+    role: 'superuser',
+    permissions: ['all'],
+    avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
+    modules: ['realestate', 'labour-planning', 'labour-potential', 'multivariate', 'network'], // Added modules for sample users
   },
   {
-    id: "2",
-    name: "Manager User",
-    email: "manager@example.com",
-    role: "Manager",
-    permissions: ["dashboard:view", "location:view", "reports:view"],
-    modules: ["realestate", "labour"], // Manager has access to two modules
-    status: "active",
-    lastLogin: "2023-11-30 02:15 PM",
-    createdAt: "2022-11-05",
-  },
-  {
-    id: "3",
-    name: "Analyst User",
-    email: "analyst@example.com",
-    role: "Analyst",
-    permissions: ["dashboard:view", "location:view"],
-    modules: ["realestate"], // Analyst has access to one module
-    status: "active",
-    lastLogin: "2023-11-28 10:22 AM",
-    createdAt: "2023-01-15",
-  },
+    id: '2',
+    name: 'Regular User',
+    email: 'user@example.com',
+    role: 'user',
+    permissions: ['dashboard:view', 'location:view', 'reports:view', 'documents:view', 'logs:view'],
+    avatar: 'https://ui-avatars.com/api/?name=Regular+User&background=0D8ABC&color=fff',
+    modules: ['realestate'], // Added modules for sample users
+  }
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -78,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true);
     
     // Simulate API call
@@ -88,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (!foundUser) {
       setIsLoading(false);
-      return false; // Return false for failed login
+      throw new Error('Invalid credentials');
     }
     
     // In a real app, you would verify the password here
@@ -96,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(foundUser);
     localStorage.setItem('user', JSON.stringify(foundUser));
     setIsLoading(false);
-    return true; // Return true for successful login
   };
 
   const logout = () => {

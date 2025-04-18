@@ -21,9 +21,6 @@ import LuxuryLocations from "@/pages/LuxuryLocations";
 import Index from "@/pages/Index";
 import AuditLogs from "@/pages/AuditLogs";
 import HelpSupport from "@/pages/HelpSupport";
-import LabourPlanning from "@/pages/LabourPlanning";
-import Reports from "@/pages/Reports";
-import Locations from "@/pages/Locations";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +58,6 @@ const App = () => (
                       <MainLayout />
                     </ProtectedRoute>
                   }>
-                    {/* Real Estate IQ Routes */}
                     <Route path="dashboard" element={
                       <ProtectedRoute requiredPermission="dashboard:view">
                         <Dashboard />
@@ -113,29 +109,15 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    {/* Labour Planning Module Routes */}
+                    {/* New model routes - these will show placeholder content until implemented */}
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
-                        <LabourPlanning />
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Workforce optimization and planning tools.</p>
+                        </div>
                       </ProtectedRoute>
                     } />
-                    <Route path="labour-planning/reports" element={
-                      <ProtectedRoute>
-                        <Reports />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/dashboard" element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="locations" element={
-                      <ProtectedRoute>
-                        <Locations />
-                      </ProtectedRoute>
-                    } />
-
-                    {/* Other model placeholder routes */}
                     <Route path="labour-potential" element={
                       <ProtectedRoute>
                         <div className="p-8">

@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import { useNavigate, Link, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -15,14 +14,8 @@ import { ModelSwitcher } from "./ModelSwitcher";
 const MainLayout = () => {
   const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
-  const currentPath = location.pathname;
-  const isLabourPlanningModule = currentPath.startsWith('/labour-planning') || 
-                               currentPath === '/labour-planning' ||
-                               currentPath === '/locations';
 
   const handleLogout = () => {
     logout();
@@ -144,7 +137,7 @@ const MainLayout = () => {
                     sideOffset={8}
                   >
                     <div className="grid gap-3">
-                      {/* The model options will be rendered here */}
+                      
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -172,99 +165,45 @@ const MainLayout = () => {
           </div>
 
           <nav className="flex-1 space-y-1 px-2 py-2">
-            {isLabourPlanningModule ? (
-              // Labour Planning navigation
-              <div className="w-full">
+            {filteredMenuItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                title={sidebarCollapsed ? item.name : undefined}
+              >
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span>{item.name}</span>}
+              </Link>
+            ))}
+
+            {filteredAdminMenuItems.length > 0 && (
+              <>
+                <div className="my-2 border-t border-sidebar-border"></div>
                 {!sidebarCollapsed && (
                   <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
-                    Labour Planning
+                    Administration
                   </div>
                 )}
-                {/* Labour Planning specific navigation */}
-                <div className="mt-2">
-                  <Link
-                    to="/labour-planning/dashboard"
-                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <LayoutDashboard className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {!sidebarCollapsed && <span>Dashboard</span>}
-                  </Link>
-                  <Link
-                    to="/labour-planning"
-                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <Users className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {!sidebarCollapsed && <span>Labour Planning</span>}
-                  </Link>
-                  <Link
-                    to="/labour-planning/reports"
-                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <FileText className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {!sidebarCollapsed && <span>Reports</span>}
-                  </Link>
-                  <Link
-                    to="/locations"
-                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <Map className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {!sidebarCollapsed && <span>Locations</span>}
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              // Real Estate IQ navigation
-              <>
-                {filteredMenuItems.map((item) => (
+
+                {filteredAdminMenuItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={cn(
-                      "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                      currentPath === item.path && "bg-sidebar-accent text-sidebar-accent-foreground"
-                    )}
+                    className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     title={sidebarCollapsed ? item.name : undefined}
                   >
                     <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                     {!sidebarCollapsed && <span>{item.name}</span>}
                   </Link>
                 ))}
-
-                {filteredAdminMenuItems.length > 0 && (
-                  <>
-                    <div className="my-2 border-t border-sidebar-border"></div>
-                    {!sidebarCollapsed && (
-                      <div className="px-3 pb-2 text-xs font-semibold uppercase text-sidebar-foreground/60">
-                        Administration
-                      </div>
-                    )}
-
-                    {filteredAdminMenuItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        className={cn(
-                          "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          currentPath === item.path && "bg-sidebar-accent text-sidebar-accent-foreground"
-                        )}
-                        title={sidebarCollapsed ? item.name : undefined}
-                      >
-                        <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                        {!sidebarCollapsed && <span>{item.name}</span>}
-                      </Link>
-                    ))}
-                  </>
-                )}
               </>
             )}
             
             <div className="my-2 border-t border-sidebar-border"></div>
             <Link
               to={supportMenuItem.path}
-              className={cn(
-                "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                currentPath === supportMenuItem.path && "bg-sidebar-accent text-sidebar-accent-foreground"
-              )}
+              className="group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               title={sidebarCollapsed ? supportMenuItem.name : undefined}
             >
               <supportMenuItem.icon className="mr-3 h-5 w-5 flex-shrink-0" />
