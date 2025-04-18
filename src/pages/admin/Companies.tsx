@@ -18,16 +18,16 @@ const Companies = () => {
   const { data: companies = [], isLoading, error } = useQuery({
     queryKey: ['companies'],
     queryFn: getCompanies,
-    onSettled: (data, error) => {
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load companies. Please try again later.",
-        });
-      }
-    },
   });
+
+  // Handle error state separately
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to load companies. Please try again later.",
+    });
+  }
 
   const filteredCompanies = companies.filter(company =>
     company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
