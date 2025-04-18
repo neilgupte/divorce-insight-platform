@@ -18,12 +18,14 @@ const Companies = () => {
   const { data: companies = [], isLoading, error } = useQuery({
     queryKey: ['companies'],
     queryFn: getCompanies,
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load companies. Please try again later.",
-      });
+    onSettled: (data, error) => {
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load companies. Please try again later.",
+        });
+      }
     },
   });
 
