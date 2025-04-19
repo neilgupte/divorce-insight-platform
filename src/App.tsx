@@ -24,6 +24,7 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
+import InvoiceHistory from "@/pages/admin/InvoiceHistory";
 
 // Admin dashboard imports
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -195,6 +196,12 @@ const App = () => (
                           <h1 className="text-3xl font-bold">Network Optimization</h1>
                           <p className="mt-4 text-muted-foreground">Coming soon: Supply chain optimization tools.</p>
                         </div>
+                      </ProtectedRoute>
+                    } />
+                    {/* Add the new invoices route */}
+                    <Route path="invoices" element={
+                      <ProtectedRoute>
+                        <InvoiceHistory />
                       </ProtectedRoute>
                     } />
                   </Route>
