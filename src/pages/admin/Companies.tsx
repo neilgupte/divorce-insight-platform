@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { CompanyTable } from "@/components/admin/companies/CompanyTable";
 import { CompanySearch } from "@/components/admin/companies/CompanySearch";
 import { getCompanies } from "@/services/companyService";
 import { useToast } from "@/hooks/use-toast";
+import { Company } from "@/components/admin/companies/types";
 
 const Companies = () => {
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const Companies = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Mock data to include a lead company
-  const mockCompanies = [
+  const mockCompanies: Company[] = [
     {
       id: 1,
       name: "Acme Corp",

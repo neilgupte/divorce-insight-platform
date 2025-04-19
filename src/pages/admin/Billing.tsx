@@ -1,5 +1,6 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -9,9 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Download, Filter } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreditCard, Download, Filter, Building, Plus } from "lucide-react";
+import { ClientSetupForm } from "@/components/admin/billing/ClientSetupForm";
+import { InvoiceTable } from "@/components/admin/billing/InvoiceTable";
+import { BillingProfileList } from "@/components/admin/billing/BillingProfileList";
 
 const Billing = () => {
+  const [showClientSetup, setShowClientSetup] = useState(false);
+  
   // Mock data for billing
   const transactions = [
     {
@@ -49,6 +56,12 @@ const Billing = () => {
             Manage billing and subscription details
           </p>
         </div>
+        <Button 
+          onClick={() => setShowClientSetup(true)} 
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" /> New Client Setup
+        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -93,59 +106,52 @@ const Billing = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-between items-center mb-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" /> Filter
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Download className="h-4 w-4" /> Export
-            </Button>
-          </div>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invoice</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{transaction.invoice}</TableCell>
-                    <TableCell>{transaction.company}</TableCell>
-                    <TableCell>{transaction.amount}</TableCell>
-                    <TableCell>{transaction.date}</TableCell>
-                    <TableCell>
-                      <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        transaction.status === 'paid' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}>
-                        {transaction.status}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="transactions">
+        <TabsList className="mb-4">
+          <TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
+          <TabsTrigger value="clients">Client Billing Profiles</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="transactions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center mb-4">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" /> Filter
+                </Button>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Download className="h-4 w-4" /> Export
+                </Button>
+              </div>
+              <InvoiceTable transactions={transactions} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="clients">
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Billing Profiles</CardTitle>
+              <CardDescription>
+                Active billing profiles and subscription status for all clients
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BillingProfileList />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {showClientSetup && (
+        <ClientSetupForm 
+          onClose={() => setShowClientSetup(false)}
+          onSubmit={() => setShowClientSetup(false)}
+        />
+      )}
     </div>
   );
 };
