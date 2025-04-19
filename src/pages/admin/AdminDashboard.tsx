@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -42,6 +41,37 @@ const AdminDashboard = () => {
     { name: "Module 4", count: 12, color: "bg-yellow-500" },
     { name: "Module 5", count: 8, color: "bg-red-500" },
   ]);
+
+  const [outstandingInvoices] = useState([
+    { 
+      id: 1, 
+      company: "TechGiant Inc", 
+      dueDate: "2025-04-25", 
+      amount: "$2,500",
+      status: "overdue"
+    },
+    { 
+      id: 2, 
+      company: "Small Business LLC", 
+      dueDate: "2025-04-30", 
+      amount: "$1,800",
+      status: "pending"
+    },
+    { 
+      id: 3, 
+      company: "Acme Corp", 
+      dueDate: "2025-05-05", 
+      amount: "$3,200",
+      status: "pending"
+    }
+  ]);
+
+  const handleSendReminder = (companyName: string) => {
+    toast({
+      title: "Reminder Sent",
+      description: `Payment reminder sent to ${companyName}`,
+    });
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -108,35 +138,82 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      {/* Module Popularity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Modules Purchased (by popularity)</CardTitle>
-          <CardDescription>
-            Distribution of module usage across companies
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {moduleStats.map((module) => (
-              <div key={module.name} className="flex items-center">
-                <div className="w-full">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">{module.name}</span>
-                    <span className="text-sm text-muted-foreground">{module.count} companies</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2.5">
-                    <div
-                      className={`${module.color} h-2.5 rounded-full`}
-                      style={{ width: `${(module.count / stats.companies) * 100}%` }}
-                    ></div>
+      {/* Updated layout for Modules and Invoices */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Module Popularity - Now 50% width */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Modules Purchased</CardTitle>
+            <CardDescription>
+              Distribution of module usage across companies
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {moduleStats.map((module) => (
+                <div key={module.name} className="flex items-center">
+                  <div className="w-full">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">{module.name}</span>
+                      <span className="text-sm text-muted-foreground">{module.count} companies</span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-2.5">
+                      <div
+                        className={`${module.color} h-2.5 rounded-full`}
+                        style={{ width: `${(module.count / stats.companies) * 100}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Outstanding Invoices - New card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Outstanding Invoices</CardTitle>
+            <CardDescription>
+              Pending and overdue payments
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {outstandingInvoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell className="font-medium">{invoice.company}</TableCell>
+                    <TableCell>
+                      <span className={invoice.status === 'overdue' ? 'text-red-500' : ''}>
+                        {invoice.dueDate}
+                      </span>
+                    </TableCell>
+                    <TableCell>{invoice.amount}</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleSendReminder(invoice.company)}
+                      >
+                        Send Reminder
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Activity Log */}
       <Card>
