@@ -1,4 +1,3 @@
-
 export type PaymentTerm = "monthly" | "annual";
 export type PaymentMethod = "card" | "invoice" | "trial";
 export type PaymentStatus = "paid" | "pending" | "failed";
@@ -13,6 +12,7 @@ export interface BillingProfile {
   paymentMethod: PaymentMethod;
   nextBillingDate: string;
   status: "active" | "suspended" | "trial";
+  paymentRequestSentAt?: string;
 }
 
 export interface Invoice {

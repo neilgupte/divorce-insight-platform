@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CreditCard, 
@@ -6,7 +5,8 @@ import {
   CheckCircle, 
   AlertCircle, 
   CalendarIcon, 
-  ArrowRight 
+  ArrowRight, 
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,6 @@ export function BillingProfileList() {
   const [selectedProfile, setSelectedProfile] = useState<BillingProfile | null>(null);
   const [viewMode, setViewMode] = useState<'detail' | 'confirmation' | 'payment'>('detail');
   
-  // Mock data for billing profiles
   const billingProfiles: BillingProfile[] = [
     {
       id: 1,
@@ -31,6 +30,7 @@ export function BillingProfileList() {
       paymentMethod: "card",
       nextBillingDate: "2025-05-15",
       status: "active",
+      paymentRequestSentAt: "2025-04-19T10:30:00Z"
     },
     {
       id: 2,
@@ -81,10 +81,6 @@ export function BillingProfileList() {
     setViewMode('confirmation');
   };
 
-  const handleShowPaymentEntry = () => {
-    setViewMode('payment');
-  };
-
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -124,6 +120,13 @@ export function BillingProfileList() {
                 <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                 <span>Next billing: {profile.nextBillingDate}</span>
               </div>
+
+              {profile.paymentRequestSentAt && (
+                <div className="flex items-center gap-2 text-muted-foreground mt-2">
+                  <Mail className="h-4 w-4" />
+                  <span>Payment request sent: {new Date(profile.paymentRequestSentAt).toLocaleDateString()}</span>
+                </div>
+              )}
               
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex flex-wrap gap-1">
@@ -134,7 +137,7 @@ export function BillingProfileList() {
                   ))}
                 </div>
                 
-                <Button variant="ghost" className="h-8 w-8 p-0" asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -155,15 +158,17 @@ export function BillingProfileList() {
         <ClientBillingConfirmation
           profile={selectedProfile}
           onBack={() => setViewMode('detail')}
-          onConfirm={handleShowPaymentEntry}
-        />
-      )}
-      
-      {selectedProfile && viewMode === 'payment' && (
-        <PaymentMethodEntry
-          profile={selectedProfile}
-          onBack={() => setViewMode('confirmation')}
-          onComplete={handleClose}
+          onConfirm={() => {
+            const updatedProfile = {
+              ...selectedProfile,
+              paymentRequestSentAt: new Date().toISOString()
+            };
+            handleClose();
+            toast({
+              title: "Payment request sent",
+              description: "The client will receive an email with payment instructions.",
+            });
+          }}
         />
       )}
     </div>
