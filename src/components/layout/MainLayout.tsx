@@ -55,113 +55,117 @@ const MainLayout = () => {
       {/* Sidebar navigation */}
       <nav className="flex-none w-64 border-r bg-background hidden md:block p-6">
         <div className="space-y-1">
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/dashboard" className="flex items-center gap-2">
-                <BarChart className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+          <NavigationMenu>
+            <NavigationMenuList className="flex flex-col space-y-1">
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/dashboard" className="flex items-center gap-2">
+                    <BarChart className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/location" className="flex items-center gap-2">
-                <Compass className="h-4 w-4" />
-                <span>Location Analyzer</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/location" className="flex items-center gap-2">
+                    <Compass className="h-4 w-4" />
+                    <span>Location Analyzer</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/luxury-locations" className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                <span>Luxury Locations</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/luxury-locations" className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span>Luxury Locations</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/reports" className="flex items-center gap-2">
-                <ScrollText className="h-4 w-4" />
-                <span>Report Generator</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/reports" className="flex items-center gap-2">
+                    <ScrollText className="h-4 w-4" />
+                    <span>Report Generator</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/documents" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Document Vault</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/documents" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Document Vault</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/assistant" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                <span>AI Assistant</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/assistant" className="flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    <span>AI Assistant</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/invoices" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Invoices</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/invoices" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Invoices</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/labour-planning" className="flex items-center gap-2">
-                <LayoutPanelLeft className="h-4 w-4" />
-                <span>Labour Planning</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/labour-planning" className="flex items-center gap-2">
+                    <LayoutPanelLeft className="h-4 w-4" />
+                    <span>Labour Planning</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              <Link to="/network" className="flex items-center gap-2">
-                <Network className="h-4 w-4" />
-                <span>Network Optimization</span>
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to="/network" className="flex items-center gap-2">
+                    <Network className="h-4 w-4" />
+                    <span>Network Optimization</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
       </nav>
 
