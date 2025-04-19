@@ -8,8 +8,10 @@ import {
   Clock,
   Mail
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -18,7 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,7 @@ interface ReminderDialogState {
   isOpen: boolean;
   company: string;
   emails: string[];
+  message: string;
 }
 
 const AdminDashboard = () => {
@@ -41,6 +43,7 @@ const AdminDashboard = () => {
     isOpen: false,
     company: "",
     emails: [],
+    message: "Dear client,\n\nThis is a friendly reminder that payment for our services is currently due. Please process this payment at your earliest convenience.\n\nBest regards,\nAdmin Team"
   });
   const [newEmail, setNewEmail] = useState("");
 
@@ -95,6 +98,7 @@ const AdminDashboard = () => {
       isOpen: true,
       company: companyName,
       emails: ["finance@" + companyName.toLowerCase().replace(/\s+/g, '') + ".com"],
+      message: "Dear client,\n\nThis is a friendly reminder that payment for our services is currently due. Please process this payment at your earliest convenience.\n\nBest regards,\nAdmin Team"
     });
   };
 
@@ -115,12 +119,19 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReminderDialog({
+      ...reminderDialog,
+      message: e.target.value,
+    });
+  };
+
   const handleSendReminder = () => {
     toast({
       title: "Reminder Sent",
       description: `Payment reminder sent to ${reminderDialog.company}`,
     });
-    setReminderDialog({ isOpen: false, company: "", emails: [] });
+    setReminderDialog({ isOpen: false, company: "", emails: [], message: "" });
   };
 
   return (
@@ -134,7 +145,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link to="/admin/companies" className="block">
           <Card className="hover:shadow-md transition-shadow">
@@ -188,9 +198,7 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      {/* Updated layout for Modules and Invoices */}
       <div className="grid grid-cols-3 gap-6">
-        {/* Module Popularity - Now 1/3 width */}
         <Card>
           <CardHeader>
             <CardTitle>Modules Purchased</CardTitle>
@@ -220,7 +228,6 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Outstanding Invoices - Now 2/3 width */}
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>Outstanding Invoices</CardTitle>
@@ -265,7 +272,6 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Activity Log */}
       <Card>
         <CardHeader className="flex justify-between items-start">
           <div>
@@ -313,9 +319,8 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Reminder Dialog */}
       <Dialog open={reminderDialog.isOpen} onOpenChange={(isOpen) => !isOpen && setReminderDialog(prev => ({ ...prev, isOpen: false }))}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Payment Reminder</DialogTitle>
             <DialogDescription>
@@ -347,9 +352,15 @@ const AdminDashboard = () => {
               />
               <Button onClick={handleAddEmail} variant="secondary">Add</Button>
             </div>
+            <Textarea
+              value={reminderDialog.message}
+              onChange={handleMessageChange}
+              className="min-h-[150px]"
+              placeholder="Enter reminder message"
+            />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReminderDialog({ isOpen: false, company: "", emails: [] })}>
+            <Button variant="outline" onClick={() => setReminderDialog({ isOpen: false, company: "", emails: [], message: "" })}>
               Cancel
             </Button>
             <Button onClick={handleSendReminder}>
