@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -6,7 +5,8 @@ import {
   Building, 
   Package, 
   Users,
-  Clock
+  Clock,
+  Mail
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
+interface ReminderDialogState {
+  isOpen: boolean;
+  company: string;
+  emails: string[];
+}
 
 const AdminDashboard = () => {
   const { toast } = useToast();
-  // Mock data
+  const [reminderDialog, setReminderDialog] = useState<ReminderDialogState>({
+    isOpen: false,
+    company: "",
+    emails: [],
+  });
+  const [newEmail, setNewEmail] = useState("");
+
   const [stats] = useState({
     companies: 48,
     modules: 74,
@@ -69,11 +90,37 @@ const AdminDashboard = () => {
     }
   ]);
 
-  const handleSendReminder = (companyName: string) => {
+  const handleGenerateReminder = (companyName: string) => {
+    setReminderDialog({
+      isOpen: true,
+      company: companyName,
+      emails: ["finance@" + companyName.toLowerCase().replace(/\s+/g, '') + ".com"],
+    });
+  };
+
+  const handleAddEmail = () => {
+    if (newEmail && !reminderDialog.emails.includes(newEmail)) {
+      setReminderDialog({
+        ...reminderDialog,
+        emails: [...reminderDialog.emails, newEmail],
+      });
+      setNewEmail("");
+    }
+  };
+
+  const handleRemoveEmail = (emailToRemove: string) => {
+    setReminderDialog({
+      ...reminderDialog,
+      emails: reminderDialog.emails.filter(email => email !== emailToRemove),
+    });
+  };
+
+  const handleSendReminder = () => {
     toast({
       title: "Reminder Sent",
-      description: `Payment reminder sent to ${companyName}`,
+      description: `Payment reminder sent to ${reminderDialog.company}`,
     });
+    setReminderDialog({ isOpen: false, company: "", emails: [] });
   };
 
   return (
@@ -142,8 +189,8 @@ const AdminDashboard = () => {
       </div>
 
       {/* Updated layout for Modules and Invoices */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Module Popularity - Now 50% width */}
+      <div className="grid grid-cols-3 gap-6">
+        {/* Module Popularity - Now 1/3 width */}
         <Card>
           <CardHeader>
             <CardTitle>Modules Purchased</CardTitle>
@@ -173,8 +220,8 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Outstanding Invoices - New card */}
-        <Card>
+        {/* Outstanding Invoices - Now 2/3 width */}
+        <Card className="col-span-2">
           <CardHeader>
             <CardTitle>Outstanding Invoices</CardTitle>
             <CardDescription>
@@ -203,11 +250,11 @@ const AdminDashboard = () => {
                     <TableCell>{invoice.amount}</TableCell>
                     <TableCell>
                       <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm"
-                        onClick={() => handleSendReminder(invoice.company)}
+                        onClick={() => handleGenerateReminder(invoice.company)}
                       >
-                        Send Reminder
+                        Generate Reminder
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -265,6 +312,52 @@ const AdminDashboard = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Reminder Dialog */}
+      <Dialog open={reminderDialog.isOpen} onOpenChange={(isOpen) => !isOpen && setReminderDialog(prev => ({ ...prev, isOpen: false }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Payment Reminder</DialogTitle>
+            <DialogDescription>
+              Send payment reminder to {reminderDialog.company}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-4">
+              {reminderDialog.emails.map((email) => (
+                <div key={email} className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span className="flex-1">{email}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveEmail(email)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add email address"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                type="email"
+              />
+              <Button onClick={handleAddEmail} variant="secondary">Add</Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReminderDialog({ isOpen: false, company: "", emails: [] })}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendReminder}>
+              Send Reminder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
