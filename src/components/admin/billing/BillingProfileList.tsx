@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   CreditCard, 
@@ -14,8 +15,10 @@ import { BillingProfile } from "./types";
 import { BillingProfileDetail } from "./BillingProfileDetail";
 import { ClientBillingConfirmation } from "./ClientBillingConfirmation";
 import { PaymentMethodEntry } from "./PaymentMethodEntry";
+import { useToast } from "@/hooks/use-toast";
 
 export function BillingProfileList() {
+  const { toast } = useToast();
   const [selectedProfile, setSelectedProfile] = useState<BillingProfile | null>(null);
   const [viewMode, setViewMode] = useState<'detail' | 'confirmation' | 'payment'>('detail');
   
