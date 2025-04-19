@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -30,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { PaymentMethod, PaymentTerm } from "./types";
 
 const clientSetupSchema = z.object({
   clientName: z.string().min(1, { message: "Client name is required" }),
@@ -79,15 +77,12 @@ export function ClientSetupForm({ onClose, onSubmit }: ClientSetupFormProps) {
       description: `Billing profile created for ${data.clientName}`,
     });
     
-    // Show confirmation or close directly
+    // Show confirmation screen
     setShowConfirmation(true);
-    
-    // Close after a delay if showing confirmation
-    if (!showConfirmation) {
-      setTimeout(() => {
-        onSubmit();
-      }, 1500);
-    }
+  };
+
+  const handleContinue = () => {
+    onSubmit();
   };
 
   return (
@@ -257,7 +252,7 @@ export function ClientSetupForm({ onClose, onSubmit }: ClientSetupFormProps) {
               <p className="text-center text-muted-foreground mb-6">
                 The client billing profile has been created and an onboarding email has been sent.
               </p>
-              <Button onClick={onSubmit}>Continue</Button>
+              <Button onClick={handleContinue}>Continue</Button>
             </div>
           </>
         )}
