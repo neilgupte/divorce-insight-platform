@@ -24,22 +24,10 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
-import InvoiceHistory from "@/pages/admin/InvoiceHistory";
-
-// Admin dashboard imports
-import AdminLayout from "@/components/admin/AdminLayout";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import Companies from "@/pages/admin/Companies";
-import CompanyDetail from "@/pages/admin/CompanyDetail";
-import Modules from "@/pages/admin/Modules";
-import Users from "@/pages/admin/Users";
-import Billing from "@/pages/admin/Billing";
-import SystemLogs from "@/pages/admin/SystemLogs";
-import AdminSettings from "@/pages/admin/AdminSettings";
+import InvoiceHistory from "@/pages/InvoiceHistory";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
   const { user, hasPermission } = useAuth();
 
@@ -68,7 +56,6 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
                   
-                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
@@ -87,7 +74,6 @@ const App = () => (
                       <MainLayout />
                     </ProtectedRoute>
                   }>
-                    {/* Real Estate IQ Module Routes */}
                     <Route path="dashboard" element={
                       <ProtectedRoute requiredPermission="dashboard:view">
                         <Dashboard />
@@ -139,7 +125,6 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    {/* Labour Planning Module Routes */}
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
                         <LabourPlanningDashboard />
@@ -198,7 +183,6 @@ const App = () => (
                         </div>
                       </ProtectedRoute>
                     } />
-                    {/* Add the new invoices route */}
                     <Route path="invoices" element={
                       <ProtectedRoute>
                         <InvoiceHistory />

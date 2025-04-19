@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ import {
 
 const MainLayout = () => {
   const { user, logout } = useAuth();
-  const { notifications } = useMessaging();
+  const { unreadTotal } = useMessaging();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
