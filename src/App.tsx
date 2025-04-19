@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,7 +24,6 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
-import InvoiceHistory from "@/pages/InvoiceHistory";
 
 // Admin dashboard imports
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -40,6 +38,7 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
+// Protected route component
 const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
   const { user, hasPermission } = useAuth();
 
@@ -68,6 +67,7 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
                   
+                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
@@ -86,6 +86,7 @@ const App = () => (
                       <MainLayout />
                     </ProtectedRoute>
                   }>
+                    {/* Real Estate IQ Module Routes */}
                     <Route path="dashboard" element={
                       <ProtectedRoute requiredPermission="dashboard:view">
                         <Dashboard />
@@ -137,6 +138,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
+                    {/* Labour Planning Module Routes */}
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
                         <LabourPlanningDashboard />
@@ -193,11 +195,6 @@ const App = () => (
                           <h1 className="text-3xl font-bold">Network Optimization</h1>
                           <p className="mt-4 text-muted-foreground">Coming soon: Supply chain optimization tools.</p>
                         </div>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="invoices" element={
-                      <ProtectedRoute>
-                        <InvoiceHistory />
                       </ProtectedRoute>
                     } />
                   </Route>
