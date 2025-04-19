@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +26,17 @@ import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
 import InvoiceHistory from "@/pages/InvoiceHistory";
+
+// Admin dashboard imports
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Companies from "@/pages/admin/Companies";
+import CompanyDetail from "@/pages/admin/CompanyDetail";
+import Modules from "@/pages/admin/Modules";
+import Users from "@/pages/admin/Users";
+import Billing from "@/pages/admin/Billing";
+import SystemLogs from "@/pages/admin/SystemLogs";
+import AdminSettings from "@/pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
