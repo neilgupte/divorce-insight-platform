@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,27 +24,10 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
-
-// Labour Planning imports
-import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
-import TaskMapping from "@/pages/labour-planning/TaskMapping";
-import ModelRuns from "@/pages/labour-planning/ModelRuns";
-import ModelResults from "@/pages/labour-planning/ModelResults";
-
-// Admin dashboard imports
-import AdminLayout from "@/components/admin/AdminLayout";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import Companies from "@/pages/admin/Companies";
-import CompanyDetail from "@/pages/admin/CompanyDetail";
-import Modules from "@/pages/admin/Modules";
-import Users from "@/pages/admin/Users";
-import Billing from "@/pages/admin/Billing";
-import SystemLogs from "@/pages/admin/SystemLogs";
-import AdminSettings from "@/pages/admin/AdminSettings";
+import LabourPotential from "@/pages/LabourPotential";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
   const { user, hasPermission } = useAuth();
 
@@ -74,7 +56,6 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
                   
-                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
@@ -93,7 +74,6 @@ const App = () => (
                       <MainLayout />
                     </ProtectedRoute>
                   }>
-                    {/* Real Estate IQ Module Routes */}
                     <Route path="dashboard" element={
                       <ProtectedRoute requiredPermission="dashboard:view">
                         <Dashboard />
@@ -145,7 +125,6 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    {/* Labour Planning Module Routes */}
                     <Route path="labour-planning" element={
                       <ProtectedRoute>
                         <LabourPlanningDashboard />
@@ -191,10 +170,7 @@ const App = () => (
                     } />
                     <Route path="labour-potential" element={
                       <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Labour Potential</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Workforce potential analysis tools.</p>
-                        </div>
+                        <LabourPotential />
                       </ProtectedRoute>
                     } />
                     <Route path="multivariate" element={
