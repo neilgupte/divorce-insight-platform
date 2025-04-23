@@ -124,13 +124,19 @@ const App = () => (
                     } />
 
                     {/* ✅ Labour Potential Routes (NEW) */}
-                    <Route path="labour-potential" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
-                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
-                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
-                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
-                      <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
-                    </Route>
+                   <Route path="labour-potential" element={
+  <ProtectedRoute>
+    <MainLayout />
+  </ProtectedRoute>
+}>
+  <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
+  <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
+  <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
+  <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
+  <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+  <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
+</Route>
+
 
                     {/* Placeholder Modules */}
                     <Route path="multivariate" element={
