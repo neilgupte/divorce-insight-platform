@@ -124,11 +124,7 @@ const App = () => (
                     } />
 
                     {/* ✅ Labour Potential Routes (NEW) */}
-                   <Route path="labour-potential" element={
-  <ProtectedRoute>
-    <MainLayout />
-  </ProtectedRoute>
-}>
+                   <Route path="labour-potential" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
   <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
   <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
   <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
@@ -136,6 +132,7 @@ const App = () => (
   <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
   <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
 </Route>
+
 
 
                     {/* Placeholder Modules */}
