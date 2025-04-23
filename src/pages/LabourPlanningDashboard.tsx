@@ -7,7 +7,8 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  ClipboardList
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -82,7 +83,7 @@ const LabourPlanningDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [modelToDelete, setModelToDelete<number | null>(null);
+  const [modelToDelete, setModelToDelete] = useState<number | null>(null);
 
   const handleDeleteClick = (id: number) => {
     setModelToDelete(id);
