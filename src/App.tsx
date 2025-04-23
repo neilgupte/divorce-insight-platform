@@ -124,7 +124,7 @@ const App = () => (
                     } />
 
                     {/* ✅ Labour Potential Routes (NEW) */}
-                    <Route path="labour-potential" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                    <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
                       <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
                       <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
                       <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
