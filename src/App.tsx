@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -38,7 +37,13 @@ import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
 import TaskMapping from "@/pages/labour-planning/TaskMapping";
 import ModelRuns from "@/pages/labour-planning/ModelRuns";
 import ModelResults from "@/pages/labour-planning/ModelResults";
-import LabourPotential from "@/pages/LabourPotential";
+
+// 👇 Import Labour Potential pages
+import LabourDashboard from "@/components/labour-potential/LabourDashboard";
+import SearchLocation from "@/components/labour-potential/SearchLocation";
+import SupplyDemandView from "@/components/labour-potential/SupplyDemandView";
+import MarketReportGenerator from "@/components/labour-potential/MarketReportGenerator";
+import LabourSettings from "@/components/labour-potential/LabourSettings";
 
 const queryClient = new QueryClient();
 
@@ -69,7 +74,8 @@ const App = () => (
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
-                  
+
+                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
@@ -82,98 +88,32 @@ const App = () => (
                     <Route path="logs" element={<SystemLogs />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
-                  
+
+                  {/* Main App Routes */}
                   <Route path="/" element={
                     <ProtectedRoute>
                       <MainLayout />
                     </ProtectedRoute>
                   }>
-                    <Route path="dashboard" element={
-                      <ProtectedRoute requiredPermission="dashboard:view">
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="location" element={
-                      <ProtectedRoute requiredPermission="location:view">
-                        <LocationAnalyzer />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="luxury-locations" element={
-                      <ProtectedRoute requiredPermission="location:view">
-                        <LuxuryLocations />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="reports" element={
-                      <ProtectedRoute requiredPermission="reports:view">
-                        <ReportGenerator />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="documents" element={
-                      <ProtectedRoute requiredPermission="documents:view">
-                        <DocumentVault />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="assistant" element={
-                      <ProtectedRoute requiredPermission="assistant:view">
-                        <AIAssistant />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="users" element={
-                      <ProtectedRoute requiredPermission="users:manage">
-                        <UserManagement />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="settings" element={
-                      <ProtectedRoute requiredPermission="settings:manage">
-                        <Settings />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="audit-logs" element={
-                      <ProtectedRoute requiredPermission="logs:view">
-                        <AuditLogs />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="help" element={
-                      <ProtectedRoute>
-                        <HelpSupport />
-                      </ProtectedRoute>
-                    } />
+                    <Route path="dashboard" element={<ProtectedRoute requiredPermission="dashboard:view"><Dashboard /></ProtectedRoute>} />
+                    <Route path="location" element={<ProtectedRoute requiredPermission="location:view"><LocationAnalyzer /></ProtectedRoute>} />
+                    <Route path="luxury-locations" element={<ProtectedRoute requiredPermission="location:view"><LuxuryLocations /></ProtectedRoute>} />
+                    <Route path="reports" element={<ProtectedRoute requiredPermission="reports:view"><ReportGenerator /></ProtectedRoute>} />
+                    <Route path="documents" element={<ProtectedRoute requiredPermission="documents:view"><DocumentVault /></ProtectedRoute>} />
+                    <Route path="assistant" element={<ProtectedRoute requiredPermission="assistant:view"><AIAssistant /></ProtectedRoute>} />
+                    <Route path="users" element={<ProtectedRoute requiredPermission="users:manage"><UserManagement /></ProtectedRoute>} />
+                    <Route path="settings" element={<ProtectedRoute requiredPermission="settings:manage"><Settings /></ProtectedRoute>} />
+                    <Route path="audit-logs" element={<ProtectedRoute requiredPermission="logs:view"><AuditLogs /></ProtectedRoute>} />
+                    <Route path="help" element={<ProtectedRoute><HelpSupport /></ProtectedRoute>} />
 
-                    <Route path="labour-planning" element={
-                      <ProtectedRoute>
-                        <LabourPlanningDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/create" element={
-                      <ProtectedRoute>
-                        <CreateLabourModel />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/create/:modelId" element={
-                      <ProtectedRoute>
-                        <CreateLabourModel />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/task-mapping" element={
-                      <ProtectedRoute>
-                        <TaskMapping />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/model-runs" element={
-                      <ProtectedRoute>
-                        <ModelRuns />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/model-runs/:runId" element={
-                      <ProtectedRoute>
-                        <ModelResults />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/locations" element={
-                      <ProtectedRoute>
-                        <LabourPlanningLocations />
-                      </ProtectedRoute>
-                    } />
+                    {/* Labour Planning */}
+                    <Route path="labour-planning" element={<ProtectedRoute><LabourPlanningDashboard /></ProtectedRoute>} />
+                    <Route path="labour-planning/create" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
+                    <Route path="labour-planning/create/:modelId" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
+                    <Route path="labour-planning/task-mapping" element={<ProtectedRoute><TaskMapping /></ProtectedRoute>} />
+                    <Route path="labour-planning/model-runs" element={<ProtectedRoute><ModelRuns /></ProtectedRoute>} />
+                    <Route path="labour-planning/model-runs/:runId" element={<ProtectedRoute><ModelResults /></ProtectedRoute>} />
+                    <Route path="labour-planning/locations" element={<ProtectedRoute><LabourPlanningLocations /></ProtectedRoute>} />
                     <Route path="labour-planning/settings" element={
                       <ProtectedRoute>
                         <div className="p-8">
@@ -182,11 +122,17 @@ const App = () => (
                         </div>
                       </ProtectedRoute>
                     } />
-                    <Route path="labour-potential" element={
-                      <ProtectedRoute>
-                        <LabourPotential />
-                      </ProtectedRoute>
-                    } />
+
+                    {/* ✅ Labour Potential Routes (NEW) */}
+                    <Route path="labour-potential" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
+                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
+                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
+                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
+                    </Route>
+
+                    {/* Placeholder Modules */}
                     <Route path="multivariate" element={
                       <ProtectedRoute>
                         <div className="p-8">
@@ -204,7 +150,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                   </Route>
-                  
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
