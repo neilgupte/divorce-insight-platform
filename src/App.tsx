@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,12 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
+
+// Labour Planning imports
+import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
+import TaskMapping from "@/pages/labour-planning/TaskMapping";
+import ModelRuns from "@/pages/labour-planning/ModelRuns";
+import ModelResults from "@/pages/labour-planning/ModelResults";
 
 // Admin dashboard imports
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -144,32 +151,41 @@ const App = () => (
                         <LabourPlanningDashboard />
                       </ProtectedRoute>
                     } />
+                    <Route path="labour-planning/create" element={
+                      <ProtectedRoute>
+                        <CreateLabourModel />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/create/:modelId" element={
+                      <ProtectedRoute>
+                        <CreateLabourModel />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/task-mapping" element={
+                      <ProtectedRoute>
+                        <TaskMapping />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/model-runs" element={
+                      <ProtectedRoute>
+                        <ModelRuns />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="labour-planning/model-runs/:runId" element={
+                      <ProtectedRoute>
+                        <ModelResults />
+                      </ProtectedRoute>
+                    } />
                     <Route path="labour-planning/locations" element={
                       <ProtectedRoute>
                         <LabourPlanningLocations />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/reports" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Labour Planning Reports</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Report generation for labour planning.</p>
-                        </div>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="labour-planning/schedule" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Labour Planning Schedule</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Schedule management tools.</p>
-                        </div>
                       </ProtectedRoute>
                     } />
                     <Route path="labour-planning/settings" element={
                       <ProtectedRoute>
                         <div className="p-8">
                           <h1 className="text-3xl font-bold">Labour Planning Settings</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Configuration options for labour planning.</p>
+                          <p className="mt-4 text-muted-foreground">Configuration options for labour planning.</p>
                         </div>
                       </ProtectedRoute>
                     } />

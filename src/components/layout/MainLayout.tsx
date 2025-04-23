@@ -1,11 +1,12 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight, Brain, MapPin } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings, Activity, HelpCircle, ChevronLeft, ChevronRight, Brain, MapPin, Clock, GitMerge, History } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -114,15 +115,21 @@ const MainLayout = () => {
       permission: ""
     },
     {
-      name: "Reports",
-      icon: FileText,
-      path: "/labour-planning/reports",
+      name: "Create Labour Model",
+      icon: Clock,
+      path: "/labour-planning/create",
       permission: ""
     },
     {
-      name: "Labour Planning",
-      icon: Users,
-      path: "/labour-planning/schedule",
+      name: "Task Mapping",
+      icon: GitMerge,
+      path: "/labour-planning/task-mapping",
+      permission: ""
+    },
+    {
+      name: "Model Runs",
+      icon: History,
+      path: "/labour-planning/model-runs",
       permission: ""
     },
     {
@@ -220,7 +227,7 @@ const MainLayout = () => {
               </Link>
             ))}
 
-            {filteredAdminMenuItems.length > 0 && (
+            {filteredAdminMenuItems.length > 0 && activeModule !== 'labour-planning' && (
               <>
                 <div className="my-2 border-t border-sidebar-border"></div>
                 {!sidebarCollapsed && (
