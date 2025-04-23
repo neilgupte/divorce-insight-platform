@@ -20,26 +20,30 @@ const LabourPotential = () => {
   };
   
   return (
-  <div className="flex-1 overflow-auto">
-    {activeView === "dashboard" && (
-      <LabourDashboard onNewAnalysis={() => setActiveView("search")} />
-    )}
-    {activeView === "search" && (
-      <SearchLocation onRunAnalysis={handleRunAnalysis} />
-    )}
-    {activeView === "supply-demand" && (
-      <SupplyDemandView 
-        location={selectedLocation} 
-        onGenerateReport={() => setActiveView("reports")}
-      />
-    )}
-    {activeView === "reports" && (
-      <MarketReportGenerator location={selectedLocation} />
-    )}
-    {activeView === "settings" && (
-      <LabourSettings />
-    )}
-  </div>
-);
+    <div className="flex h-full min-h-[calc(100vh-4rem)]">
+      <LabourSidebar activeView={activeView} setActiveView={setActiveView} />
+      <div className="flex-1 overflow-auto">
+        {activeView === "dashboard" && (
+          <LabourDashboard onNewAnalysis={() => setActiveView("search")} />
+        )}
+        {activeView === "search" && (
+          <SearchLocation onRunAnalysis={handleRunAnalysis} />
+        )}
+        {activeView === "supply-demand" && (
+          <SupplyDemandView 
+            location={selectedLocation} 
+            onGenerateReport={() => setActiveView("reports")}
+          />
+        )}
+        {activeView === "reports" && (
+          <MarketReportGenerator location={selectedLocation} />
+        )}
+        {activeView === "settings" && (
+          <LabourSettings />
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default LabourPotential;
