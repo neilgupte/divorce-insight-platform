@@ -1,11 +1,8 @@
+import MainLayout from "@/components/layout/MainLayout";
 import { Outlet } from "react-router-dom";
 
 const LabourPotential = () => {
-  return (
-    <div className="flex-1 overflow-auto">
-      <Outlet />
-    </div>
-  );
+  return <MainLayout><Outlet /></MainLayout>;
 };
 
 export default LabourPotential;
