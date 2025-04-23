@@ -1,25 +1,14 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Download, 
-  Upload,
-  Search,
-  Clock,
-  Users,
-  FileText,
-  X
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
+import { ArrowLeft, Search, Plus, GitMerge, SlidersHorizontal, Save } from "lucide-react";
+import { 
   Table,
   TableBody,
   TableCell,
@@ -27,456 +16,270 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-
-interface Task {
-  id: string;
-  name: string;
-  duration: number;
-  role: string;
-  template: string;
-  tags: string[];
-}
 
 const TaskMapping = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
   
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", name: "Prescription Filling", duration: 5, role: "Technician", template: "Pharmacy Standard", tags: ["pharmacy", "core"] },
-    { id: "2", name: "Patient Consultation", duration: 10, role: "Pharmacist", template: "Pharmacy Standard", tags: ["pharmacy", "customer"] },
-    { id: "3", name: "Inventory Management", duration: 15, role: "Both", template: "Pharmacy Standard", tags: ["pharmacy", "inventory"] },
-    { id: "4", name: "Phone Calls", duration: 3, role: "Both", template: "Pharmacy Standard", tags: ["pharmacy", "communication"] },
-    { id: "5", name: "Ordering", duration: 20, role: "Pharmacist", template: "Inventory", tags: ["inventory", "admin"] },
-    { id: "6", name: "Cleaning", duration: 30, role: "Technician", template: "Maintenance", tags: ["maintenance"] },
-    { id: "7", name: "Training", duration: 60, role: "Both", template: "HR", tags: ["development", "hr"] },
-    { id: "8", name: "Documentation", duration: 15, role: "Pharmacist", template: "Admin", tags: ["admin", "compliance"] }
+  // Sample data for the task mapping
+  const [tasks] = useState([
+    { 
+      id: 1, 
+      name: "Prescription Filling", 
+      type: "Core", 
+      roleSplit: { pharmacist: 30, technician: 70 }, 
+      configurable: true 
+    },
+    { 
+      id: 2, 
+      name: "Patient Consultation", 
+      type: "Core", 
+      roleSplit: { pharmacist: 100, technician: 0 }, 
+      configurable: false 
+    },
+    { 
+      id: 3, 
+      name: "Medication Review", 
+      type: "Core", 
+      roleSplit: { pharmacist: 100, technician: 0 }, 
+      configurable: false 
+    },
+    { 
+      id: 4, 
+      name: "Inventory Management", 
+      type: "Support", 
+      roleSplit: { pharmacist: 20, technician: 80 }, 
+      configurable: true 
+    },
+    { 
+      id: 5, 
+      name: "Order Entry", 
+      type: "Support", 
+      roleSplit: { pharmacist: 10, technician: 90 }, 
+      configurable: true 
+    },
+    { 
+      id: 6, 
+      name: "Administrative Work", 
+      type: "Support", 
+      roleSplit: { pharmacist: 50, technician: 50 }, 
+      configurable: true 
+    }
   ]);
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("all");
-  const [selectedRole, setSelectedRole] = useState("all");
-  
-  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
-  const templates = ["Pharmacy Standard", "Inventory", "Maintenance", "HR", "Admin"];
-  const roles = ["Pharmacist", "Technician", "Both"];
-
-  const handleEditTask = (task: Task) => {
-    setCurrentTask({ ...task });
-    setIsEditing(true);
-    setTaskDialogOpen(true);
-  };
-
-  const handleAddTask = () => {
-    setCurrentTask({
-      id: "",
-      name: "",
-      duration: 5,
-      role: "Technician",
-      template: "Pharmacy Standard",
-      tags: []
-    });
-    setIsEditing(false);
-    setTaskDialogOpen(true);
-  };
-
-  const handleDeleteClick = (taskId: string) => {
-    setTaskToDelete(taskId);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (taskToDelete) {
-      setTasks(tasks.filter(task => task.id !== taskToDelete));
-      setDeleteDialogOpen(false);
-      setTaskToDelete(null);
-      
-      toast({
-        title: "Task deleted",
-        description: "The task has been removed from the library."
-      });
-    }
-  };
-
-  const handleSaveTask = () => {
-    if (!currentTask || !currentTask.name) return;
-    
-    let updatedTasks = [...tasks];
-    const taskToSave: Task = {
-      ...currentTask,
-      id: currentTask.id || Math.random().toString(36).substr(2, 9)
-    };
-    
-    if (isEditing) {
-      updatedTasks = updatedTasks.map(task => 
-        task.id === taskToSave.id ? taskToSave : task
-      );
-    } else {
-      updatedTasks.push(taskToSave);
-    }
-    
-    setTasks(updatedTasks);
-    setTaskDialogOpen(false);
-    
-    toast({
-      title: isEditing ? "Task updated" : "Task added",
-      description: `Task "${taskToSave.name}" has been ${isEditing ? "updated" : "added"} to the library.`
-    });
-  };
-
-  // Filter tasks based on search and filters
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          task.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesTemplate = selectedTemplate === "all" || task.template === selectedTemplate;
-    const matchesRole = selectedRole === "all" || task.role === selectedRole;
-    
-    return matchesSearch && matchesTemplate && matchesRole;
-  });
-
-  // Add a tag to the current task
-  const [newTag, setNewTag] = useState("");
-  
-  const handleAddTag = () => {
-    if (!newTag.trim() || !currentTask) return;
-    
-    const tag = newTag.trim().toLowerCase();
-    if (!currentTask.tags.includes(tag)) {
-      setCurrentTask({
-        ...currentTask,
-        tags: [...currentTask.tags, tag]
-      });
-    }
-    
-    setNewTag("");
-  };
-  
-  const handleRemoveTag = (tag: string) => {
-    if (!currentTask) return;
-    
-    setCurrentTask({
-      ...currentTask,
-      tags: currentTask.tags.filter(t => t !== tag)
-    });
-  };
+  // Sample data for task templates
+  const [templates] = useState([
+    { id: 1, name: "Standard Pharmacy", tasks: 12, lastUpdated: "2025-03-15" },
+    { id: 2, name: "High-Volume Pharmacy", tasks: 15, lastUpdated: "2025-02-28" },
+    { id: 3, name: "Hospital Pharmacy", tasks: 18, lastUpdated: "2025-01-10" },
+    { id: 4, name: "Clinic Setting", tasks: 10, lastUpdated: "2025-04-01" }
+  ]);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center mb-2">
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-2 text-muted-foreground" 
+          onClick={() => navigate('/labour-planning')}
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+        </Button>
+      </div>
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Task Mapping</h1>
           <p className="text-muted-foreground">
-            Manage global task templates for labour planning models
+            Configure tasks and role assignments for labour models
           </p>
         </div>
-        <div className="space-x-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Export as CSV</DropdownMenuItem>
-              <DropdownMenuItem>Export as Excel</DropdownMenuItem>
-              <DropdownMenuItem>Export as JSON</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <Button onClick={handleAddTask}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Task
+        
+        <div className="flex gap-2">
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Add New Task
+          </Button>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Save className="h-4 w-4" /> Save Template
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Library</CardTitle>
-          <CardDescription>
-            Browse and manage standardized tasks for labour models
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="md:w-1/2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input 
-                  className="pl-10" 
-                  placeholder="Search tasks or tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+      <Tabs defaultValue="tasks">
+        <TabsList>
+          <TabsTrigger value="tasks">Task Library</TabsTrigger>
+          <TabsTrigger value="templates">Task Templates</TabsTrigger>
+          <TabsTrigger value="settings">Mapping Settings</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tasks" className="space-y-4 pt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Task Library</CardTitle>
+              <CardDescription>
+                Manage all available tasks and their role assignments
+              </CardDescription>
+              <div className="mt-2 relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search tasks..." className="pl-8" />
               </div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:w-1/2">
-              <div>
-                <Label htmlFor="template-filter" className="mb-1 block">Template</Label>
-                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                  <SelectTrigger id="template-filter">
-                    <SelectValue placeholder="Filter by template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Templates</SelectItem>
-                    {templates.map(template => (
-                      <SelectItem key={template} value={template}>{template}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="role-filter" className="mb-1 block">Role</Label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger id="role-filter">
-                    <SelectValue placeholder="Filter by role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    {roles.map(role => (
-                      <SelectItem key={role} value={role}>{role}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {filteredTasks.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <h3 className="mt-4 text-lg font-medium">No tasks found</h3>
-              <p className="text-muted-foreground">
-                {searchTerm || selectedTemplate !== "all" || selectedRole !== "all" 
-                  ? "Try adjusting your search or filters"
-                  : "Create your first task to get started"}
-              </p>
-              <Button className="mt-4" onClick={handleAddTask}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Task
-              </Button>
-            </div>
-          ) : (
-            <div className="border rounded-md overflow-auto">
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Task Name</TableHead>
-                    <TableHead>
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-4 w-4" />
-                        Duration
-                      </div>
-                    </TableHead>
-                    <TableHead>
-                      <div className="flex items-center">
-                        <Users className="mr-2 h-4 w-4" />
-                        Role
-                      </div>
-                    </TableHead>
-                    <TableHead>Template</TableHead>
-                    <TableHead>Tags</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Pharmacist %</TableHead>
+                    <TableHead>Technician %</TableHead>
+                    <TableHead>Configurable</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTasks.map((task) => (
+                  {tasks.map((task) => (
                     <TableRow key={task.id}>
                       <TableCell className="font-medium">{task.name}</TableCell>
-                      <TableCell>{task.duration} mins</TableCell>
-                      <TableCell>{task.role}</TableCell>
-                      <TableCell>{task.template}</TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {task.tags.map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          task.type === "Core" 
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                        }`}>
+                          {task.type}
+                        </span>
+                      </TableCell>
+                      <TableCell>{task.roleSplit.pharmacist}%</TableCell>
+                      <TableCell>{task.roleSplit.technician}%</TableCell>
+                      <TableCell>
+                        {task.configurable ? (
+                          <Checkbox checked disabled />
+                        ) : (
+                          <span className="text-sm text-muted-foreground">No</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEditTask(task)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(task.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Button variant="ghost" size="sm">Edit</Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="border-t p-6 flex justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredTasks.length} of {tasks.length} tasks
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => {}}>
-            <Upload className="mr-2 h-4 w-4" />
-            Import Tasks
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? "Edit Task" : "Add New Task"}</DialogTitle>
-            <DialogDescription>
-              {isEditing ? "Update task details below." : "Create a new task for the task library."}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="taskName">Task Name</Label>
-                <Input 
-                  id="taskName" 
-                  value={currentTask?.name || ""} 
-                  onChange={(e) => setCurrentTask(prev => prev ? { ...prev, name: e.target.value } : null)} 
-                  placeholder="Enter task name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes)</Label>
-                <Input 
-                  id="duration" 
-                  type="number" 
-                  value={currentTask?.duration || 0} 
-                  onChange={(e) => setCurrentTask(prev => prev ? { ...prev, duration: parseInt(e.target.value) || 0 } : null)} 
-                  min={1}
-                  max={120}
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select 
-                  value={currentTask?.role || "Technician"} 
-                  onValueChange={(value) => setCurrentTask(prev => prev ? { ...prev, role: value } : null)}
-                >
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pharmacist">Pharmacist</SelectItem>
-                    <SelectItem value="Technician">Technician</SelectItem>
-                    <SelectItem value="Both">Both</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="template">Template</Label>
-                <Select 
-                  value={currentTask?.template || "Pharmacy Standard"} 
-                  onValueChange={(value) => setCurrentTask(prev => prev ? { ...prev, template: value } : null)}
-                >
-                  <SelectTrigger id="template">
-                    <SelectValue placeholder="Select template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.map(template => (
-                      <SelectItem key={template} value={template}>{template}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <div className="flex gap-2 mb-2 flex-wrap">
-                {currentTask?.tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-4 w-4 p-0" 
-                      onClick={() => handleRemoveTag(tag)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="templates" className="space-y-4 pt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Task Templates</CardTitle>
+              <CardDescription>
+                Pre-configured task sets for different pharmacy environments
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {templates.map((template) => (
+                  <Card key={template.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-medium mb-1">{template.name}</h3>
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <GitMerge className="h-3 w-3 mr-1" />
+                            <span>{template.tasks} tasks</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Last updated: {template.lastUpdated}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">Use</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
+                
+                <Card className="border-dashed">
+                  <CardContent className="p-4 flex flex-col items-center justify-center h-full min-h-[120px]">
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" /> Create New Template
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="Add a tag" 
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddTag();
-                    }
-                  }}
-                />
-                <Button type="button" onClick={handleAddTag}>Add</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="settings" className="space-y-4 pt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Mapping Settings</CardTitle>
+              <CardDescription>
+                Configure global settings for task mapping
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="enforce-splits" />
+                    <Label htmlFor="enforce-splits">Enforce role splits across all models</Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground pl-6">
+                    When enabled, tasks will use the same role splits in all models
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="allow-override" checked />
+                    <Label htmlFor="allow-override">Allow model-specific overrides</Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground pl-6">
+                    When enabled, individual models can override the default task configurations
+                  </p>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <h3 className="font-medium mb-3 flex items-center gap-2">
+                    <SlidersHorizontal className="h-4 w-4" /> Default Role Allocations
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="default-prescription">Default Prescription Processing Split</Label>
+                      <div className="grid grid-cols-2 gap-4 mt-1">
+                        <div>
+                          <Label className="text-xs">Pharmacist %</Label>
+                          <Input id="default-prescription-pharm" type="number" value="30" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Technician %</Label>
+                          <Input id="default-prescription-tech" type="number" value="70" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="default-admin">Default Administrative Work Split</Label>
+                      <div className="grid grid-cols-2 gap-4 mt-1">
+                        <div>
+                          <Label className="text-xs">Pharmacist %</Label>
+                          <Input id="default-admin-pharm" type="number" value="50" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Technician %</Label>
+                          <Input id="default-admin-tech" type="number" value="50" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Tags help organize and find tasks more easily
-              </p>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveTask}>
-              {isEditing ? "Save Changes" : "Create Task"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
-            <DialogDescription>
-              This will permanently delete this task from the library. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

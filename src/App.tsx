@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { MessagingProvider } from "@/contexts/MessagingContext";
 import MainLayout from "@/components/layout/MainLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import LocationAnalyzer from "@/pages/LocationAnalyzer";
@@ -24,6 +26,18 @@ import HelpSupport from "@/pages/HelpSupport";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
 import AddCompany from "@/pages/admin/AddCompany";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Companies from "@/pages/admin/Companies";
+import CompanyDetail from "@/pages/admin/CompanyDetail";
+import Modules from "@/pages/admin/Modules";
+import Users from "@/pages/admin/Users";
+import Billing from "@/pages/admin/Billing";
+import SystemLogs from "@/pages/admin/SystemLogs";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
+import TaskMapping from "@/pages/labour-planning/TaskMapping";
+import ModelRuns from "@/pages/labour-planning/ModelRuns";
+import ModelResults from "@/pages/labour-planning/ModelResults";
 import LabourPotential from "@/pages/LabourPotential";
 
 const queryClient = new QueryClient();
