@@ -45,9 +45,9 @@ const LabourSidebar = ({ activeView, setActiveView }: LabourSidebarProps) => {
   ];
 
   return (
-    <div className="w-64 border-r bg-background">
+    <div className="w-64 border-r bg-sidebar">
       <div className="p-4 border-b">
-        <h2 className="font-semibold text-xl">Labour Potential</h2>
+        <h2 className="font-semibold text-xl text-sidebar-foreground">Labour Potential</h2>
       </div>
       <nav className="p-2">
         {menuItems.map((item) => (
@@ -55,10 +55,10 @@ const LabourSidebar = ({ activeView, setActiveView }: LabourSidebarProps) => {
             key={item.id}
             onClick={() => setActiveView(item.id)}
             className={cn(
-              "flex items-center gap-3 w-full p-3 rounded-md text-left mb-1 transition-colors",
+              "flex items-center gap-3 w-full p-3 rounded-md text-left mb-1 transition-colors text-sidebar-foreground",
               activeView === item.id
                 ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted"
+                : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
           >
             <item.icon className="h-5 w-5" />
