@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,6 +38,9 @@ import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
 import TaskMapping from "@/pages/labour-planning/TaskMapping";
 import ModelRuns from "@/pages/labour-planning/ModelRuns";
 import ModelResults from "@/pages/labour-planning/ModelResults";
+
+// Import the LabourPotential component
+import LabourPotential from "@/pages/LabourPotential";
 
 // 👇 Import Labour Potential pages
 import LabourDashboard from "@/components/labour-potential/LabourDashboard";
