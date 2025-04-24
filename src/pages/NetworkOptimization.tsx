@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -72,43 +72,44 @@ const navigation = [
 ];
 
 const NetworkOptimization = () => {
-  const location = useLocation();
-
   return (
-    <div className="flex h-full">
-      <div className="w-64 border-r bg-sidebar text-sidebar-foreground">
-        <nav className="p-4 space-y-1">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
+    <div className="flex flex-col h-full">
+      <div className="flex-1 grid grid-cols-[240px,1fr]">
+        {/* Network Navigation Sidebar */}
+        <aside className="border-r bg-card">
+          <nav className="p-4 space-y-2">
+            {navigation.map((item) => (
+              <a
                 key={item.path}
-                to={item.path}
+                href={item.path}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-md text-sm transition-colors",
-                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  "group relative",
-                  isActive 
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-                    : "text-sidebar-foreground/70"
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 )}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
                 <span>{item.name}</span>
-                {/* Tooltip */}
-                <div className="absolute left-full ml-2 invisible group-hover:visible bg-popover text-popover-foreground px-3 py-2 rounded-md text-xs w-48 z-50">
-                  {item.description}
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-      <div className="flex-1">
-        <Outlet />
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Content Area */}
+        <div className="min-h-full">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
 };
 
-export default NetworkOptimization;
+// Default export with redirect to dashboard
+export default function NetworkOptimizationWithRedirect() {
+  // If we're exactly at /network, redirect to /network/dashboard
+  if (window.location.pathname === '/network') {
+    return <Navigate to="/network/dashboard" replace />;
+  }
+  
+  return <NetworkOptimization />;
+}

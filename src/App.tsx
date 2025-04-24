@@ -34,32 +34,33 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
 
-        {/* Real Estate IQ Routes */}
+        {/* All routes wrapped in MainLayout & ProtectedRoute */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <MainLayout />
             </ProtectedRoute>
           }
         >
+          {/* Real Estate IQ Routes */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="location" element={<LocationAnalyzer />} />
           <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="settings" element={<Settings />} />
-        </Route>
-        
-        {/* Network Optimization Routes */}
-        <Route path="/network" element={<NetworkOptimization />}>
-          <Route path="dashboard" element={<NetworkDashboard />} />
-          <Route path="facilities" element={<NetworkFacilities />} />
-          <Route path="workforce" element={<NetworkWorkforce />} />
-          <Route path="coverage" element={<NetworkCoverage />} />
-          <Route path="scenarios" element={<NetworkScenarios />} />
-          <Route path="hiring" element={<NetworkHiring />} />
-          <Route path="recommendations" element={<NetworkRecommendations />} />
-          <Route path="logs" element={<NetworkLogs />} />
-          <Route path="help" element={<NetworkHelp />} />
+
+          {/* Network Optimization Routes */}
+          <Route path="network" element={<NetworkOptimization />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<NetworkDashboard />} />
+            <Route path="facilities" element={<NetworkFacilities />} />
+            <Route path="workforce" element={<NetworkWorkforce />} />
+            <Route path="coverage" element={<NetworkCoverage />} />
+            <Route path="scenarios" element={<NetworkScenarios />} />
+            <Route path="hiring" element={<NetworkHiring />} />
+            <Route path="recommendations" element={<NetworkRecommendations />} />
+            <Route path="logs" element={<NetworkLogs />} />
+            <Route path="help" element={<NetworkHelp />} />
+          </Route>
         </Route>
 
         {/* 404 Route */}
