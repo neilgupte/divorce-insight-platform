@@ -126,10 +126,18 @@ const App = () => (
 
                     <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
                       <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
-                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
-                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
-                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
-                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+                      <Route path="dashboard" element={<ProtectedRoute>
+                        <LabourDashboard onNewAnalysis={() => {}} />
+                      </ProtectedRoute>} />
+                      <Route path="search" element={<ProtectedRoute>
+                        <SearchLocation onRunAnalysis={() => {}} />
+                      </ProtectedRoute>} />
+                      <Route path="supply-vs-demand" element={<ProtectedRoute>
+                        <SupplyDemandView location="Sample Location" onGenerateReport={() => {}} />
+                      </ProtectedRoute>} />
+                      <Route path="reports" element={<ProtectedRoute>
+                        <MarketReportGenerator location="Sample Location" />
+                      </ProtectedRoute>} />
                       <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
                     </Route>
 
