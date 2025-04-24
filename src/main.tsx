@@ -7,6 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import { MessagingProvider } from '@/contexts/MessagingContext'
 import { ThemeProvider } from './components/ThemeProvider'
+import { Toaster } from "@/components/ui/toaster"
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <MessagingProvider>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <App />
+            <Toaster />
           </ThemeProvider>
         </MessagingProvider>
       </NotificationProvider>
