@@ -3,6 +3,15 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Network, Layers, Building, Cpu, Users, Clock, PieChart, MapPin } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 import NetworkMap from "./NetworkMap";
 import FacilityTable from "./FacilityTable";
 import InsightsPanel from "./InsightsPanel";
