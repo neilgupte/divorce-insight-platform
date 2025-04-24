@@ -76,7 +76,7 @@ const NetworkOptimization = () => {
 
   return (
     <div className="flex h-full">
-      <div className="w-64 border-r bg-card">
+      <div className="w-64 border-r bg-sidebar text-sidebar-foreground">
         <nav className="p-4 space-y-1">
           {navigation.map((item) => {
             const isActive = location.pathname === item.path;
@@ -86,9 +86,11 @@ const NetworkOptimization = () => {
                 to={item.path}
                 className={cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-md text-sm transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
+                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   "group relative",
-                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  isActive 
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                    : "text-sidebar-foreground/70"
                 )}
               >
                 <item.icon className="h-4 w-4 shrink-0" />

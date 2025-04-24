@@ -1,0 +1,3 @@
+
+import { NotFound } from "@/pages/NotFound";
+export default function NetworkHiring() { return <NotFound />; }
