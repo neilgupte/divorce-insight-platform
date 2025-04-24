@@ -1,8 +1,24 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Network, Layers, Building, Cpu, Users, Clock, PieChart, MapPin } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs";
+import {
+  Network,
+  Building,
+  Users,
+  Clock,
+  MapPin
+} from "lucide-react";
 import NetworkMap from "./NetworkMap";
 import FacilityTable from "./FacilityTable";
 import InsightsPanel from "./InsightsPanel";
@@ -140,69 +156,67 @@ const NetworkDashboard = () => {
         </Tabs>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Interactive Map Section */}
-        <Card className="lg:col-span-2 h-[500px] overflow-hidden">
-          <CardHeader className="p-4 pb-0">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg">Facility Network Map</CardTitle>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => toggleMapLayer('facilities')}
-                  className={`px-2 py-1 rounded-md text-xs ${mapLayers.facilities ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-                >
-                  Facilities
-                </button>
-                <button
-                  onClick={() => toggleMapLayer('commuteRadii')}
-                  className={`px-2 py-1 rounded-md text-xs ${mapLayers.commuteRadii ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-                >
-                  Commute Radii
-                </button>
-                <button
-                  onClick={() => toggleMapLayer('populationDensity')}
-                  className={`px-2 py-1 rounded-md text-xs ${mapLayers.populationDensity ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-                >
-                  Population
-                </button>
-                <button
-                  onClick={() => toggleMapLayer('laborHeatmap')}
-                  className={`px-2 py-1 rounded-md text-xs ${mapLayers.laborHeatmap ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-                >
-                  Labor Pool
-                </button>
+      {/* Map & Table side by side (60/40 split) */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-[60%] w-full">
+          <Card className="h-[500px] overflow-hidden">
+            <CardHeader className="p-4 pb-0">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">Facility Network Map</CardTitle>
+                <div className="flex space-x-2">
+                  {["facilities", "commuteRadii", "populationDensity", "laborHeatmap"].map(layer => (
+                    <button
+                      key={layer}
+                      onClick={() => toggleMapLayer(layer as keyof typeof mapLayers)}
+                      className={`px-2 py-1 rounded-md text-xs ${
+                        mapLayers[layer as keyof typeof mapLayers]
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {layer === "commuteRadii"
+                        ? "Commute Radii"
+                        : layer === "populationDensity"
+                        ? "Population"
+                        : layer === "laborHeatmap"
+                        ? "Labor Pool"
+                        : "Facilities"}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0 h-[calc(100%-60px)]">
-            <NetworkMap 
-              facilities={facilities} 
-              selectedFacility={selectedFacility}
-              onSelectFacility={handleFacilitySelect}
-              layers={mapLayers}
-            />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-0 h-[calc(100%-60px)]">
+              <NetworkMap
+                facilities={facilities}
+                selectedFacility={selectedFacility}
+                onSelectFacility={handleFacilitySelect}
+                layers={mapLayers}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Facility Table Section */}
-        <Card className="h-[500px] overflow-hidden">
-          <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg">Facility Overview</CardTitle>
-            <CardDescription className="text-xs">
-              {facilities.length} facilities, {facilities.reduce((sum, f) => sum + f.workers, 0)} workers total
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 pt-2 h-[calc(100%-90px)]">
-            <FacilityTable 
-              facilities={facilities} 
-              selectedFacilityId={selectedFacility?.id}
-              onSelectFacility={handleFacilitySelect}
-            />
-          </CardContent>
-        </Card>
+        <div className="lg:w-[40%] w-full">
+          <Card className="h-[500px] overflow-hidden">
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="text-lg">Facility Overview</CardTitle>
+              <CardDescription className="text-xs">
+                {facilities.length} facilities, {facilities.reduce((sum, f) => sum + f.workers, 0)} workers total
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 pt-2 h-[calc(100%-90px)]">
+              <FacilityTable
+                facilities={facilities}
+                selectedFacilityId={selectedFacility?.id}
+                onSelectFacility={handleFacilitySelect}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Insights & Recommendations */}
+      {/* Insights Section */}
       <Card>
         <CardHeader className="p-4 pb-2">
           <CardTitle className="text-lg">Insights & Recommendations</CardTitle>
@@ -215,7 +229,7 @@ const NetworkDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* KPI Summary Cards */}
+      {/* KPI Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
