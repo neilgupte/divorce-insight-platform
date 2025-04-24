@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -44,7 +45,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
-  const circles = useRef<{ [key: string]: mapboxgl.Marker }>({});
+  const circles = useRef<{ [key: string]: mapboxgl.Circle }>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -319,7 +320,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       .setLngLat([facility.lng, facility.lat])
       .addTo(map.current);
     
-    circles.current[facility.id] = circleMarker;
+    circles.current[facility.id] = circleMarker as any;
   };
 
   // Get color based on facility type

@@ -3,15 +3,6 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Network, Layers, Building, Cpu, Users, Clock, PieChart, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
 import NetworkMap from "./NetworkMap";
 import FacilityTable from "./FacilityTable";
 import InsightsPanel from "./InsightsPanel";
@@ -149,9 +140,9 @@ const NetworkDashboard = () => {
         </Tabs>
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
-        {/* Interactive Map Section - 60% width */}
-        <Card className="col-span-3 h-[500px] overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Interactive Map Section */}
+        <Card className="lg:col-span-2 h-[500px] overflow-hidden">
           <CardHeader className="p-4 pb-0">
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">Facility Network Map</CardTitle>
@@ -193,50 +184,20 @@ const NetworkDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Facility Table Section - 40% width */}
-        <Card className="col-span-2 h-[500px] overflow-hidden">
-          <CardHeader className="p-3">
-            <CardTitle className="text-base">Facility Overview</CardTitle>
+        {/* Facility Table Section */}
+        <Card className="h-[500px] overflow-hidden">
+          <CardHeader className="p-4 pb-0">
+            <CardTitle className="text-lg">Facility Overview</CardTitle>
             <CardDescription className="text-xs">
               {facilities.length} facilities, {facilities.reduce((sum, f) => sum + f.workers, 0)} workers total
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0 h-[calc(100%-80px)]">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs whitespace-nowrap">Facility Name</TableHead>
-                  <TableHead className="text-xs text-right">Workers</TableHead>
-                  <TableHead className="text-xs text-right">Needed</TableHead>
-                  <TableHead className="text-xs text-right">Value</TableHead>
-                  <TableHead className="text-xs text-right">Util %</TableHead>
-                  <TableHead className="text-xs text-right">Attr %</TableHead>
-                  <TableHead className="text-xs text-right">Commute</TableHead>
-                  <TableHead className="text-xs text-right">Index</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {facilities.map((facility) => (
-                  <TableRow 
-                    key={facility.id}
-                    className={cn(
-                      "cursor-pointer hover:bg-muted/50",
-                      selectedFacility?.id === facility.id && "bg-muted"
-                    )}
-                    onClick={() => handleFacilitySelect(facility)}
-                  >
-                    <TableCell className="text-xs whitespace-nowrap font-medium">{facility.name}</TableCell>
-                    <TableCell className="text-xs text-right">{facility.workers}</TableCell>
-                    <TableCell className="text-xs text-right">{facility.neededWorkers}</TableCell>
-                    <TableCell className="text-xs text-right">{(facility.marginalValue * 100).toFixed(0)}%</TableCell>
-                    <TableCell className="text-xs text-right">{(facility.utilisation * 100).toFixed(0)}%</TableCell>
-                    <TableCell className="text-xs text-right">{(facility.attrition * 100).toFixed(0)}%</TableCell>
-                    <TableCell className="text-xs text-right">{facility.commuteTime}m</TableCell>
-                    <TableCell className="text-xs text-right">{(facility.laborPoolIndex * 100).toFixed(0)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <CardContent className="p-0 pt-2 h-[calc(100%-90px)]">
+            <FacilityTable 
+              facilities={facilities} 
+              selectedFacilityId={selectedFacility?.id}
+              onSelectFacility={handleFacilitySelect}
+            />
           </CardContent>
         </Card>
       </div>

@@ -1,71 +1,165 @@
-
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+import { MessagingProvider } from "@/contexts/MessagingContext";
 import MainLayout from "@/components/layout/MainLayout";
-import NetworkOptimization from "@/pages/NetworkOptimization";
+import AdminLayout from "@/components/admin/AdminLayout";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import LocationAnalyzer from "@/pages/LocationAnalyzer";
-import AuditLogs from "@/pages/AuditLogs";
+import ReportGenerator from "@/pages/ReportGenerator";
+import DocumentVault from "@/pages/DocumentVault";
+import AIAssistant from "@/pages/AIAssistant";
+import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
-import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
-import { useAuth } from "@/contexts/AuthContext";
+import LuxuryLocations from "@/pages/LuxuryLocations";
+import Index from "@/pages/Index";
+import AuditLogs from "@/pages/AuditLogs";
+import HelpSupport from "@/pages/HelpSupport";
+import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
+import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
+import AddCompany from "@/pages/admin/AddCompany";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Companies from "@/pages/admin/Companies";
+import CompanyDetail from "@/pages/admin/CompanyDetail";
+import Modules from "@/pages/admin/Modules";
+import Users from "@/pages/admin/Users";
+import Billing from "@/pages/admin/Billing";
+import SystemLogs from "@/pages/admin/SystemLogs";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
+import TaskMapping from "@/pages/labour-planning/TaskMapping";
+import ModelRuns from "@/pages/labour-planning/ModelRuns";
+import ModelResults from "@/pages/labour-planning/ModelResults";
+import LabourPotential from "@/pages/LabourPotential";
+import LabourDashboard from "@/components/labour-potential/LabourDashboard";
+import SearchLocation from "@/components/labour-potential/SearchLocation";
+import SupplyDemandView from "@/components/labour-potential/SupplyDemandView";
+import MarketReportGenerator from "@/components/labour-potential/MarketReportGenerator";
+import LabourSettings from "@/components/labour-potential/LabourSettings";
+import NetworkOptimization from "@/pages/NetworkOptimization";
 import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
-import NetworkFacilities from "@/pages/network/NetworkFacilities";
-import NetworkWorkforce from "@/pages/network/NetworkWorkforce";
-import NetworkCoverage from "@/pages/network/NetworkCoverage";
-import NetworkScenarios from "@/pages/network/NetworkScenarios";
-import NetworkHiring from "@/pages/network/NetworkHiring";
-import NetworkRecommendations from "@/pages/network/NetworkRecommendations";
-import NetworkLogs from "@/pages/network/NetworkLogs";
-import NetworkHelp from "@/pages/network/NetworkHelp";
+import FacilityMap from "@/components/network-optimization/FacilityMap";
+import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
+import NetworkSettings from "@/components/network-optimization/NetworkSettings";
 
-// Protected Route component
-const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  return children;
+const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
+  const { user, hasPermission } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 };
 
-export default function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="system">
+      <AuthProvider>
+        <NotificationProvider>
+          <MessagingProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/" element={<Index />} />
 
-        {/* All routes wrapped in MainLayout & ProtectedRoute */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Real Estate IQ Routes */}
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="location" element={<LocationAnalyzer />} />
-          <Route path="audit-logs" element={<AuditLogs />} />
-          <Route path="settings" element={<Settings />} />
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="companies" element={<Companies />} />
+                    <Route path="companies/new" element={<AddCompany />} />
+                    <Route path="companies/:companyId" element={<CompanyDetail />} />
+                    <Route path="modules" element={<Modules />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="billing" element={<Billing />} />
+                    <Route path="logs" element={<SystemLogs />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
 
-          {/* Network Optimization Routes */}
-          <Route path="network" element={<NetworkOptimization />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<NetworkDashboard />} />
-            <Route path="facilities" element={<NetworkFacilities />} />
-            <Route path="workforce" element={<NetworkWorkforce />} />
-            <Route path="coverage" element={<NetworkCoverage />} />
-            <Route path="scenarios" element={<NetworkScenarios />} />
-            <Route path="hiring" element={<NetworkHiring />} />
-            <Route path="recommendations" element={<NetworkRecommendations />} />
-            <Route path="logs" element={<NetworkLogs />} />
-            <Route path="help" element={<NetworkHelp />} />
-          </Route>
-        </Route>
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <MainLayout />
+                    </ProtectedRoute>
+                  }>
+                    <Route path="dashboard" element={<ProtectedRoute requiredPermission="dashboard:view"><Dashboard /></ProtectedRoute>} />
+                    <Route path="location" element={<ProtectedRoute requiredPermission="location:view"><LocationAnalyzer /></ProtectedRoute>} />
+                    <Route path="luxury-locations" element={<ProtectedRoute requiredPermission="location:view"><LuxuryLocations /></ProtectedRoute>} />
+                    <Route path="reports" element={<ProtectedRoute requiredPermission="reports:view"><ReportGenerator /></ProtectedRoute>} />
+                    <Route path="documents" element={<ProtectedRoute requiredPermission="documents:view"><DocumentVault /></ProtectedRoute>} />
+                    <Route path="assistant" element={<ProtectedRoute requiredPermission="assistant:view"><AIAssistant /></ProtectedRoute>} />
+                    <Route path="users" element={<ProtectedRoute requiredPermission="users:manage"><UserManagement /></ProtectedRoute>} />
+                    <Route path="settings" element={<ProtectedRoute requiredPermission="settings:manage"><Settings /></ProtectedRoute>} />
+                    <Route path="audit-logs" element={<ProtectedRoute requiredPermission="logs:view"><AuditLogs /></ProtectedRoute>} />
+                    <Route path="help" element={<ProtectedRoute><HelpSupport /></ProtectedRoute>} />
 
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
-  );
-}
+                    <Route path="labour-planning" element={<ProtectedRoute><LabourPlanningDashboard /></ProtectedRoute>} />
+                    <Route path="labour-planning/create" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
+                    <Route path="labour-planning/create/:modelId" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
+                    <Route path="labour-planning/task-mapping" element={<ProtectedRoute><TaskMapping /></ProtectedRoute>} />
+                    <Route path="labour-planning/model-runs" element={<ProtectedRoute><ModelRuns /></ProtectedRoute>} />
+                    <Route path="labour-planning/model-runs/:runId" element={<ProtectedRoute><ModelResults /></ProtectedRoute>} />
+                    <Route path="labour-planning/locations" element={<ProtectedRoute><LabourPlanningLocations /></ProtectedRoute>} />
+                    <Route path="labour-planning/settings" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Labour Planning Settings</h1>
+                          <p className="mt-4 text-muted-foreground">Configuration options for labour planning.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+
+                    <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
+                      <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
+                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
+                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
+                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
+                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
+                    </Route>
+
+                    <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
+                      <Route index element={<Navigate to="/network/dashboard" replace />} />
+                      <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
+                      <Route path="facilities" element={<ProtectedRoute><FacilityMap /></ProtectedRoute>} />
+                      <Route path="scenarios" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
+                    </Route>
+
+                    <Route path="multivariate" element={
+                      <ProtectedRoute>
+                        <div className="p-8">
+                          <h1 className="text-3xl font-bold">Multivariate Optimization</h1>
+                          <p className="mt-4 text-muted-foreground">Coming soon: Complex decision optimization tools.</p>
+                        </div>
+                      </ProtectedRoute>
+                    } />
+                  </Route>
+
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </MessagingProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+
+export default App;
