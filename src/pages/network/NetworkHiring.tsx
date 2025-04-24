@@ -1,3 +1,7 @@
 
-import { NotFound } from "@/pages/NotFound";
-export default function NetworkHiring() { return <NotFound />; }
+import React from "react";
+import NotFound from "@/pages/NotFound";
+
+export default function NetworkHiring() { 
+  return <NotFound />; 
+}
