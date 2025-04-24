@@ -2,8 +2,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-const LabourPotential = () => {
+const NetworkOptimization = () => {
   return <Outlet />;
 };
 
-export default LabourPotential;
+export default NetworkOptimization;

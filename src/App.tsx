@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -38,16 +37,17 @@ import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
 import TaskMapping from "@/pages/labour-planning/TaskMapping";
 import ModelRuns from "@/pages/labour-planning/ModelRuns";
 import ModelResults from "@/pages/labour-planning/ModelResults";
-
-// Import the LabourPotential component
 import LabourPotential from "@/pages/LabourPotential";
-
-// 👇 Import Labour Potential pages
 import LabourDashboard from "@/components/labour-potential/LabourDashboard";
 import SearchLocation from "@/components/labour-potential/SearchLocation";
 import SupplyDemandView from "@/components/labour-potential/SupplyDemandView";
 import MarketReportGenerator from "@/components/labour-potential/MarketReportGenerator";
 import LabourSettings from "@/components/labour-potential/LabourSettings";
+import NetworkOptimization from "@/pages/NetworkOptimization";
+import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
+import FacilityMap from "@/components/network-optimization/FacilityMap";
+import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
+import NetworkSettings from "@/components/network-optimization/NetworkSettings";
 
 const queryClient = new QueryClient();
 
@@ -79,7 +79,6 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
 
-                  {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
@@ -93,7 +92,6 @@ const App = () => (
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
-                  {/* Main App Routes */}
                   <Route path="/" element={
                     <ProtectedRoute>
                       <MainLayout />
@@ -110,7 +108,6 @@ const App = () => (
                     <Route path="audit-logs" element={<ProtectedRoute requiredPermission="logs:view"><AuditLogs /></ProtectedRoute>} />
                     <Route path="help" element={<ProtectedRoute><HelpSupport /></ProtectedRoute>} />
 
-                    {/* Labour Planning */}
                     <Route path="labour-planning" element={<ProtectedRoute><LabourPlanningDashboard /></ProtectedRoute>} />
                     <Route path="labour-planning/create" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
                     <Route path="labour-planning/create/:modelId" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
@@ -127,32 +124,28 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    {/* ✅ Labour Potential Routes (NEW) */}
-                   <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
-  <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
-  <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
-  <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
-  <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
-  <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
-  <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
-</Route>
+                    <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
+                      <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
+                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
+                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
+                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
+                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
+                    </Route>
 
+                    <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
+                      <Route index element={<Navigate to="/network/dashboard" replace />} />
+                      <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
+                      <Route path="facilities" element={<ProtectedRoute><FacilityMap /></ProtectedRoute>} />
+                      <Route path="scenarios" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
+                    </Route>
 
-
-                    {/* Placeholder Modules */}
                     <Route path="multivariate" element={
                       <ProtectedRoute>
                         <div className="p-8">
                           <h1 className="text-3xl font-bold">Multivariate Optimization</h1>
                           <p className="mt-4 text-muted-foreground">Coming soon: Complex decision optimization tools.</p>
-                        </div>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="network" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Network Optimization</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Supply chain optimization tools.</p>
                         </div>
                       </ProtectedRoute>
                     } />
