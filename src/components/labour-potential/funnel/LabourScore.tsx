@@ -69,7 +69,7 @@ const LabourScore: React.FC = () => {
       <div className="space-y-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-2">Current Score</div>
+            <div className="text-sm text-muted-foreground mb-2">Current Score (As of 25th April 2025)</div>
             <div className="text-3xl font-bold">{currentScore}/100</div>
           </CardContent>
         </Card>
