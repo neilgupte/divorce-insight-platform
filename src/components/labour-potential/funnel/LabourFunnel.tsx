@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Move, Trash, Save, X, Pencil } from "lucide-react";
+import { Plus, Move, Trash, Save, X, Pencil, Lock, Unlock, Info } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface FunnelStage {
