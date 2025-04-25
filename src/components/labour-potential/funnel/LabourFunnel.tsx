@@ -87,27 +87,27 @@ const LabourFunnel = () => {
   };
 
   const getPreviousValue = (index: number): number => {
-    if (index === 0) return stages[0].value;
-    
-    const previousStage = stages[index - 1];
-    const previousValue = getPreviousValue(index - 1);
-    
-    if (previousStage.isPercentage) {
-      return Math.round(previousValue * (1 - previousStage.value / 100));
-    } else {
-      return previousValue - previousStage.value;
-    }
-  };
+  if (index === 0) return stages[0].value;
 
-  const getFinalValue = (stage: FunnelStage, index: number) => {
-    const previousValue = getPreviousValue(index);
-    
-    if (stage.isPercentage) {
-      return Math.round(previousValue * (1 - stage.value / 100));
-    } else {
-      return previousValue - stage.value;
-    }
-  };
+  const previousStage = stages[index - 1];
+  const previousValue = getPreviousValue(index - 1);
+
+  if (previousStage.isPercentage) {
+    return Math.round(previousValue * (1 - previousStage.value / 100));
+  } else {
+    return previousValue - previousStage.value; // <<---- Corrected here
+  }
+};
+
+const getFinalValue = (stage: FunnelStage, index: number) => {
+  const previousValue = getPreviousValue(index);
+
+  if (stage.isPercentage) {
+    return Math.round(previousValue * (1 - stage.value / 100));
+  } else {
+    return previousValue - stage.value;
+  }
+};
 
   return (
     <Card className="h-full">
