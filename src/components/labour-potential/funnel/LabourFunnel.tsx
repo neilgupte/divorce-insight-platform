@@ -123,10 +123,10 @@ const getFinalValue = (stage: FunnelStage, index: number) => {
           <Droppable droppableId="funnelStages">
             {(provided) => (
               <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="space-y-3"
-              >
+  {...provided.droppableProps}
+  ref={provided.innerRef}
+  className="space-y-3 flex flex-col items-center"
+>
                 {stages.map((stage, index) => {
                   const finalValue = getFinalValue(stage, index);
                   return (
