@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash } from "lucide-react";
+import { Plus, Move, Trash, Pencil } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import clsx from "clsx";
 
 interface FunnelStage {
   id: string;
@@ -17,178 +16,130 @@ interface FunnelStage {
 
 const LabourFunnel: React.FC = () => {
   const [stages, setStages] = useState<FunnelStage[]>([
-    {
-      id: uuidv4(),
-      name: "Total Hireable Market",
-      value: 100000,
-      isPercentage: false,
-      color: "#6366F1"
-    },
-    {
-      id: uuidv4(),
-      name: "Experience/Wage Cut",
-      value: 30,
-      isPercentage: true,
-      color: "#8B5CF6"
-    },
-    {
-      id: uuidv4(),
-      name: "Skill & Availability Cut",
-      value: 10,
-      isPercentage: true,
-      color: "#A855F7"
-    },
-    {
-      id: uuidv4(),
-      name: "Final Readiness Pool",
-      value: 10,
-      isPercentage: true,
-      color: "#D946EF"
-    }
+    { id: uuidv4(), name: "Total Hireable Market", value: 100000, isPercentage: false, color: "#6366F1" },
+    { id: uuidv4(), name: "Experience/Wage Cut", value: 30, isPercentage: true, color: "#8B5CF6" },
+    { id: uuidv4(), name: "Skill & Availability Cut", value: 10, isPercentage: true, color: "#C084FC" },
+    { id: uuidv4(), name: "Final Readiness Pool", value: 10, isPercentage: true, color: "#E879F9" }
   ]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [editValue, setEditValue] = useState(0);
+  const [editValue, setEditValue] = useState<number>(0);
+  const [editIsPercentage, setEditIsPercentage] = useState(true);
 
-  const addStage = () => {
-    const newStage = {
+  const handleEdit = (stage: FunnelStage) => {
+    setEditingId(stage.id);
+    setEditName(stage.name);
+    setEditValue(stage.value);
+    setEditIsPercentage(stage.isPercentage);
+  };
+
+  const handleSave = () => {
+    setStages(stages.map(s => s.id === editingId ? { ...s, name: editName, value: editValue, isPercentage: editIsPercentage } : s));
+    setEditingId(null);
+  };
+
+  const handleDelete = (id: string) => {
+    setStages(stages.filter(s => s.id !== id));
+  };
+
+  const handleAdd = () => {
+    const newStage: FunnelStage = {
       id: uuidv4(),
       name: "New Stage",
       value: 10,
       isPercentage: true,
-      color: "#9333EA"
+      color: "#D8B4FE"
     };
     setStages([...stages, newStage]);
   };
 
-  const deleteStage = (id: string) => {
-    setStages(stages.filter((s) => s.id !== id));
-  };
-
-  const startEditing = (stage: FunnelStage) => {
-    setEditingId(stage.id);
-    setEditName(stage.name);
-    setEditValue(stage.value);
-  };
-
-  const saveStage = () => {
-    setStages((prev) =>
-      prev.map((s) =>
-        s.id === editingId
-          ? { ...s, name: editName, value: editValue }
-          : s
-      )
-    );
-    setEditingId(null);
-  };
-
-  const getCascadingValues = (): number[] => {
-    const values: number[] = [];
-    let current = stages[0].value;
-    values.push(current);
-
+  const getFinalValues = () => {
+    const values = [stages[0].value];
     for (let i = 1; i < stages.length; i++) {
+      const prevValue = values[i - 1];
       const stage = stages[i];
-      if (stage.isPercentage) {
-        current = Math.round(current * (1 - stage.value / 100));
-      } else {
-        current = Math.max(0, current - stage.value);
-      }
-      values.push(current);
+      const reduced = stage.isPercentage ? prevValue * (1 - stage.value / 100) : prevValue - stage.value;
+      values.push(Math.round(reduced));
     }
-
     return values;
   };
 
-  const cascadingValues = getCascadingValues();
+  const finalValues = getFinalValues();
 
   return (
     <Card>
-      <CardHeader className="pb-2 flex items-center justify-between">
-        <CardTitle className="text-base font-semibold">Labour Potential Funnel</CardTitle>
-        <Button onClick={addStage} size="sm" variant="outline">
-          <Plus className="w-4 h-4 mr-1" />
-          Add Stage
+      <CardHeader className="pb-2 flex justify-between items-center">
+        <CardTitle className="text-sm font-semibold">Labour Potential Funnel</CardTitle>
+        <Button size="sm" variant="outline" onClick={handleAdd}>
+          <Plus className="w-4 h-4 mr-1" /> Add Stage
         </Button>
       </CardHeader>
-
-      <CardContent className="flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-0 border rounded overflow-hidden">
-          <div className="flex flex-col border-r">
-            {stages.map((stage, index) => (
-              <div
-                key={stage.id}
-                className={clsx("flex items-center justify-between px-3 py-2 text-sm border-b last:border-b-0", {
-                  "bg-gray-100 font-medium": index === 0,
-                  "bg-gray-50": index !== 0
-                })}
-              >
-                {editingId === stage.id ? (
-                  <div className="flex flex-col w-full gap-2">
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      size={10}
-                      className="text-xs"
-                    />
-                    <Input
-                      type="number"
-                      value={editValue}
-                      onChange={(e) => setEditValue(Number(e.target.value))}
-                      className="text-xs"
-                    />
-                    <div className="flex gap-1 justify-end">
-                      <Button variant="outline" size="xs" onClick={saveStage}>
-                        Save
-                      </Button>
-                      <Button variant="ghost" size="xs" onClick={() => setEditingId(null)}>
-                        Cancel
-                      </Button>
-                    </div>
+      <CardContent className="grid grid-cols-[1fr_1fr] gap-x-2 text-xs">
+        <div className="space-y-1">
+          {stages.map((stage, index) => (
+            <div
+              key={stage.id}
+              className="flex items-center justify-between bg-gray-50 px-3 py-1 border-b"
+            >
+              {editingId === stage.id ? (
+                <div className="flex flex-col gap-1 w-full">
+                  <Input
+                    className="text-xs"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                  <Input
+                    className="text-xs"
+                    type="number"
+                    value={editValue}
+                    onChange={(e) => setEditValue(Number(e.target.value))}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button size="xs" onClick={handleSave}>Save</Button>
+                    <Button size="xs" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
                   </div>
-                ) : (
-                  <>
-                    <span>{stage.name}</span>
-                    {index > 0 && (
-                      <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => startEditing(stage)}>
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => deleteStage(stage.id)}>
-                          <Trash className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-            <div className="px-3 py-2 text-sm font-semibold bg-gray-300">
-              Total Hireable Market Population
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            {stages.map((stage, index) => {
-              const value = cascadingValues[index];
-              return (
-                <div
-                  key={stage.id}
-                  className="text-sm text-white font-bold px-4 py-2 text-right"
-                  style={{
-                    backgroundColor: stage.color,
-                    clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)"
-                  }}
-                >
-                  {value.toLocaleString()}{" "}
-                  {stage.isPercentage ? `(${stage.value}%)` : ""}
                 </div>
-              );
-            })}
-            <div className="bg-black text-white text-right font-bold px-4 py-2">
-              {cascadingValues[cascadingValues.length - 1].toLocaleString()}
+              ) : (
+                <>
+                  <span>{stage.name}</span>
+                  <div className="flex gap-2">
+                    <Pencil
+                      className="w-4 h-4 cursor-pointer text-muted-foreground"
+                      onClick={() => handleEdit(stage)}
+                    />
+                    {index !== 0 && (
+                      <Trash
+                        className="w-4 h-4 cursor-pointer text-muted-foreground"
+                        onClick={() => handleDelete(stage.id)}
+                      />
+                    )}
+                  </div>
+                </>
+              )}
             </div>
+          ))}
+          <div className="bg-gray-300 text-xs font-semibold px-3 py-2 border-t">
+            Total Hireable Market Population
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end space-y-1">
+          {stages.map((stage, index) => (
+            <div
+              key={stage.id}
+              className="w-full px-3 py-1 text-white text-right font-semibold"
+              style={{
+                background: stage.color,
+                clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0% 100%)"
+              }}
+            >
+              {finalValues[index].toLocaleString()}{" "}
+              {stage.isPercentage ? `(${stage.value}%)` : ""}
+            </div>
+          ))}
+          <div className="bg-black text-white text-right w-full px-3 py-2 font-semibold text-sm">
+            {finalValues[finalValues.length - 1].toLocaleString()}
           </div>
         </div>
       </CardContent>
