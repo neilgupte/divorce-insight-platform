@@ -3,22 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Move, Trash, Save, X, Pencil, Lock, Unlock, Info } from "lucide-react";
+import { Plus, Pencil, Trash } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
+import clsx from "clsx";
 
 interface FunnelStage {
   id: string;
   name: string;
   value: number;
-  description: string;
   isPercentage: boolean;
-  isLocked: boolean;
   color: string;
 }
 
@@ -27,126 +20,82 @@ const LabourFunnel: React.FC = () => {
     {
       id: uuidv4(),
       name: "Total Hireable Market",
-      value: 10000,
-      description: "The total number of potential hires in the market",
+      value: 100000,
       isPercentage: false,
-      isLocked: true,
-      color: "#4F46E5"
-    },
-    {
-      id: uuidv4(),
-      name: "Skill & Availability Cut",
-      value: 25,
-      description: "Reduction based on required skills and availability",
-      isPercentage: true,
-      isLocked: false,
-      color: "#7C3AED"
+      color: "#6366F1"
     },
     {
       id: uuidv4(),
       name: "Experience/Wage Cut",
       value: 30,
-      description: "Reduction after experience and wage requirements",
       isPercentage: true,
-      isLocked: false,
-      color: "#9333EA"
+      color: "#8B5CF6"
+    },
+    {
+      id: uuidv4(),
+      name: "Skill & Availability Cut",
+      value: 10,
+      isPercentage: true,
+      color: "#A855F7"
     },
     {
       id: uuidv4(),
       name: "Final Readiness Pool",
-      value: 20,
-      description: "Final reduction based on readiness to hire",
+      value: 10,
       isPercentage: true,
-      isLocked: false,
-      color: "#C026D3"
+      color: "#D946EF"
     }
   ]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [editValue, setEditValue] = useState<number>(0);
-  const [editIsPercentage, setEditIsPercentage] = useState<boolean>(true);
+  const [editValue, setEditValue] = useState(0);
 
   const addStage = () => {
     const newStage = {
       id: uuidv4(),
       name: "New Stage",
       value: 10,
-      description: "Describe the stage",
       isPercentage: true,
-      isLocked: false,
-      color: getRandomColor()
+      color: "#9333EA"
     };
     setStages([...stages, newStage]);
-    startEditing(newStage);
-  };
-
-  const startEditing = (stage: FunnelStage) => {
-    if (stage.isLocked) return;
-    setEditingId(stage.id);
-    setEditName(stage.name);
-    setEditValue(stage.value);
-    setEditIsPercentage(stage.isPercentage);
-  };
-
-  const saveEditing = () => {
-    if (!editingId) return;
-    setStages((prev) =>
-      prev.map((s) =>
-        s.id === editingId
-          ? { ...s, name: editName, value: editValue, isPercentage: editIsPercentage }
-          : s
-      )
-    );
-    setEditingId(null);
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
   };
 
   const deleteStage = (id: string) => {
     setStages(stages.filter((s) => s.id !== id));
   };
 
-  const toggleLock = (id: string) => {
+  const startEditing = (stage: FunnelStage) => {
+    setEditingId(stage.id);
+    setEditName(stage.name);
+    setEditValue(stage.value);
+  };
+
+  const saveStage = () => {
     setStages((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isLocked: !s.isLocked } : s))
+      prev.map((s) =>
+        s.id === editingId
+          ? { ...s, name: editName, value: editValue }
+          : s
+      )
     );
-  };
-
-  const getRandomColor = () => {
-    const colors = ["#4F46E5", "#7C3AED", "#9333EA", "#C026D3", "#8B5CF6", "#6366F1"];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  const calculateWidth = (index: number) => {
-    const total = stages.length;
-    const percent = 100 - (index * (60 / total));
-    return `${Math.max(percent, 40)}%`;
-  };
-
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const items = [...stages];
-    const [moved] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, moved);
-    setStages(items);
+    setEditingId(null);
   };
 
   const getCascadingValues = (): number[] => {
     const values: number[] = [];
-    let currentValue = stages[0].value;
-    values.push(currentValue);
+    let current = stages[0].value;
+    values.push(current);
 
     for (let i = 1; i < stages.length; i++) {
-      const prevStage = stages[i - 1];
-      if (prevStage.isPercentage) {
-        currentValue = Math.round(currentValue * (1 - prevStage.value / 100));
+      const stage = stages[i];
+      if (stage.isPercentage) {
+        current = Math.round(current * (1 - stage.value / 100));
       } else {
-        currentValue = Math.max(0, currentValue - prevStage.value);
+        current = Math.max(0, current - stage.value);
       }
-      values.push(currentValue);
+      values.push(current);
     }
 
     return values;
@@ -155,178 +104,95 @@ const LabourFunnel: React.FC = () => {
   const cascadingValues = getCascadingValues();
 
   return (
-    <TooltipProvider>
-      <Card>
-        <CardHeader className="pb-2 flex justify-between items-center">
-          <CardTitle className="text-base font-semibold">Labour Potential Funnel</CardTitle>
-          <Button onClick={addStage} variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Stage
-          </Button>
-        </CardHeader>
+    <Card>
+      <CardHeader className="pb-2 flex items-center justify-between">
+        <CardTitle className="text-base font-semibold">Labour Potential Funnel</CardTitle>
+        <Button onClick={addStage} size="sm" variant="outline">
+          <Plus className="w-4 h-4 mr-1" />
+          Add Stage
+        </Button>
+      </CardHeader>
 
-        <CardContent>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="funnel">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="flex flex-col items-center space-y-3"
-                >
-                  {stages.map((stage, index) => {
-                    const finalValue = cascadingValues[index];
-                    const isEditing = editingId === stage.id;
-
-                    return (
-                      <Draggable key={stage.id} draggableId={stage.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="relative"
-                            style={{
-                              width: calculateWidth(index),
-                              transition: "all 0.2s ease"
-                            }}
-                          >
-                            <div
-                              className="p-3 text-white rounded-md flex flex-col"
-                              style={{
-                                background: stage.color,
-                                clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)"
-                              }}
-                            >
-                              {isEditing ? (
-                                <>
-                                  <Input
-                                    value={editName}
-                                    onChange={(e) => setEditName(e.target.value)}
-                                    className="text-xs mb-2"
-                                  />
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Input
-                                      type="number"
-                                      value={editValue}
-                                      onChange={(e) => setEditValue(Number(e.target.value))}
-                                      className="text-xs"
-                                    />
-                                    <Button
-                                      size="xs"
-                                      variant="ghost"
-                                      onClick={() => setEditIsPercentage(!editIsPercentage)}
-                                    >
-                                      {editIsPercentage ? "%" : "#"}
-                                    </Button>
-                                  </div>
-                                  <div className="flex justify-end gap-2 text-white">
-                                    <Button size="xs" variant="outline" onClick={saveEditing}>
-                                      <Save className="w-4 h-4 mr-1" /> Save
-                                    </Button>
-                                    <Button size="xs" variant="ghost" onClick={cancelEditing}>
-                                      <X className="w-4 h-4 mr-1" /> Cancel
-                                    </Button>
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="flex justify-between items-center">
-                                  <div className="flex gap-2 items-center">
-                                    <div {...provided.dragHandleProps}>
-                                      <Move className="h-4 w-4 cursor-move" />
-                                    </div>
-                                    <div className="text-xs font-medium">{stage.name}</div>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs font-bold">
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span>
-                                          {stage.isPercentage
-                                            ? `${stage.value}% (${finalValue.toLocaleString()})`
-                                            : `${stage.value} (${finalValue.toLocaleString()})`}
-                                        </span>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        {stage.isPercentage
-                                          ? "Percentage reduction"
-                                          : "Fixed number reduction"}
-                                      </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="text-white"
-                                          onClick={() => toggleLock(stage.id)}
-                                        >
-                                          {stage.isLocked ? (
-                                            <Lock className="w-4 h-4" />
-                                          ) : (
-                                            <Unlock className="w-4 h-4" />
-                                          )}
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        {stage.isLocked ? "Unlock to edit" : "Lock this stage"}
-                                      </TooltipContent>
-                                    </Tooltip>
-
-                                    {!stage.isLocked && (
-                                      <>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="text-white"
-                                              onClick={() => startEditing(stage)}
-                                            >
-                                              <Pencil className="h-4 w-4" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>Edit stage</TooltipContent>
-                                        </Tooltip>
-
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="text-white"
-                                              onClick={() => deleteStage(stage.id)}
-                                            >
-                                              <Trash className="h-4 w-4" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>Delete stage</TooltipContent>
-                                        </Tooltip>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-
-          <div className="mt-6 text-center">
-            <div className="text-sm font-semibold">Total Hireable Market Population</div>
-            <div className="text-3xl font-bold text-primary">
-              {cascadingValues[0].toLocaleString()}
+      <CardContent className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-0 border rounded overflow-hidden">
+          <div className="flex flex-col border-r">
+            {stages.map((stage, index) => (
+              <div
+                key={stage.id}
+                className={clsx("flex items-center justify-between px-3 py-2 text-sm border-b last:border-b-0", {
+                  "bg-gray-100 font-medium": index === 0,
+                  "bg-gray-50": index !== 0
+                })}
+              >
+                {editingId === stage.id ? (
+                  <div className="flex flex-col w-full gap-2">
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      size={10}
+                      className="text-xs"
+                    />
+                    <Input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(Number(e.target.value))}
+                      className="text-xs"
+                    />
+                    <div className="flex gap-1 justify-end">
+                      <Button variant="outline" size="xs" onClick={saveStage}>
+                        Save
+                      </Button>
+                      <Button variant="ghost" size="xs" onClick={() => setEditingId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span>{stage.name}</span>
+                    {index > 0 && (
+                      <div className="flex gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => startEditing(stage)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => deleteStage(stage.id)}>
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+            <div className="px-3 py-2 text-sm font-semibold bg-gray-300">
+              Total Hireable Market Population
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </TooltipProvider>
+
+          <div className="flex flex-col">
+            {stages.map((stage, index) => {
+              const value = cascadingValues[index];
+              return (
+                <div
+                  key={stage.id}
+                  className="text-sm text-white font-bold px-4 py-2 text-right"
+                  style={{
+                    backgroundColor: stage.color,
+                    clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)"
+                  }}
+                >
+                  {value.toLocaleString()}{" "}
+                  {stage.isPercentage ? `(${stage.value}%)` : ""}
+                </div>
+              );
+            })}
+            <div className="bg-black text-white text-right font-bold px-4 py-2">
+              {cascadingValues[cascadingValues.length - 1].toLocaleString()}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
