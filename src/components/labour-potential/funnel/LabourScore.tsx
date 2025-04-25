@@ -28,22 +28,24 @@ const LabourScore: React.FC<LabourScoreProps> = ({ location = "Current Market" }
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-sm text-muted-foreground mb-2">Current Score</div>
-          <div className="text-3xl font-bold">{currentScore}/100</div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-sm text-muted-foreground mb-2">Projected Score (3-5 Years)</div>
-          <div className="text-3xl font-bold text-green-600">{projectedScore}/100</div>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-2">Current Score</div>
+            <div className="text-3xl font-bold">{currentScore}/100</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-2">Projected Score (3-5 Years)</div>
+            <div className="text-3xl font-bold text-green-600">{projectedScore}/100</div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card className="col-span-2">
+      <Card>
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full flex justify-between p-4">
@@ -52,8 +54,21 @@ const LabourScore: React.FC<LabourScoreProps> = ({ location = "Current Market" }
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <ScrollArea className="h-[200px] px-4 pb-4">
-              <div className="space-y-2">
+            {factors.length > 5 ? (
+              <ScrollArea className="h-[200px] px-4 pb-4">
+                <div className="space-y-2">
+                  {factors.map((factor, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span>{factor.name}</span>
+                      <span className={factor.impact.startsWith("+") ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                        {factor.impact} points
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="space-y-2 px-4 pb-4">
                 {factors.map((factor, index) => (
                   <div key={index} className="flex justify-between items-center">
                     <span>{factor.name}</span>
@@ -63,7 +78,7 @@ const LabourScore: React.FC<LabourScoreProps> = ({ location = "Current Market" }
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            )}
           </CollapsibleContent>
         </Collapsible>
       </Card>

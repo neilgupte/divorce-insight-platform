@@ -45,11 +45,6 @@ const mockAnalyses = [
   }
 ];
 
-// Calculate summary stats
-const totalLocations = mockAnalyses.length;
-const locationsWithRisk = mockAnalyses.filter(a => a.supplyRisk === "red" || a.supplyRisk === "amber").length;
-const riskPercentage = Math.round((locationsWithRisk / totalLocations) * 100);
-
 interface LabourDashboardProps {
   onNewAnalysis?: () => void;
 }
@@ -71,55 +66,10 @@ const LabourDashboard = ({ onNewAnalysis }: LabourDashboardProps) => {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Locations Analyzed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalLocations}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Locations with Labour Risk
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{riskPercentage}%</p>
-            <p className="text-sm text-muted-foreground">{locationsWithRisk} locations at risk</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Average Wage by Role
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <p>Pharmacist</p>
-                <p className="font-medium">$58.25/hr</p>
-              </div>
-              <div className="flex justify-between">
-                <p>Technician</p>
-                <p className="font-medium">$22.75/hr</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Add the Labour Potential Funnel component here */}
       <LabourPotentialFunnel />
 
-      <Card>
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle>Location Analyses</CardTitle>
         </CardHeader>
