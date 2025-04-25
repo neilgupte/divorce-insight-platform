@@ -153,7 +153,7 @@ const getFinalValue = (stage: FunnelStage, index: number) => {
                               <div {...provided.dragHandleProps}>
                                 <Move className="h-4 w-4 cursor-move" />
                               </div>
-                              <div className="font-medium">{stage.name}</div>
+                              <div className="text-sm font-medium">{stage.name}</div>
                             </div>
                             <div className="font-bold">
                               {stage.isPercentage 
