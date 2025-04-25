@@ -39,9 +39,8 @@ import ModelRuns from "@/pages/labour-planning/ModelRuns";
 import ModelResults from "@/pages/labour-planning/ModelResults";
 import LabourPotential from "@/pages/LabourPotential";
 import LabourDashboard from "@/components/labour-potential/LabourDashboard";
-import SearchLocation from "@/components/labour-potential/SearchLocation";
-import SupplyDemandView from "@/components/labour-potential/SupplyDemandView";
-import MarketReportGenerator from "@/components/labour-potential/MarketReportGenerator";
+import { LabourPotentialProvider } from "@/components/labour-potential/LabourPotentialProvider";
+import LabourPotentialWrapper from "@/components/labour-potential/LabourPotentialWrapper";
 import LabourSettings from "@/components/labour-potential/LabourSettings";
 import NetworkOptimization from "@/pages/NetworkOptimization";
 import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
@@ -124,12 +123,18 @@ const App = () => (
                       </ProtectedRoute>
                     } />
 
-                    <Route path="labour-potential" element={<ProtectedRoute><LabourPotential /></ProtectedRoute>}>
+                    <Route path="labour-potential" element={
+                      <ProtectedRoute>
+                        <LabourPotentialProvider>
+                          <LabourPotential />
+                        </LabourPotentialProvider>
+                      </ProtectedRoute>
+                    }>
                       <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
                       <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
-                      <Route path="search" element={<ProtectedRoute><SearchLocation /></ProtectedRoute>} />
-                      <Route path="supply-vs-demand" element={<ProtectedRoute><SupplyDemandView /></ProtectedRoute>} />
-                      <Route path="reports" element={<ProtectedRoute><MarketReportGenerator /></ProtectedRoute>} />
+                      <Route path="search" element={<ProtectedRoute><LabourPotentialWrapper component="search" /></ProtectedRoute>} />
+                      <Route path="supply-vs-demand" element={<ProtectedRoute><LabourPotentialWrapper component="supply-demand" /></ProtectedRoute>} />
+                      <Route path="reports" element={<ProtectedRoute><LabourPotentialWrapper component="reports" /></ProtectedRoute>} />
                       <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
                     </Route>
 
