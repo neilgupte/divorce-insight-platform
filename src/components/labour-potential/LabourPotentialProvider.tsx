@@ -1,11 +1,15 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 
 interface LabourPotentialContextType {
   location: string | null;
   setLocation: (location: string) => void;
   generateReport: () => void;
+}
+
+interface LabourPotentialProviderProps {
+  children?: ReactNode;
 }
 
 const LabourPotentialContext = createContext<LabourPotentialContextType | undefined>(undefined);
@@ -18,7 +22,7 @@ export const useLabourPotential = (): LabourPotentialContextType => {
   return context;
 };
 
-export const LabourPotentialProvider: React.FC = () => {
+export const LabourPotentialProvider: React.FC<LabourPotentialProviderProps> = ({ children }) => {
   const [location, setLocation] = useState<string | null>(null);
 
   const handleRunAnalysis = (newLocation: string) => {
@@ -38,7 +42,7 @@ export const LabourPotentialProvider: React.FC = () => {
         generateReport: handleGenerateReport
       }}
     >
-      <Outlet />
+      {children || <Outlet />}
     </LabourPotentialContext.Provider>
   );
 };
