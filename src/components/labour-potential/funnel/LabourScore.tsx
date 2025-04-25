@@ -66,22 +66,22 @@ const LabourScore: React.FC = () => {
   return (
     <>
       {/* Score Cards + Flyout Trigger */}
-      <div className="space-y-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        <Card className="flex flex-col">
           <CardContent className="pt-6">
             <div className="text-sm text-muted-foreground mb-2">Current Score (As of 25th April 2025)</div>
             <div className="text-3xl font-bold">{currentScore}/100</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <CardContent className="pt-6">
             <div className="text-sm text-muted-foreground mb-2">Projected Score (3–5 Years)</div>
             <div className="text-3xl font-bold text-green-600">{projectedScore}/100</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <CardContent className="pt-6">
             <div className="text-sm font-semibold flex items-center gap-2 mb-1">
               🧠 Why?
