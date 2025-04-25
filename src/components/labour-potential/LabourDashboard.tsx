@@ -59,7 +59,7 @@ const LabourDashboard = ({ onNewAnalysis }: LabourDashboardProps) => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Labour Availability Dashboard</h1>
+        <h1 className="text-3xl font-bold">Labour Availability Dashboard!</h1>
         <Button onClick={handleNewAnalysis} className="gap-2">
           <Plus className="h-4 w-4" />
           Analyse New Location
