@@ -89,9 +89,15 @@ const FactorDrivers: React.FC = () => {
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Top Trends / Factor Drivers</CardTitle>
-        <CardDescription>Market factors influencing labour potential</CardDescription>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-lg">Top Trends / Factor Drivers</CardTitle>
+          <CardDescription>Market factors influencing labour potential</CardDescription>
+        </div>
+        <Button onClick={addFactor} variant="outline" size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Factor
+        </Button>
       </CardHeader>
       <CardContent>
         <Table>

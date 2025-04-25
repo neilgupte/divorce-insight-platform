@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Move } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface FunnelStage {
@@ -95,7 +95,7 @@ const LabourFunnel = () => {
     if (previousStage.isPercentage) {
       return Math.round(previousValue * (1 - previousStage.value / 100));
     } else {
-      return previousValue - previousStage.value;
+      return previousValue - stage.value;
     }
   };
 
@@ -111,8 +111,12 @@ const LabourFunnel = () => {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Labour Potential Funnel</CardTitle>
+        <Button onClick={addStage} variant="outline" size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Stage
+        </Button>
       </CardHeader>
       <CardContent>
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -131,25 +135,30 @@ const LabourFunnel = () => {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}
                           className="relative"
                           style={{
-                            marginLeft: `${index * 5}%`,
                             width: calculatePercentageWidth(index),
                             transition: "all 0.2s ease"
                           }}
                         >
                           <div
-                            className="p-3 text-white rounded-md"
+                            className="p-3 text-white rounded-md flex items-center justify-between"
                             style={{ 
                               background: stage.color,
                               clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0% 100%)",
                               minHeight: "60px"
                             }}
                           >
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <div {...provided.dragHandleProps}>
+                                <Move className="h-4 w-4 cursor-move" />
+                              </div>
                               <div className="font-medium">{stage.name}</div>
-                              <div className="font-bold">{finalValue.toLocaleString()}</div>
+                            </div>
+                            <div className="font-bold">
+                              {stage.isPercentage 
+                                ? `${stage.value}% (${finalValue.toLocaleString()})`
+                                : finalValue.toLocaleString()}
                             </div>
                           </div>
                         </div>
@@ -163,10 +172,12 @@ const LabourFunnel = () => {
           </Droppable>
         </DragDropContext>
         
-        <Button onClick={addStage} className="mt-4 w-full" variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Funnel Stage
-        </Button>
+        <div className="mt-6 text-center">
+          <div className="text-lg font-semibold">Total Hireable Market Population</div>
+          <div className="text-3xl font-bold text-primary">
+            {getPreviousValue(0).toLocaleString()}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -11,11 +11,9 @@ const LabourPotentialFunnel: React.FC = () => {
         <div className="col-span-4">
           <LabourFunnel />
         </div>
-        <div className="col-span-6">
+        <div className="col-span-6 space-y-6">
           <LabourScore />
-          <div className="mt-6">
-            <FactorDrivers />
-          </div>
+          <FactorDrivers />
         </div>
       </div>
     </div>
