@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Eye, Download, Trash } from "lucide-react";
+import LabourPotentialFunnel from "./funnel/LabourPotentialFunnel";
 
 // Mock data for the dashboard
 const mockAnalyses = [
@@ -50,15 +51,21 @@ const locationsWithRisk = mockAnalyses.filter(a => a.supplyRisk === "red" || a.s
 const riskPercentage = Math.round((locationsWithRisk / totalLocations) * 100);
 
 interface LabourDashboardProps {
-  onNewAnalysis: () => void;
+  onNewAnalysis?: () => void;
 }
 
 const LabourDashboard = ({ onNewAnalysis }: LabourDashboardProps) => {
+  const handleNewAnalysis = () => {
+    if (onNewAnalysis) {
+      onNewAnalysis();
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Labour Availability Dashboard</h1>
-        <Button onClick={onNewAnalysis} className="gap-2">
+        <Button onClick={handleNewAnalysis} className="gap-2">
           <Plus className="h-4 w-4" />
           Analyse New Location
         </Button>
@@ -108,6 +115,9 @@ const LabourDashboard = ({ onNewAnalysis }: LabourDashboardProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add the Labour Potential Funnel component here */}
+      <LabourPotentialFunnel />
 
       <Card>
         <CardHeader>
