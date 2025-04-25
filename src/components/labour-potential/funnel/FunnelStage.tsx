@@ -12,6 +12,7 @@ interface FunnelStageProps {
   description: string;
   previousValue: number;
   isPercentage: boolean;
+  color: string;
   onNameChange: (id: string, name: string) => void;
   onValueChange: (id: string, value: number) => void;
   onDescriptionChange: (id: string, description: string) => void;
@@ -25,25 +26,37 @@ const FunnelStage: React.FC<FunnelStageProps> = ({
   description,
   previousValue,
   isPercentage,
+  color,
   onNameChange,
   onValueChange,
-  onDescriptionChange,
   onToggleValueType
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingValue, setIsEditingValue] = useState(false);
   
-  const displayValue = isPercentage 
-    ? `${value}%` 
-    : value.toLocaleString();
-  
   const resultValue = isPercentage
     ? Math.round(previousValue * (1 - value / 100))
     : previousValue - value;
 
+  const percentage = (resultValue / previousValue) * 100;
+  
   return (
-    <Card className="mb-2 border-l-4 border-l-blue-500">
-      <CardContent className="p-4">
+    <div 
+      className="relative mb-1 w-full transition-all duration-200"
+      style={{ 
+        minHeight: "60px",
+        maxWidth: `${Math.max(percentage, 30)}%`,
+        marginLeft: `${(100 - Math.max(percentage, 30)) / 2}%`
+      }}
+    >
+      <div 
+        className="w-full p-3 text-white"
+        style={{ 
+          background: color,
+          clipPath: "polygon(5% 0, 95% 0, 100% 100%, 0 100%)",
+          minHeight: "60px"
+        }}
+      >
         <div className="flex justify-between items-center">
           <div className="flex-1">
             {isEditingName ? (
@@ -53,18 +66,18 @@ const FunnelStage: React.FC<FunnelStageProps> = ({
                 onBlur={() => setIsEditingName(false)}
                 onKeyDown={(e) => e.key === "Enter" && setIsEditingName(false)}
                 autoFocus
-                className="font-medium"
+                className="font-medium bg-white/20"
               />
             ) : (
               <div 
-                className="font-medium cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2" 
+                className="font-medium cursor-pointer flex items-center gap-2" 
                 onClick={() => setIsEditingName(true)}
               >
                 {name}
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info size={16} className="text-muted-foreground cursor-help" />
+                    <TooltipTrigger>
+                      <Info size={14} className="cursor-help opacity-70" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{description || "Add a description"}</p>
@@ -75,49 +88,35 @@ const FunnelStage: React.FC<FunnelStageProps> = ({
             )}
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-muted-foreground">Previous: {previousValue.toLocaleString()}</div>
-            <div className="flex items-center">
-              {isEditingValue ? (
-                <Input
-                  type="number"
-                  value={value}
-                  onChange={(e) => onValueChange(id, Number(e.target.value))}
-                  onBlur={() => setIsEditingValue(false)}
-                  onKeyDown={(e) => e.key === "Enter" && setIsEditingValue(false)}
-                  autoFocus
-                  className="w-24 text-right"
-                />
-              ) : (
-                <div 
-                  className="font-bold cursor-pointer hover:text-blue-500 transition-colors text-right w-24"
-                  onClick={() => setIsEditingValue(true)}
-                >
-                  {isPercentage ? `${value}%` : value.toLocaleString()}
-                </div>
-              )}
-              <button 
-                className="ml-2 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => onToggleValueType(id)}
+          <div className="flex items-center gap-2">
+            {isEditingValue ? (
+              <Input
+                type="number"
+                value={value}
+                onChange={(e) => onValueChange(id, Number(e.target.value))}
+                onBlur={() => setIsEditingValue(false)}
+                onKeyDown={(e) => e.key === "Enter" && setIsEditingValue(false)}
+                autoFocus
+                className="w-20 text-right bg-white/20"
+              />
+            ) : (
+              <div 
+                className="font-bold cursor-pointer text-right w-20"
+                onClick={() => setIsEditingValue(true)}
               >
-                {isPercentage ? "%" : "#"}
-              </button>
-            </div>
+                {resultValue.toLocaleString()}
+              </div>
+            )}
+            <button 
+              className="ml-2 text-xs opacity-70 hover:opacity-100"
+              onClick={() => onToggleValueType(id)}
+            >
+              {isPercentage ? "%" : "#"}
+            </button>
           </div>
         </div>
-        
-        <div className="mt-4 h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-blue-500 transition-all duration-500" 
-            style={{ width: `${(resultValue / previousValue) * 100}%` }}
-          ></div>
-        </div>
-        
-        <div className="mt-2 font-bold text-right">
-          Result: {resultValue.toLocaleString()}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
