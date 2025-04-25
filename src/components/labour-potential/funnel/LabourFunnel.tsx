@@ -145,7 +145,7 @@ const getFinalValue = (stage: FunnelStage, index: number) => {
                             className="p-3 text-white rounded-md flex items-center justify-between"
                             style={{ 
                               background: stage.color,
-                              clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0% 100%)",
+                              clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
                               minHeight: "60px"
                             }}
                           >
