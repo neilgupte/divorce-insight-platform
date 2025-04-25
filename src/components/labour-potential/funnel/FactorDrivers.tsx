@@ -213,14 +213,7 @@ const FactorDrivers: React.FC = () => {
           </TableBody>
         </Table>
 
-        <Button
-          onClick={addFactor}
-          className="mt-4 text-xs px-3 py-1"
-          variant="outline"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Factor
-        </Button>
+        
       </CardContent>
     </Card>
   );
