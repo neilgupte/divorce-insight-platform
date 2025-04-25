@@ -95,7 +95,7 @@ const LabourFunnel = () => {
   if (previousStage.isPercentage) {
     return Math.round(previousValue * (1 - previousStage.value / 100));
   } else {
-    return previousValue - previousStage.value; // <<---- Corrected here
+    return previousValue - previousStage.value;  // ✅ Corrected here
   }
 };
 
