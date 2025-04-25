@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
-import { Plus, Move, Trash, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Plus, Move, Trash, Save, X, Pencil } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface FunnelStage {
@@ -157,7 +157,7 @@ const LabourFunnel = () => {
                           }}
                         >
                           <div
-                            className="p-3 text-white rounded-md flex items-center justify-between"
+                            className="p-3 text-white rounded-md flex flex-col justify-between"
                             style={{
                               background: stage.color,
                               clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
@@ -165,7 +165,7 @@ const LabourFunnel = () => {
                             }}
                           >
                             {isEditing ? (
-                              <div className="flex flex-col gap-1 w-full text-xs">
+                              <div className="bg-white text-black p-2 rounded shadow text-xs space-y-2">
                                 <Input
                                   value={editName}
                                   onChange={(e) => setEditName(e.target.value)}
@@ -178,7 +178,7 @@ const LabourFunnel = () => {
                                   className="text-xs"
                                 />
                                 <div className="flex justify-end gap-2 pt-1">
-                                  <Button size="xs" variant="ghost" onClick={saveEditing}>
+                                  <Button size="xs" variant="outline" onClick={saveEditing}>
                                     <Save className="w-4 h-4 mr-1" /> Save
                                   </Button>
                                   <Button size="xs" variant="ghost" onClick={cancelEditing}>
@@ -187,7 +187,7 @@ const LabourFunnel = () => {
                                 </div>
                               </div>
                             ) : (
-                              <>
+                              <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-2">
                                   <div {...provided.dragHandleProps}>
                                     <Move className="h-4 w-4 cursor-move" />
@@ -196,14 +196,14 @@ const LabourFunnel = () => {
                                 </div>
                                 <div className="flex items-center gap-2 text-xs font-bold">
                                   {stage.isPercentage ? `${stage.value}% (${finalValue})` : finalValue}
-                                  <Button variant="ghost" size="icon" onClick={() => deleteStage(stage.id)}>
-                                    <Trash className="w-4 h-4 text-white opacity-75" />
+                                  <Button variant="ghost" size="icon" className="text-white opacity-75" onClick={() => startEditing(stage.id, stage.name, stage.value)}>
+                                    <Pencil className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon" onClick={() => startEditing(stage.id, stage.name, stage.value)}>
-                                    ✏️
+                                  <Button variant="ghost" size="icon" className="text-white opacity-75" onClick={() => deleteStage(stage.id)}>
+                                    <Trash className="h-4 w-4" />
                                   </Button>
                                 </div>
-                              </>
+                              </div>
                             )}
                           </div>
                         </div>
