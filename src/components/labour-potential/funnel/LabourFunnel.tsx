@@ -15,7 +15,7 @@ interface FunnelStage {
   color: string;
 }
 
-const LabourFunnel = () => {
+const LabourFunnel: React.FC = () => {
   const [stages, setStages] = useState<FunnelStage[]>([
     {
       id: uuidv4(),
@@ -29,7 +29,7 @@ const LabourFunnel = () => {
       id: uuidv4(),
       name: "Skill & Availability Cut",
       value: 25,
-      description: "Cut based on skills",
+      description: "Reduction based on required skills and availability",
       isPercentage: true,
       color: "#7C3AED"
     },
@@ -37,7 +37,7 @@ const LabourFunnel = () => {
       id: uuidv4(),
       name: "Experience/Wage Cut",
       value: 30,
-      description: "Cut based on experience and wage",
+      description: "Reduction after experience and wage requirements",
       isPercentage: true,
       color: "#9333EA"
     },
@@ -45,7 +45,7 @@ const LabourFunnel = () => {
       id: uuidv4(),
       name: "Final Readiness Pool",
       value: 20,
-      description: "Final filter",
+      description: "Final reduction based on readiness to hire",
       isPercentage: true,
       color: "#C026D3"
     }
@@ -59,8 +59,8 @@ const LabourFunnel = () => {
     const newStage = {
       id: uuidv4(),
       name: "New Stage",
-      value: 15,
-      description: "Describe this cut",
+      value: 10,
+      description: "Describe the stage",
       isPercentage: true,
       color: getRandomColor()
     };
@@ -69,7 +69,7 @@ const LabourFunnel = () => {
   };
 
   const deleteStage = (id: string) => {
-    setStages(stages.filter(s => s.id !== id));
+    setStages(stages.filter((stage) => stage.id !== id));
   };
 
   const startEditing = (id: string, name: string, value: number) => {
@@ -80,9 +80,13 @@ const LabourFunnel = () => {
 
   const saveEditing = () => {
     if (!editingId) return;
-    setStages(stages.map(stage =>
-      stage.id === editingId ? { ...stage, name: editName, value: editValue } : stage
-    ));
+    setStages((prev) =>
+      prev.map((stage) =>
+        stage.id === editingId
+          ? { ...stage, name: editName, value: editValue }
+          : stage
+      )
+    );
     setEditingId(null);
   };
 
@@ -103,26 +107,26 @@ const LabourFunnel = () => {
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-    const items = Array.from(stages);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    setStages(items);
+    const updated = Array.from(stages);
+    const [moved] = updated.splice(result.source.index, 1);
+    updated.splice(result.destination.index, 0, moved);
+    setStages(updated);
   };
 
-  const getPreviousValue = (index: number): number => {
-    if (index === 0) return stages[0].value;
-    const previousStage = stages[index - 1];
-    const previousValue = getPreviousValue(index - 1);
-    return previousStage.isPercentage
-      ? Math.round(previousValue * (1 - previousStage.value / 100))
-      : previousValue - previousStage.value;
-  };
+  // NEW: Cascade logic fix
+  const getFinalValue = (index: number): number => {
+    let value = stages[0].value;
 
-  const getFinalValue = (stage: FunnelStage, index: number) => {
-    const previousValue = getPreviousValue(index);
-    return stage.isPercentage
-      ? Math.round(previousValue * (1 - stage.value / 100))
-      : previousValue - stage.value;
+    for (let i = 1; i <= index; i++) {
+      const prev = stages[i - 1];
+      if (prev.isPercentage) {
+        value = Math.max(0, Math.round(value * (1 - prev.value / 100)));
+      } else {
+        value = Math.max(0, value - prev.value);
+      }
+    }
+
+    return value;
   };
 
   return (
@@ -141,7 +145,7 @@ const LabourFunnel = () => {
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3 flex flex-col items-center">
                 {stages.map((stage, index) => {
-                  const finalValue = getFinalValue(stage, index);
+                  const finalValue = getFinalValue(index);
                   const isEditing = stage.id === editingId;
 
                   return (
@@ -195,7 +199,9 @@ const LabourFunnel = () => {
                                   <div className="text-xs font-medium">{stage.name}</div>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs font-bold">
-                                  {stage.isPercentage ? `${stage.value}% (${finalValue})` : finalValue}
+                                  {stage.isPercentage
+                                    ? `${stage.value}% (${finalValue.toLocaleString()})`
+                                    : finalValue.toLocaleString()}
                                   <Button variant="ghost" size="icon" className="text-white opacity-75" onClick={() => startEditing(stage.id, stage.name, stage.value)}>
                                     <Pencil className="h-4 w-4" />
                                   </Button>
@@ -219,7 +225,7 @@ const LabourFunnel = () => {
 
         <div className="mt-6 text-center">
           <div className="text-sm font-semibold">Total Hireable Market Population</div>
-          <div className="text-3xl font-bold text-primary">{getPreviousValue(0).toLocaleString()}</div>
+          <div className="text-3xl font-bold text-primary">{getFinalValue(0).toLocaleString()}</div>
         </div>
       </CardContent>
     </Card>
