@@ -7,20 +7,24 @@ export const useDivorceData = (selectedState: string) => {
   const fetchHouseholdsIncome = async () => {
     const safeState = selectedState.trim().toUpperCase();
 
-    // Fetch from the correct table
     const { data, error } = await supabase
-      .from('income') // ✅ correct table
-      .select('Income_bracket, Households, State') // ✅ correct fields
-      .eq('State', safeState); // ✅ match by State exactly
+      .from('income')
+      .select('Income_bracket, Households, State')
+      .eq('State', safeState);
+
+    console.log("Supabase data:", data);
+    console.log("Supabase error:", error);
 
     if (error) {
       console.error("Error fetching households income:", error);
       throw error;
     }
 
-    if (!data || data.length === 0) return { householdsIncome: [] };
+    if (!data || data.length === 0) {
+      console.warn(`No data found for state: ${safeState}`);
+      return { householdsIncome: [] };
+    }
 
-    // Group data by Income_bracket (sum households if duplicates exist)
     const incomeMap: Record<number, number> = {};
 
     data.forEach((row) => {
