@@ -1,228 +1,76 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Move, Trash, Save, X, Pencil } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
 
-interface FunnelStage {
-  id: string;
-  name: string;
-  value: number;
-  description: string;
-  isPercentage: boolean;
-  color: string;
-}
-
-const LabourFunnel = () => {
-  const [stages, setStages] = useState<FunnelStage[]>([
-    {
-      id: uuidv4(),
-      name: "Total Hireable Market",
-      value: 10000,
-      description: "The total number of potential hires in the market",
-      isPercentage: false,
-      color: "#4F46E5"
-    },
-    {
-      id: uuidv4(),
-      name: "Skill & Availability Cut",
-      value: 25,
-      description: "Cut based on skills",
-      isPercentage: true,
-      color: "#7C3AED"
-    },
-    {
-      id: uuidv4(),
-      name: "Experience/Wage Cut",
-      value: 30,
-      description: "Cut based on experience and wage",
-      isPercentage: true,
-      color: "#9333EA"
-    },
-    {
-      id: uuidv4(),
-      name: "Final Readiness Pool",
-      value: 20,
-      description: "Final filter",
-      isPercentage: true,
-      color: "#C026D3"
-    }
-  ]);
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editValue, setEditValue] = useState<number>(0);
-
-  const addStage = () => {
-    const newStage = {
-      id: uuidv4(),
-      name: "New Stage",
-      value: 15,
-      description: "Describe this cut",
-      isPercentage: true,
-      color: getRandomColor()
-    };
-    setStages([...stages, newStage]);
-    startEditing(newStage.id, newStage.name, newStage.value);
-  };
-
-  const deleteStage = (id: string) => {
-    setStages(stages.filter(s => s.id !== id));
-  };
-
-  const startEditing = (id: string, name: string, value: number) => {
-    setEditingId(id);
-    setEditName(name);
-    setEditValue(value);
-  };
-
-  const saveEditing = () => {
-    if (!editingId) return;
-    setStages(stages.map(stage =>
-      stage.id === editingId ? { ...stage, name: editName, value: editValue } : stage
-    ));
-    setEditingId(null);
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
-
-  const getRandomColor = () => {
-    const colors = ["#4F46E5", "#7C3AED", "#9333EA", "#C026D3", "#8B5CF6", "#6366F1"];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  const calculatePercentageWidth = (index: number) => {
-    const totalStages = stages.length;
-    const percentage = 100 - (index * (60 / totalStages));
-    return `${Math.max(percentage, 40)}%`;
-  };
-
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const items = Array.from(stages);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    setStages(items);
-  };
-
-  const getPreviousValue = (index: number): number => {
-    if (index === 0) return stages[0].value;
-    const previousStage = stages[index - 1];
-    const previousValue = getPreviousValue(index - 1);
-    return previousStage.isPercentage
-      ? Math.round(previousValue * (1 - previousStage.value / 100))
-      : previousValue - previousStage.value;
-  };
-
-  const getFinalValue = (stage: FunnelStage, index: number) => {
-    const previousValue = getPreviousValue(index);
-    return stage.isPercentage
-      ? Math.round(previousValue * (1 - stage.value / 100))
-      : previousValue - stage.value;
-  };
-
+const LabourFunnel: React.FC<any> = (props) => {
+  const { data, isLoading, error } = props;
+  
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full">Loading funnel data...</div>;
+  }
+  
+  if (error) {
+    return <div className="flex items-center justify-center h-full text-red-500">Error loading funnel data</div>;
+  }
+  
+  if (!data) {
+    return <div className="flex items-center justify-center h-full">No funnel data available</div>;
+  }
+  
+  // Example funnel data visualization
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-base font-semibold">Labour Potential Funnel</CardTitle>
-        <Button onClick={addStage} variant="outline" size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Stage
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-medium">Labour Supply Funnel</h3>
+        <Button size="sm" variant="outline" className="h-8">
+          Export
         </Button>
-      </CardHeader>
-
-      <CardContent>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="funnelStages">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3 flex flex-col items-center">
-                {stages.map((stage, index) => {
-                  const finalValue = getFinalValue(stage, index);
-                  const isEditing = stage.id === editingId;
-
-                  return (
-                    <Draggable key={stage.id} draggableId={stage.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className="relative"
-                          style={{
-                            width: calculatePercentageWidth(index),
-                            transition: "all 0.2s ease"
-                          }}
-                        >
-                          <div
-                            className="p-3 text-white rounded-md flex flex-col justify-between"
-                            style={{
-                              background: stage.color,
-                              clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
-                              minHeight: "60px"
-                            }}
-                          >
-                            {isEditing ? (
-                              <div className="bg-white text-black p-2 rounded shadow text-xs space-y-2">
-                                <Input
-                                  value={editName}
-                                  onChange={(e) => setEditName(e.target.value)}
-                                  className="text-xs"
-                                />
-                                <Input
-                                  type="number"
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(Number(e.target.value))}
-                                  className="text-xs"
-                                />
-                                <div className="flex justify-end gap-2 pt-1">
-                                  <Button size="xs" variant="outline" onClick={saveEditing}>
-                                    <Save className="w-4 h-4 mr-1" /> Save
-                                  </Button>
-                                  <Button size="xs" variant="ghost" onClick={cancelEditing}>
-                                    <X className="w-4 h-4 mr-1" /> Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-2">
-                                  <div {...provided.dragHandleProps}>
-                                    <Move className="h-4 w-4 cursor-move" />
-                                  </div>
-                                  <div className="text-xs font-medium">{stage.name}</div>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs font-bold">
-                                  {stage.isPercentage ? `${stage.value}% (${finalValue})` : finalValue}
-                                  <Button variant="ghost" size="icon" className="text-white opacity-75" onClick={() => startEditing(stage.id, stage.name, stage.value)}>
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="text-white opacity-75" onClick={() => deleteStage(stage.id)}>
-                                    <Trash className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-
-        <div className="mt-6 text-center">
-          <div className="text-sm font-semibold">Total Hireable Market Population</div>
-          <div className="text-3xl font-bold text-primary">{getPreviousValue(0).toLocaleString()}</div>
+      </div>
+      
+      <div className="space-y-2">
+        {/* Funnel stages */}
+        <div className="bg-primary/10 p-3 rounded-md">
+          <div className="flex justify-between">
+            <span className="text-sm font-medium">Total Available Workforce</span>
+            <span className="text-sm font-semibold">{data.totalWorkforce.toLocaleString()}</span>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="bg-primary/20 p-3 rounded-md ml-4">
+          <div className="flex justify-between">
+            <span className="text-sm font-medium">Qualified Candidates</span>
+            <span className="text-sm font-semibold">{data.qualifiedCandidates.toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div className="bg-primary/30 p-3 rounded-md ml-8">
+          <div className="flex justify-between">
+            <span className="text-sm font-medium">Interested Candidates</span>
+            <span className="text-sm font-semibold">{data.interestedCandidates.toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div className="bg-primary/40 p-3 rounded-md ml-12">
+          <div className="flex justify-between">
+            <span className="text-sm font-medium">Available for Hire</span>
+            <span className="text-sm font-semibold">{data.availableForHire.toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div className="bg-primary/50 p-3 rounded-md ml-16">
+          <div className="flex justify-between">
+            <span className="text-sm font-medium">Likely to Accept Offer</span>
+            <span className="text-sm font-semibold">{data.likelyToAccept.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="pt-4">
+        <div className="text-xs text-muted-foreground">
+          <p>Conversion rate from total to final stage: {data.conversionRate}%</p>
+          <p>Industry average: {data.industryAverage}%</p>
+        </div>
+      </div>
+    </div>
   );
 };
 

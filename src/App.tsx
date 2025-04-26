@@ -1,70 +1,94 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import MainLayout from "@/components/layout/MainLayout";
-import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Location from "@/pages/Location";
-import Reports from "@/pages/Reports";
-import Documents from "@/pages/Documents";
-import Assistant from "@/pages/Assistant";
-import AuditLogs from "@/pages/AuditLogs";
-import Users from "@/pages/Users";
-import SettingsPage from "@/pages/Settings";
-import LabourPlanning from "@/pages/LabourPlanning";
-import LabourPlanningCreate from "@/pages/LabourPlanningCreate";
-import TaskMapping from "@/pages/TaskMapping";
-import ModelRuns from "@/pages/ModelRuns";
-import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
-import LabourPlanningSettings from "@/pages/LabourPlanningSettings";
-import LabourPotentialDashboard from "@/pages/LabourPotentialDashboard";
-import LabourPotentialSearch from "@/pages/LabourPotentialSearch";
-import LabourPotentialSupplyDemand from "@/pages/LabourPotentialSupplyDemand";
-import LabourPotentialReports from "@/pages/LabourPotentialReports";
-import LabourPotentialSettings from "@/pages/LabourPotentialSettings";
-import Help from "@/pages/Help";
-import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 
-// Import our new Dashboard2 component
+// Import Dashboard2 component
 import Dashboard2 from "./pages/Dashboard2";
 
-const App = () => {
+// Import NotFound component
+import NotFound from "@/pages/NotFound";
+
+// Fix the formatNumber function in HouseholdsIncomeChart.tsx
+<lov-write file_path="src/components/dashboard2/HouseholdsIncomeChart.tsx">
+import React from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { useDivorceData } from '@/hooks/useDivorceData';
+
+interface HouseholdsIncomeChartProps {
+  selectedState: string;
+}
+
+const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedState }) => {
+  const { data, isLoading, error } = useDivorceData(selectedState);
+  
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full">Loading chart data...</div>;
+  }
+  
+  if (error) {
+    return <div className="flex items-center justify-center h-full text-red-500">Error loading chart data</div>;
+  }
+  
+  if (!data || !data.householdsIncome) {
+    return <div className="flex items-center justify-center h-full">No data available</div>;
+  }
+
+  const formatCurrency = (value: number) => {
+    return `$${value.toLocaleString()}`;
+  };
+
+  const formatNumber = (value: number): string => {
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(1)}K`;
+    }
+    return value.toString();
+  };
+
   return (
-    <Router>
-      <ThemeProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to="/dashboard" />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="dashboard2" element={<Dashboard2 />} />
-            <Route path="location" element={<Location />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="documents" element={<Documents />} />
-            <Route path="assistant" element={<Assistant />} />
-            <Route path="audit-logs" element={<AuditLogs />} />
-            <Route path="users" element={<Users />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="labour-planning" element={<LabourPlanning />} />
-            <Route path="labour-planning/create" element={<LabourPlanningCreate />} />
-            <Route path="labour-planning/task-mapping" element={<TaskMapping />} />
-            <Route path="labour-planning/model-runs" element={<ModelRuns />} />
-            <Route path="labour-planning/locations" element={<LabourPlanningLocations />} />
-            <Route path="labour-planning/settings" element={<LabourPlanningSettings />} />
-            <Route path="labour-potential/dashboard" element={<LabourPotentialDashboard />} />
-            <Route path="labour-potential/search" element={<LabourPotentialSearch />} />
-            <Route path="labour-potential/supply-vs-demand" element={<LabourPotentialSupplyDemand />} />
-            <Route path="labour-potential/reports" element={<LabourPotentialReports />} />
-            <Route path="labour-potential/settings" element={<LabourPotentialSettings />} />
-            <Route path="help" element={<Help />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </ThemeProvider>
-    </Router>
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={data.householdsIncome}
+        margin={{ top: 5, right: 20, bottom: 25, left: 0 }}
+      >
+        <defs>
+          <linearGradient id="householdGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="#8884d8" stopOpacity={0.1}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
+        <XAxis 
+          dataKey="income" 
+          tickFormatter={formatCurrency} 
+          tickLine={false}
+          axisLine={{ stroke: '#e0e0e0' }}
+          tick={{ fontSize: 10 }}
+        />
+        <YAxis 
+          tickFormatter={formatNumber} 
+          domain={[0, 'auto']}
+          tickLine={false}
+          axisLine={{ stroke: '#e0e0e0' }}
+          tickMargin={5}
+          tick={{ fontSize: 10 }}
+        />
+        <Tooltip 
+          formatter={(value: number) => [`${value.toLocaleString()} households`, 'Number of Households']}
+          labelFormatter={(label: number) => `Income Level: ${formatCurrency(label)}`}
+        />
+        <Area 
+          type="monotone" 
+          dataKey="households" 
+          stroke="#8884d8" 
+          fillOpacity={1} 
+          fill="url(#householdGradient)" 
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 };
 
-export default App;
+export default HouseholdsIncomeChart;

@@ -37,6 +37,10 @@ const Dashboard2 = () => {
     }));
   };
 
+  const handleSliderChange = (value: number[]) => {
+    setIncomeRange([value[0], value[1]]);
+  };
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       <h1 className="text-2xl font-bold mb-6">DivorceIQ Dashboard</h1>
@@ -63,11 +67,11 @@ const Dashboard2 = () => {
               <Label className="mb-2 block">Income Bracket Range</Label>
               <div className="pt-6 px-2">
                 <Slider
-                  value={incomeRange}
+                  value={[incomeRange[0], incomeRange[1]]}
                   min={0}
                   max={1000000}
                   step={10000}
-                  onValueChange={setIncomeRange}
+                  onValueChange={handleSliderChange}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground mt-2">
