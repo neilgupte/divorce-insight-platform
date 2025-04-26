@@ -60,7 +60,6 @@ const MainLayout = () => {
     { name: "Document Vault", icon: FileBox, path: "/documents", permission: "documents:view" },
     { name: "AI Assistant", icon: MessageCircle, path: "/assistant", permission: "assistant:view" },
     { name: "Audit Logs", icon: Activity, path: "/audit-logs", permission: "logs:view" },
-    { name: "DivorceIQ Dashboard", icon: LayoutDashboard, path: "/dashboard2", permission: "logs:view" },
   ];
 
   const adminMenuItems = [

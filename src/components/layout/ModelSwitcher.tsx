@@ -36,17 +36,16 @@ export const models = [
     name: "Multivariate Optimization",
     description: "Complex decision optimization engine",
     icon: GitBranch,
-    path: "/multivariate", // (this one is okay if you have /multivariate route later)
+    path: "/multivariate",
   },
   {
-    id: "network-optimization", // ✅ FIXED ID
+    id: "network",
     name: "Network Optimization",
     description: "Supply chain and network flow optimization",
     icon: Network,
-    path: "/network-optimization", // ✅ FIXED PATH
+    path: "/network",
   },
 ];
-
 
 export function ModelSwitcher() {
   const { user } = useAuth();

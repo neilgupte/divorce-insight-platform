@@ -1,99 +1,116 @@
-import React from "react";
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Eye, X } from "lucide-react";
+interface Factor {
+  name: string;
+  impact: string;
+  details: string;
+}
+const LabourScore: React.FC = () => {
+  const [openSheet, setOpenSheet] = useState(false);
+  const [viewingFactor, setViewingFactor] = useState<Factor | null>(null);
+  const currentScore = 72;
+  const projectedScore = 84;
+  const factors: Factor[] = [{
+    name: "Increased educational programs",
+    impact: "+5",
+    details: "This reflects increased access to local technical programs."
+  }, {
+    name: "Migration trends from nearby cities",
+    impact: "+4",
+    details: "Influx of workers from neighbouring cities boosts availability."
+  }, {
+    name: "New professional certification programs",
+    impact: "+3",
+    details: "New initiatives by trade associations support rapid upskilling."
+  }, {
+    name: "Aging workforce in certain specialties",
+    impact: "-2",
+    details: "Declining participation in some critical trades due to age."
+  }, {
+    name: "Competitive wage growth",
+    impact: "+2",
+    details: "Higher wages attracting talent from outside the region."
+  }, {
+    name: "Market expansion",
+    impact: "+3",
+    details: "Retail footprint and infrastructure growth creating more demand."
+  }];
+  return <>
+      {/* Score Cards + Flyout Trigger */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        <Card className="flex flex-col">
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-2">Current Score (As of 25th April 2025)</div>
+            <div className="text-3xl font-bold">{currentScore}/100</div>
+          </CardContent>
+        </Card>
 
-const LabourScore: React.FC<any> = (props) => {
-  const [score, setScore] = React.useState(0);
-  const [isLoading, setIsLoading] = React.useState(false);
-  
-  const calculateScore = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      // Random score between 1-100
-      setScore(Math.floor(Math.random() * 100) + 1);
-      setIsLoading(false);
-    }, 1500);
-  };
-  
-  const getScoreColor = () => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 50) return "text-amber-500";
-    return "text-red-500";
-  };
-  
-  const getScoreLabel = () => {
-    if (score >= 80) return "Excellent";
-    if (score >= 50) return "Average";
-    return "Poor";
-  };
-  
-  return (
-    <div className="bg-card rounded-lg shadow p-4">
-      <h3 className="text-lg font-medium mb-4">Labour Market Score</h3>
-      
-      <div className="flex flex-col items-center justify-center py-6">
-        {score > 0 ? (
-          <>
-            <div className={`text-5xl font-bold ${getScoreColor()}`}>
-              {score}
+        <Card className="flex flex-col">
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-2">Projected Score (3–5 Years)</div>
+            <div className="text-3xl font-bold text-green-600">{projectedScore}/100</div>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardContent className="pt-6">
+            <div className="text-sm font-semibold flex items-center gap-2 mb-1">
+              🧠 Why?
             </div>
-            <div className={`text-sm mt-2 ${getScoreColor()}`}>
-              {getScoreLabel()}
+            <div className="text-xs text-muted-foreground mb-2">
+              {factors.length} factor drivers impacting score
             </div>
-            <p className="text-xs text-muted-foreground mt-4 text-center max-w-xs">
-              This score represents the overall health of the labour market in the selected area based on multiple factors.
-            </p>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="mt-4"
-              onClick={calculateScore}
-              disabled={isLoading}
-            >
-              Recalculate
+            <Button variant="outline" size="sm" onClick={() => setOpenSheet(true)}>
+              <Eye className="w-4 h-4 mr-1" /> View
             </Button>
-          </>
-        ) : (
-          <>
-            <div className="text-muted-foreground text-center mb-4">
-              Calculate the labour market score for the selected area
-            </div>
-            <Button 
-              size="sm"
-              onClick={calculateScore}
-              disabled={isLoading}
-            >
-              {isLoading ? "Calculating..." : "Calculate Score"}
-            </Button>
-          </>
-        )}
+          </CardContent>
+        </Card>
       </div>
-      
-      {score > 0 && (
-        <div className="mt-4 pt-4 border-t">
-          <h4 className="text-sm font-medium mb-2">Score Breakdown</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Supply vs Demand</span>
-              <span className="font-medium">Good</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Wage Competitiveness</span>
-              <span className="font-medium">Average</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Talent Availability</span>
-              <span className="font-medium">Excellent</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Market Growth</span>
-              <span className="font-medium">Poor</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
+      {/* Flyout Panel */}
+      <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+        <SheetContent side="right" className="w-[320px] sm:w-[400px]">
+          <SheetHeader className="flex flex-row items-center justify-between">
+            <SheetTitle>Factor Drivers</SheetTitle>
+            
+          </SheetHeader>
+
+          <ScrollArea className="mt-4 h-[80vh] pr-2">
+            <div className="space-y-4">
+              {factors.map((factor, index) => <div key={index} className="flex flex-col border border-muted px-3 py-2 rounded-md bg-background">
+                  <div className="flex justify-between text-sm font-medium">
+                    <span>{factor.name}</span>
+                    <span className={factor.impact.startsWith("+") ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>
+                      {factor.impact} pts
+                    </span>
+                  </div>
+                  <div className="text-xs mt-1">
+                    <Button size="xs" variant="link" className="px-0 text-blue-600" onClick={() => setViewingFactor(factor)}>
+                      View more
+                    </Button>
+                  </div>
+                </div>)}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Modal Dialog for More Info */}
+      <Dialog open={!!viewingFactor} onOpenChange={() => setViewingFactor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{viewingFactor?.name}</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {viewingFactor?.details}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>;
+};
 export default LabourScore;
