@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Outlet } from "react-router-dom"; // <-- Added Outlet
 import { 
   Building, 
   Clock, 
@@ -30,53 +30,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-// Sample data for labour models
 const labourModels = [
-  { 
-    id: 1, 
-    name: "Downtown Pharmacy", 
-    location: "New York, NY", 
-    createdDate: "2025-04-10", 
-    totalHours: 420, 
-    status: "Active",
-    lastRun: "2025-04-20"
-  },
-  { 
-    id: 2, 
-    name: "Westside Pharmacy", 
-    location: "Los Angeles, CA", 
-    createdDate: "2025-04-05", 
-    totalHours: 380, 
-    status: "Active",
-    lastRun: "2025-04-18"
-  },
-  { 
-    id: 3, 
-    name: "Northside Health", 
-    location: "Chicago, IL", 
-    createdDate: "2025-03-28", 
-    totalHours: 410, 
-    status: "Inactive",
-    lastRun: "2025-04-15"
-  },
-  { 
-    id: 4, 
-    name: "Eastside Clinic", 
-    location: "Boston, MA", 
-    createdDate: "2025-03-20", 
-    totalHours: 390, 
-    status: "Active",
-    lastRun: "2025-04-10"
-  },
-  { 
-    id: 5, 
-    name: "Central Pharmacy", 
-    location: "Dallas, TX", 
-    createdDate: "2025-03-15", 
-    totalHours: 405, 
-    status: "Under Review",
-    lastRun: "2025-04-05"
-  }
+  { id: 1, name: "Downtown Pharmacy", location: "New York, NY", createdDate: "2025-04-10", totalHours: 420, status: "Active", lastRun: "2025-04-20" },
+  { id: 2, name: "Westside Pharmacy", location: "Los Angeles, CA", createdDate: "2025-04-05", totalHours: 380, status: "Active", lastRun: "2025-04-18" },
+  { id: 3, name: "Northside Health", location: "Chicago, IL", createdDate: "2025-03-28", totalHours: 410, status: "Inactive", lastRun: "2025-04-15" },
+  { id: 4, name: "Eastside Clinic", location: "Boston, MA", createdDate: "2025-03-20", totalHours: 390, status: "Active", lastRun: "2025-04-10" },
+  { id: 5, name: "Central Pharmacy", location: "Dallas, TX", createdDate: "2025-03-15", totalHours: 405, status: "Under Review", lastRun: "2025-04-05" }
 ];
 
 const LabourPlanningDashboard = () => {
@@ -91,14 +50,13 @@ const LabourPlanningDashboard = () => {
   };
 
   const handleConfirmDelete = () => {
-    if (modelToDelete) {
+    if (modelToDelete !== null) {
       toast({
         title: "Model deleted",
         description: `Labour model has been successfully deleted.`,
       });
       setDeleteDialogOpen(false);
       setModelToDelete(null);
-      // In a real application, we would remove the model from the database
     }
   };
 
@@ -108,12 +66,13 @@ const LabourPlanningDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Nested Routes will render here */}
+      <Outlet />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Labour Planning Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage your workforce optimization models
-          </p>
+          <p className="text-muted-foreground">Manage your workforce optimization models</p>
         </div>
         <Button onClick={handleCreateNewModel} className="flex items-center">
           <Plus className="h-4 w-4 mr-2" />
@@ -124,46 +83,34 @@ const LabourPlanningDashboard = () => {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Labour Models
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Labour Models</CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              3 active, 1 inactive, 1 under review
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">3 active, 1 inactive, 1 under review</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Locations
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Locations</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across 5 different states
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Across 5 different states</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Avg Weekly Hours per Store
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Avg Weekly Hours per Store</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">401</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +2.5% from previous month
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">+2.5% from previous month</p>
           </CardContent>
         </Card>
       </div>
@@ -171,9 +118,7 @@ const LabourPlanningDashboard = () => {
       <Card>
         <CardHeader>
           <CardTitle>Labour Models</CardTitle>
-          <CardDescription>
-            View and manage your existing labour models
-          </CardDescription>
+          <CardDescription>View and manage your existing labour models</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
