@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import MainLayout from "@/components/layout/MainLayout";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import Login from "@/pages/Login";
 
 // Import Dashboard2 component
@@ -18,15 +19,17 @@ const App = () => {
     <Router>
       <ThemeProvider>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<Navigate to="/dashboard2" />} />
-              <Route path="dashboard2" element={<Dashboard2 />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-          <Toaster />
+          <NotificationProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Navigate to="/dashboard2" />} />
+                <Route path="dashboard2" element={<Dashboard2 />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+            <Toaster />
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </Router>
