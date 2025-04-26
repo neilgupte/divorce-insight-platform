@@ -71,7 +71,7 @@ export const useDivorceRates = (selectedState: string) => {
   };
 
   return useQuery({
-    queryKey: ["divorce_rates", selectedState],
+    queryKey: ['divorce_rates', selectedState],
     queryFn: fetchDivorceRates,
   });
 };
