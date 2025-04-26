@@ -4,39 +4,26 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useDivorceData = (selectedState: string) => {
-  const fetchHouseholdsIncome = async () => {
-    let query = supabase
-      .from("income")
-      .select(`Income_bracket, Households, State`);
-    
-    if (selectedState !== "All States") {
-      query = query.eq("State", selectedState);
-    }
-
-    const { data, error } = await query;
+  const fetchDivorceData = async () => {
+    const { data, error } = await supabase
+      .from('your_table_name') // 🛠️ fix this
+      .select('*')
+      .eq('State', selectedState); // ✅ only filter by state
 
     if (error) {
-      console.error("Error fetching income data:", error);
-      throw error;
+      throw new Error('Error fetching divorce data');
     }
 
-    if (!data || data.length === 0) {
-      return { householdsIncome: [] };
-    }
-
-    const cleaned = data
-      .filter((r) => r.Households > 0) // remove empty rows
-      .map((r) => ({
-        income: Number(r.Income_bracket),
-        households: Number(r.Households),
-      }))
-      .sort((a, b) => a.income - b.income);
-
-    return { householdsIncome: cleaned };
+    return {
+      householdsIncome: data?.map(item => ({
+        income: item.Income_bracket,
+        households: item.Households,
+      })) ?? [],
+    };
   };
 
   return useQuery({
-    queryKey: ["households_income", selectedState],
-    queryFn: fetchHouseholdsIncome,
+    queryKey: ['divorce_data', selectedState],
+    queryFn: fetchDivorceData,
   });
 };
