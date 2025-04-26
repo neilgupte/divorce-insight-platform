@@ -10,15 +10,24 @@ export const useDivorceData = (selectedState: string) => {
   useEffect(() => {
     const fetchStatesList = async () => {
       try {
-        const { data: states, error } = await supabase
+        const { data, error } = await supabase
           .from('location')
           .select('state')
-          .distinct();
+          .eq('state', 'state') // This is a workaround since .distinct() isn't available
+          .limit(1000);
 
         if (error) throw error;
 
-        const formattedStates = ['All States', ...states.map(state => state.state).sort()];
-        setStatesList(formattedStates);
+        // Extract unique states using Set
+        if (data && data.length > 0) {
+          const uniqueStates = new Set<string>();
+          data.forEach(item => {
+            if (item.state) uniqueStates.add(item.state);
+          });
+          
+          const formattedStates = ['All States', ...Array.from(uniqueStates).sort()];
+          setStatesList(formattedStates);
+        }
       } catch (err) {
         console.error('Error fetching states:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
