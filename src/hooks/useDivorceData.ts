@@ -1,6 +1,6 @@
 // src/hooks/useDivorceData.ts
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client"; // Assuming you have Supabase set up
+import { supabase } from "@/integrations/supabase/client";
 
 export const useDivorceData = (selectedState: string) => {
   const fetchHouseholdsIncome = async () => {
@@ -17,12 +17,10 @@ export const useDivorceData = (selectedState: string) => {
       return null;
     }
 
-    // Filter by selected state if provided
     const filteredData = selectedState && selectedState !== "ALL"
       ? data.filter((row) => row.state === selectedState)
       : data;
 
-    // Sort by income ascending (optional)
     filteredData.sort((a, b) => a.income - b.income);
 
     return {
