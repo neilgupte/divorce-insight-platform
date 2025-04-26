@@ -1,7 +1,7 @@
 // src/hooks/useDivorceRates.ts
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { stateNameToAbbreviation } from "@/utils/stateMapping";
+import { stateNameToAbbreviation } from "@/lib/stateMapping";
 
 export interface DivorceRateChartData {
   year: number;
