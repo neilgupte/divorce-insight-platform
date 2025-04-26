@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ThemeProvider } from "@/components/ThemeProvider";
 import MainLayout from "@/components/layout/MainLayout";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Login from "@/pages/Login";
 
 // Import Dashboard2 component
 import Dashboard2 from "./pages/Dashboard2";
@@ -15,14 +17,17 @@ const App = () => {
   return (
     <Router>
       <ThemeProvider>
-        <Routes>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to="/dashboard2" />} />
-            <Route path="dashboard2" element={<Dashboard2 />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-        <Toaster />
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<Navigate to="/dashboard2" />} />
+              <Route path="dashboard2" element={<Dashboard2 />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
     </Router>
   );
