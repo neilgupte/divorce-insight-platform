@@ -1,3 +1,4 @@
+
 // src/hooks/useDivorceData.ts
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,12 +14,12 @@ export const useDivorceData = (selectedState: string) => {
       const to = from + pageSize - 1;
 
       const { data, error } = await supabase
-        .from("households_income") // Make sure this is your real table name
+        .from("income") // Changed from "households_income" to "income" which is in your database
         .select(`Income_bracket, Households`)
         .range(from, to);
 
       if (error) {
-        console.error("Error fetching households_income page", page, error);
+        console.error("Error fetching income data page", page, error);
         throw error;
       }
 

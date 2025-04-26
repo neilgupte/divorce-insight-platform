@@ -1,43 +1,21 @@
 
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useDivorceData } from '@/hooks/useDivorceData';
 
 interface HouseholdsIncomeChartProps {
   selectedState: string;
 }
 
 const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedState }) => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['household_income', selectedState],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('income')
-        .select('Income_bracket, Households, State')
-        .eq('State', selectedState);
-
-      if (error) {
-        console.error('Error fetching household income data:', error);
-        throw error;
-      }
-      
-      return data;
-    }
-  });
+  const { data, isLoading, error } = useDivorceData(selectedState);
 
   if (isLoading) return <div className="flex items-center justify-center h-full">Loading chart...</div>;
   if (error || !data) return <div className="flex items-center justify-center h-full text-red-500">Error loading chart</div>;
-  if (data.length === 0) return <div className="flex items-center justify-center h-full">No data available for {selectedState}</div>;
+  if (!data.householdsIncome || data.householdsIncome.length === 0) 
+    return <div className="flex items-center justify-center h-full">No data available for {selectedState}</div>;
 
-  // Sort the data by income bracket
-  const chartData = data
-    .filter(item => item.Households > 0) // Filter out zero household entries
-    .map((item: any) => ({
-      income: Number(item.Income_bracket),
-      households: Number(item.Households)
-    }))
-    .sort((a, b) => a.income - b.income);
+  const chartData = data.householdsIncome;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
