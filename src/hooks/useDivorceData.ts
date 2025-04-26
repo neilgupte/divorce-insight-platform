@@ -13,8 +13,8 @@ export const useDivorceData = (selectedState: string) => {
       const to = from + pageSize - 1;
 
       const { data, error } = await supabase
-        .from("households_income")
-        .select(`income, households`)
+        .from("households_income") // Make sure this is your real table name
+        .select(`Income_bracket, Households`)
         .range(from, to);
 
       if (error) {
@@ -28,11 +28,11 @@ export const useDivorceData = (selectedState: string) => {
       page++;
     }
 
-    // Clean and sort the data
     const cleaned = allRows
+      .filter((r) => r.Households > 0) // remove empty rows (like your 0 households for 32072)
       .map((r) => ({
-        income: Number(r.income),
-        households: Number(r.households),
+        income: Number(r.Income_bracket),
+        households: Number(r.Households),
       }))
       .sort((a, b) => a.income - b.income);
 
