@@ -1,4 +1,3 @@
-// src/components/dashboard2/HouseholdsIncomeChart.tsx
 
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -25,6 +24,17 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
 
   const chartData = data.householdsIncome;
 
+  // Format number to k or M format
+  const formatNumberToKM = (value: number): string => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `$${(value / 1000).toFixed(1)}k`;
+    } else {
+      return `$${value}`;
+    }
+  };
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
@@ -41,7 +51,7 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis 
           dataKey="income" 
-          tickFormatter={(value) => `$${value.toLocaleString()}`}
+          tickFormatter={(value) => formatNumberToKM(value)}
           tickLine={false}
           axisLine={{ stroke: '#e0e0e0' }}
         />
@@ -53,14 +63,17 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
         />
         <Tooltip 
           formatter={(value: number) => [`${value.toLocaleString()} households`, "Households"]}
-          labelFormatter={(label) => `Income Level: $${Number(label).toLocaleString()}`}
+          labelFormatter={(label) => `Income Level: ${formatNumberToKM(Number(label))}`}
         />
         <Area 
           type="monotone" 
           dataKey="households" 
           stroke="#8884d8" 
+          strokeWidth={2}  // Increased stroke width for better visibility
           fill="url(#colorHouseholds)" 
           name="Households" 
+          dot={{ r: 2, strokeWidth: 2 }}  // Added dots to make the line more visible
+          activeDot={{ r: 6 }}  // Larger dot when hovering
         />
       </AreaChart>
     </ResponsiveContainer>

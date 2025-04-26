@@ -5,32 +5,27 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const useDivorceData = (selectedState: string) => {
   const fetchHouseholdsIncome = async () => {
-    const pageSize = 1000;
-    let page = 0;
-    let allRows: any[] = [];
-
-    while (true) {
-      const from = page * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error } = await supabase
-        .from("income") // Changed from "households_income" to "income" which is in your database
-        .select(`Income_bracket, Households`)
-        .range(from, to);
-
-      if (error) {
-        console.error("Error fetching income data page", page, error);
-        throw error;
-      }
-
-      if (!data || data.length === 0) break;
-
-      allRows.push(...data);
-      page++;
+    let query = supabase
+      .from("income")
+      .select(`Income_bracket, Households, State`);
+    
+    if (selectedState !== "All States") {
+      query = query.eq("State", selectedState);
     }
 
-    const cleaned = allRows
-      .filter((r) => r.Households > 0) // remove empty rows (like your 0 households for 32072)
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching income data:", error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return { householdsIncome: [] };
+    }
+
+    const cleaned = data
+      .filter((r) => r.Households > 0) // remove empty rows
       .map((r) => ({
         income: Number(r.Income_bracket),
         households: Number(r.Households),
