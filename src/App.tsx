@@ -1,170 +1,70 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { NotificationProvider } from "@/contexts/NotificationContext";
-import { MessagingProvider } from "@/contexts/MessagingContext";
 import MainLayout from "@/components/layout/MainLayout";
-import AdminLayout from "@/components/admin/AdminLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
-import LocationAnalyzer from "@/pages/LocationAnalyzer";
-import ReportGenerator from "@/pages/ReportGenerator";
-import DocumentVault from "@/pages/DocumentVault";
-import AIAssistant from "@/pages/AIAssistant";
-import UserManagement from "@/pages/UserManagement";
-import Settings from "@/pages/Settings";
-import NotFound from "@/pages/NotFound";
-import LuxuryLocations from "@/pages/LuxuryLocations";
-import Index from "@/pages/Index";
+import Location from "@/pages/Location";
+import Reports from "@/pages/Reports";
+import Documents from "@/pages/Documents";
+import Assistant from "@/pages/Assistant";
 import AuditLogs from "@/pages/AuditLogs";
-import HelpSupport from "@/pages/HelpSupport";
-import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
+import Users from "@/pages/Users";
+import SettingsPage from "@/pages/Settings";
+import LabourPlanning from "@/pages/LabourPlanning";
+import LabourPlanningCreate from "@/pages/LabourPlanningCreate";
+import TaskMapping from "@/pages/TaskMapping";
+import ModelRuns from "@/pages/ModelRuns";
 import LabourPlanningLocations from "@/pages/LabourPlanningLocations";
-import AddCompany from "@/pages/admin/AddCompany";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import Companies from "@/pages/admin/Companies";
-import CompanyDetail from "@/pages/admin/CompanyDetail";
-import Modules from "@/pages/admin/Modules";
-import Users from "@/pages/admin/Users";
-import Billing from "@/pages/admin/Billing";
-import SystemLogs from "@/pages/admin/SystemLogs";
-import AdminSettings from "@/pages/admin/AdminSettings";
-import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
-import TaskMapping from "@/pages/labour-planning/TaskMapping";
-import ModelRuns from "@/pages/labour-planning/ModelRuns";
-import ModelResults from "@/pages/labour-planning/ModelResults";
-import LabourPotential from "@/pages/LabourPotential";
-import LabourDashboard from "@/components/labour-potential/LabourDashboard";
-import { LabourPotentialProvider } from "@/components/labour-potential/LabourPotentialProvider";
-import LabourPotentialWrapper from "@/components/labour-potential/LabourPotentialWrapper";
-import LabourSettings from "@/components/labour-potential/LabourSettings";
-import NetworkOptimization from "@/pages/NetworkOptimization";
-import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
-import FacilityMap from "@/components/network-optimization/FacilityMap";
-import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
-import NetworkSettings from "@/components/network-optimization/NetworkSettings";
+import LabourPlanningSettings from "@/pages/LabourPlanningSettings";
+import LabourPotentialDashboard from "@/pages/LabourPotentialDashboard";
+import LabourPotentialSearch from "@/pages/LabourPotentialSearch";
+import LabourPotentialSupplyDemand from "@/pages/LabourPotentialSupplyDemand";
+import LabourPotentialReports from "@/pages/LabourPotentialReports";
+import LabourPotentialSettings from "@/pages/LabourPotentialSettings";
+import Help from "@/pages/Help";
+import NotFound from "@/pages/NotFound";
+import { Toaster } from "@/components/ui/toaster";
 
-const queryClient = new QueryClient();
+// Import our new Dashboard2 component
+import Dashboard2 from "./pages/Dashboard2";
 
-const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
-  const { user, hasPermission } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
+const App = () => {
+  return (
+    <Router>
+      <ThemeProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Navigate to="/dashboard" />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard2" element={<Dashboard2 />} />
+            <Route path="location" element={<Location />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="assistant" element={<Assistant />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="users" element={<Users />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="labour-planning" element={<LabourPlanning />} />
+            <Route path="labour-planning/create" element={<LabourPlanningCreate />} />
+            <Route path="labour-planning/task-mapping" element={<TaskMapping />} />
+            <Route path="labour-planning/model-runs" element={<ModelRuns />} />
+            <Route path="labour-planning/locations" element={<LabourPlanningLocations />} />
+            <Route path="labour-planning/settings" element={<LabourPlanningSettings />} />
+            <Route path="labour-potential/dashboard" element={<LabourPotentialDashboard />} />
+            <Route path="labour-potential/search" element={<LabourPotentialSearch />} />
+            <Route path="labour-potential/supply-vs-demand" element={<LabourPotentialSupplyDemand />} />
+            <Route path="labour-potential/reports" element={<LabourPotentialReports />} />
+            <Route path="labour-potential/settings" element={<LabourPotentialSettings />} />
+            <Route path="help" element={<Help />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </ThemeProvider>
+    </Router>
+  );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system">
-      <AuthProvider>
-        <NotificationProvider>
-          <MessagingProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={<Index />} />
-
-                  <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="companies" element={<Companies />} />
-                    <Route path="companies/new" element={<AddCompany />} />
-                    <Route path="companies/:companyId" element={<CompanyDetail />} />
-                    <Route path="modules" element={<Modules />} />
-                    <Route path="users" element={<Users />} />
-                    <Route path="billing" element={<Billing />} />
-                    <Route path="logs" element={<SystemLogs />} />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <MainLayout />
-                    </ProtectedRoute>
-                  }>
-                    <Route path="dashboard" element={<ProtectedRoute requiredPermission="dashboard:view"><Dashboard /></ProtectedRoute>} />
-                    <Route path="location" element={<ProtectedRoute requiredPermission="location:view"><LocationAnalyzer /></ProtectedRoute>} />
-                    <Route path="luxury-locations" element={<ProtectedRoute requiredPermission="location:view"><LuxuryLocations /></ProtectedRoute>} />
-                    <Route path="reports" element={<ProtectedRoute requiredPermission="reports:view"><ReportGenerator /></ProtectedRoute>} />
-                    <Route path="documents" element={<ProtectedRoute requiredPermission="documents:view"><DocumentVault /></ProtectedRoute>} />
-                    <Route path="assistant" element={<ProtectedRoute requiredPermission="assistant:view"><AIAssistant /></ProtectedRoute>} />
-                    <Route path="users" element={<ProtectedRoute requiredPermission="users:manage"><UserManagement /></ProtectedRoute>} />
-                    <Route path="settings" element={<ProtectedRoute requiredPermission="settings:manage"><Settings /></ProtectedRoute>} />
-                    <Route path="audit-logs" element={<ProtectedRoute requiredPermission="logs:view"><AuditLogs /></ProtectedRoute>} />
-                    <Route path="help" element={<ProtectedRoute><HelpSupport /></ProtectedRoute>} />
-
-                    <Route path="labour-planning" element={<ProtectedRoute><LabourPlanningDashboard /></ProtectedRoute>} />
-                    <Route path="labour-planning/create" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
-                    <Route path="labour-planning/create/:modelId" element={<ProtectedRoute><CreateLabourModel /></ProtectedRoute>} />
-                    <Route path="labour-planning/task-mapping" element={<ProtectedRoute><TaskMapping /></ProtectedRoute>} />
-                    <Route path="labour-planning/model-runs" element={<ProtectedRoute><ModelRuns /></ProtectedRoute>} />
-                    <Route path="labour-planning/model-runs/:runId" element={<ProtectedRoute><ModelResults /></ProtectedRoute>} />
-                    <Route path="labour-planning/locations" element={<ProtectedRoute><LabourPlanningLocations /></ProtectedRoute>} />
-                    <Route path="labour-planning/settings" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Labour Planning Settings</h1>
-                          <p className="mt-4 text-muted-foreground">Configuration options for labour planning.</p>
-                        </div>
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="labour-potential" element={
-                      <ProtectedRoute>
-                        <LabourPotentialProvider>
-                          <LabourPotential />
-                        </LabourPotentialProvider>
-                      </ProtectedRoute>
-                    }>
-                      <Route index element={<Navigate to="/labour-potential/dashboard" replace />} />
-                      <Route path="dashboard" element={<ProtectedRoute><LabourDashboard /></ProtectedRoute>} />
-                      <Route path="search" element={<ProtectedRoute><LabourPotentialWrapper component="search" /></ProtectedRoute>} />
-                      <Route path="supply-vs-demand" element={<ProtectedRoute><LabourPotentialWrapper component="supply-demand" /></ProtectedRoute>} />
-                      <Route path="reports" element={<ProtectedRoute><LabourPotentialWrapper component="reports" /></ProtectedRoute>} />
-                      <Route path="settings" element={<ProtectedRoute><LabourSettings /></ProtectedRoute>} />
-                    </Route>
-
-                    <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
-                      <Route index element={<Navigate to="/network/dashboard" replace />} />
-                      <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
-                      <Route path="facilities" element={<ProtectedRoute><FacilityMap /></ProtectedRoute>} />
-                      <Route path="scenarios" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
-                      <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
-                    </Route>
-
-                    <Route path="multivariate" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Multivariate Optimization</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Complex decision optimization tools.</p>
-                        </div>
-                      </ProtectedRoute>
-                    } />
-                  </Route>
-
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </MessagingProvider>
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
 
 export default App;
