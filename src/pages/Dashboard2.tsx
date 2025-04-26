@@ -17,7 +17,21 @@ import DivorceRateChart from "@/components/dashboard2/DivorceRateChart";
 import HouseholdsIncomeChart from "@/components/dashboard2/HouseholdsIncomeChart";
 import OpportunityMap from "@/components/dashboard2/OpportunityMap";
 import TopTamTable from "@/components/dashboard2/TopTamTable";
-import { useDivorceData } from "@/hooks/useDivorceData";
+
+const statesList = [
+  "All States",
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+  "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+  "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island",
+  "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah",
+  "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin",
+  "Wyoming"
+];
 
 const Dashboard2 = () => {
   const [selectedState, setSelectedState] = useState<string>("Florida");
@@ -28,7 +42,7 @@ const Dashboard2 = () => {
     low: true
   });
   
-  const { isLoading, error, statesList } = useDivorceData(selectedState);
+
 
   const handleScoreFilterChange = (value: boolean, key: 'high' | 'medium' | 'low') => {
     setScoreFilters(prev => ({
