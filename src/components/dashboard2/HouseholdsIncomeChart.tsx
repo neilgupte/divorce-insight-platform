@@ -8,17 +8,20 @@ interface HouseholdsIncomeChartProps {
 }
 
 const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedState }) => {
-  const { data, isLoading, error } = useQuery(['household_income', selectedState], async () => {
-    const { data, error } = await supabase
-      .from('household_income') // 🔥 make sure this matches your table name
-      .select('income_bracket, households, state')
-      .eq('state', selectedState);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['household_income', selectedState],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('household_income')
+        .select('income_bracket, households, state')
+        .eq('state', selectedState);
 
-    if (error) {
-      console.error('Error fetching household income data:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching household income data:', error);
+        throw error;
+      }
+      return data;
     }
-    return data;
   });
 
   if (isLoading) return <div className="flex items-center justify-center h-full">Loading chart...</div>;
