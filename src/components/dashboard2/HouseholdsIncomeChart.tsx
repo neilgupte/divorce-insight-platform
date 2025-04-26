@@ -26,11 +26,11 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
     return `$${value.toLocaleString()}`;
   };
 
-  const formatNumber = (value: number) => {
+  const formatNumber = (value: number): string => {
     if (value >= 1000) {
       return `${(value / 1000).toFixed(1)}K`;
     }
-    return value;
+    return value.toString();
   };
 
   return (
