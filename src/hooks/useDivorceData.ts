@@ -1,81 +1,63 @@
-
-import { useState, useEffect } from 'react';
-
-// This would normally come from your Supabase client
-// For now, we'll use mock data until Supabase is connected
-const statesList = [
-  "All States",
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", 
-  "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
-  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", 
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
-  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", 
-  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
-  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
-  "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", 
-  "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", 
-  "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", 
-  "Wyoming"
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { stateNameToAbbreviation } from "@/utils/stateMapping";
 
 export const useDivorceData = (selectedState: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any>(null);
+  return useQuery(['divorce-data', selectedState], async () => {
+    if (!selectedState) return null;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+    let query = supabase.from('divorce_rate').select('Year, State, Divorce Rate');
 
-      try {
-        // This would be a Supabase query in the real implementation
-        // const { data, error } = await supabase
-        //   .from('divorce_data')
-        //   .select('*')
-        //   .eq('state', selectedState);
-        
-        // if (error) throw new Error(error.message);
+    if (selectedState !== 'All States') {
+      const abbrev = stateNameToAbbreviation[selectedState.toLowerCase()];
+      query = query.eq('State', abbrev);
+    }
 
-        // Mock data for now
-        const mockData = {
-          divorceRates: {
-            stateAverage: [
-              { year: 2020, rate: 7.8 },
-              { year: 2021, rate: 8.0 },
-              { year: 2022, rate: 8.0 },
-              { year: 2023, rate: 8.0 }
-            ],
-            nationalAverage: [
-              { year: 2020, rate: 6.4 },
-              { year: 2021, rate: 6.5 },
-              { year: 2022, rate: 6.5 },
-              { year: 2023, rate: 6.5 }
-            ]
-          },
-          householdsIncome: [
-            { income: 12500, households: 18000 },
-            { income: 22500, households: 19000 },
-            { income: 32500, households: 19500 },
-            { income: 42500, households: 19500 },
-            { income: 55000, households: 20000 },
-            { income: 67500, households: 30000 },
-            { income: 87500, households: 22000 },
-            { income: 112500, households: 24000 }
-          ]
-        };
+    const { data, error } = await query;
 
-        setData(mockData);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching divorce data:', err);
-        setError('Failed to load data');
-        setIsLoading(false);
-      }
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+
+    // Group by year
+    const grouped: Record<number, number[]> = {};
+
+    data.forEach((row) => {
+      if (!row.Year || !row["Divorce Rate"]) return;
+      const year = parseInt(row.Year);
+      const rate = typeof row["Divorce Rate"] === "string" 
+        ? parseFloat(row["Divorce Rate"].replace("%", "")) 
+        : Number(row["Divorce Rate"]);
+      if (!grouped[year]) grouped[year] = [];
+      grouped[year].push(rate);
+    });
+
+    const years = Object.keys(grouped).map(Number).sort();
+    
+    const stateAverage = years.map((year) => ({
+      year,
+      rate: grouped[year] && grouped[year].length > 0
+        ? Number((grouped[year].reduce((a, b) => a + b, 0) / grouped[year].length).toFixed(2))
+        : 0,
+    }));
+
+    const allRates = Object.values(grouped).flat();
+    const nationalAverageRate = allRates.length > 0
+      ? Number((allRates.reduce((a, b) => a + b, 0) / allRates.length).toFixed(2))
+      : 0;
+
+    const nationalAverage = years.map((year) => ({
+      year,
+      rate: nationalAverageRate,
+    }));
+
+    return {
+      divorceRates: {
+        stateAverage,
+        nationalAverage,
+      },
+      householdsIncome: [] // We'll fill this later
     };
-
-    fetchData();
-  }, [selectedState]);
-
-  return { data, isLoading, error, statesList };
+  }, {
+    keepPreviousData: true,
+  });
 };
