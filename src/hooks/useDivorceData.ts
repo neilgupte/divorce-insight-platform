@@ -29,7 +29,7 @@ export const useDivorceData = (selectedState: string) => {
   };
 
   return useQuery({
-    queryKey: ["householdsIncome", selectedState],
+    queryKey: ['householdsIncome', selectedState],
     queryFn: fetchHouseholdsIncome,
   });
 };
