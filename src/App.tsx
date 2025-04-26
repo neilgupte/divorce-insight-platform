@@ -9,6 +9,7 @@ import { MessagingProvider } from "@/contexts/MessagingContext";
 
 // Pages
 import Login from "@/pages/Login";
+import Dashboard from "@/pages/Dashboard"; // ✅ Added this
 import Dashboard2 from "@/pages/Dashboard2";
 import LabourPlanningDashboard from "@/pages/LabourPlanningDashboard";
 import CreateLabourModel from "@/pages/labour-planning/CreateLabourModel";
@@ -32,8 +33,8 @@ import { LabourSettings } from "@/components/labour-potential/LabourSettings";
 import { NetworkDashboard } from "@/components/network-optimization/NetworkDashboard";
 import { NetworkMap } from "@/components/network-optimization/NetworkMap";
 import { ScenarioSimulation } from "@/components/network-optimization/ScenarioSimulation";
-import FacilityMap from "@/components/network-optimization/FacilityMap"; // ✅
-import FacilityTable from "@/components/network-optimization/FacilityTable"; // ✅
+import FacilityMap from "@/components/network-optimization/FacilityMap";
+import FacilityTable from "@/components/network-optimization/FacilityTable";
 import { NetworkSettings } from "@/components/network-optimization/NetworkSettings";
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Navigate to="/dashboard2" />} />
+                  <Route path="dashboard" element={<Dashboard />} /> {/* ✅ Added this */}
                   <Route path="dashboard2" element={<Dashboard2 />} />
 
                   {/* Labour Planning Routes */}
@@ -74,7 +76,7 @@ const App = () => {
                     <Route path="dashboard" element={<NetworkDashboard />} />
                     <Route path="map" element={<NetworkMap />} />
                     <Route path="simulation" element={<ScenarioSimulation />} />
-                    <Route path="facilities/map" element={<FacilityMap />} /> {/* ✅ Fixed */}
+                    <Route path="facilities/map" element={<FacilityMap />} />
                     <Route path="facilities/table" element={<FacilityTable />} />
                     <Route path="settings" element={<NetworkSettings />} />
                   </Route>
