@@ -34,7 +34,7 @@ import NetworkOptimization from "@/pages/NetworkOptimization";
 import { NetworkDashboard } from "@/components/network-optimization/NetworkDashboard";
 import { NetworkMap } from "@/components/network-optimization/NetworkMap";
 import { ScenarioSimulation } from "@/components/network-optimization/ScenarioSimulation";
-import { FacilityMap } from "@/components/network-optimization/FacilityMap";
+import  FacilityMap  from "@/components/network-optimization/FacilityMap";
 import { FacilityTable } from "@/components/network-optimization/FacilityTable";
 import { NetworkSettings } from "@/components/network-optimization/NetworkSettings";
 
