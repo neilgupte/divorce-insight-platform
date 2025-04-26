@@ -1,4 +1,3 @@
-
 // src/hooks/useDivorceRates.ts
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,18 +9,12 @@ export interface DivorceRateChartData {
   avgNational: number; // Percent (e.g., 7.4)
 }
 
-interface DivorceRateRow {
-  Year: string;
-  State: string;
-  divorce_rate: string;
-}
-
 export const useDivorceRates = (selectedState: string) => {
   const fetchDivorceRates = async (): Promise<DivorceRateChartData[]> => {
     // 1. Page through the raw `divorce_rate` table
     const pageSize = 1000;
     let page = 0;
-    let allRows: DivorceRateRow[] = [];
+    let allRows: { Year: string; State: string; divorce_rate: string }[] = [];
 
     while (true) {
       const from = page * pageSize;
@@ -29,7 +22,7 @@ export const useDivorceRates = (selectedState: string) => {
 
       const { data, error } = await supabase
         .from("divorce_rate")
-        .select("Year, State, divorce_rate")
+        .select<{ Year: string; State: string; divorce_rate: string }>(`"Year", "State", divorce_rate`)
         .range(from, to);
 
       if (error) {
@@ -39,9 +32,7 @@ export const useDivorceRates = (selectedState: string) => {
 
       if (!data || data.length === 0) break;
 
-      // Type assertion to ensure the data shape matches DivorceRateRow
-      const typedData = data as unknown as DivorceRateRow[];
-      allRows.push(...typedData);
+      allRows.push(...data);
       page++;
     }
 

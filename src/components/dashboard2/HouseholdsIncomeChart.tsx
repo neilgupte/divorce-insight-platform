@@ -8,7 +8,7 @@ interface HouseholdsIncomeChartProps {
 }
 
 const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedState }) => {
-  const { householdsIncome, isLoading, error } = useDivorceData(selectedState);
+  const { data, isLoading, error } = useDivorceData(selectedState);
   
   if (isLoading) {
     return <div className="flex items-center justify-center h-full">Loading chart data...</div>;
@@ -18,7 +18,7 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
     return <div className="flex items-center justify-center h-full text-red-500">Error loading chart data</div>;
   }
   
-  if (!householdsIncome || householdsIncome.length === 0) {
+  if (!data || !data.householdsIncome) {
     return <div className="flex items-center justify-center h-full">No data available</div>;
   }
 
@@ -36,7 +36,7 @@ const HouseholdsIncomeChart: React.FC<HouseholdsIncomeChartProps> = ({ selectedS
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
-        data={householdsIncome}
+        data={data.householdsIncome}
         margin={{ top: 5, right: 20, bottom: 25, left: 0 }}
       >
         <defs>
