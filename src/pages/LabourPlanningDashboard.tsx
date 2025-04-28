@@ -140,7 +140,7 @@ const LabourPlanningDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Labour Planning Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage your workforce optimization models
+            ⚠️ This model used 1st Party Data [Confidential]
           </p>
         </div>
         <Button onClick={handleCreateNewModel} className="flex items-center">
