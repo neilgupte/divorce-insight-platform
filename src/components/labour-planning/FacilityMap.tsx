@@ -50,7 +50,7 @@ const FacilityMap: React.FC<FacilityMapProps> = ({
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: "mapbox://styles/mapbox/streets-v12",
         center: getMapCenter(),
         zoom: 5
       });
