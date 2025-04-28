@@ -244,7 +244,7 @@ const MainLayout = () => {
               </Button>
               <img 
                 src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
-                alt="Logo" 
+                alt="WorkForce AI Logo" 
                 className="h-8" 
               />
             </div>
