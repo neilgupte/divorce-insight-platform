@@ -92,12 +92,18 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    // Clear any previous map instance
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
+
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: "mapbox://styles/mapbox/streets-v11", // Changed to streets-v11 for more color
         center: [-122.2712, 37.8044], // Center on Oakland
         zoom: 9
       });
@@ -111,7 +117,8 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
         // Add hotspots to the map
         displayFacilities.forEach((hotspot) => {
           // Add circle layer for the radius
-          map.current?.addSource(`radius-${hotspot.id}`, {
+          const sourceId = `radius-${hotspot.id}`;
+          map.current?.addSource(sourceId, {
             type: "geojson",
             data: {
               type: "Feature",
@@ -126,7 +133,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
           map.current?.addLayer({
             id: `radius-${hotspot.id}`,
             type: "circle",
-            source: `radius-${hotspot.id}`,
+            source: sourceId,
             paint: {
               "circle-radius": {
                 stops: [
@@ -182,7 +189,10 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     }
 
     return () => {
-      map.current?.remove();
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, [toast, displayFacilities, onSelectFacility]);
 
@@ -198,7 +208,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
 
   return (
     <div className="relative h-full w-full">
-      <div ref={mapContainer} className="h-full w-full" />
+      <div ref={mapContainer} className="h-full w-full rounded-md overflow-hidden" />
     </div>
   );
 };

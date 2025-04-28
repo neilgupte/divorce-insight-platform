@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Card,
@@ -19,6 +20,7 @@ import {
   Clock,
   MapPin
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import NetworkMap from "./NetworkMap";
 import FacilityTable from "./FacilityTable";
 import InsightsPanel from "./InsightsPanel";
@@ -121,6 +123,7 @@ const NetworkDashboard = () => {
     populationDensity: false,
     laborHeatmap: true
   });
+  const navigate = useNavigate();
 
   const handleFacilitySelect = (facility: Facility) => {
     setSelectedFacility(facility);
@@ -133,6 +136,16 @@ const NetworkDashboard = () => {
     });
   };
 
+  // Handle tab change with navigation
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    if (view === "table") {
+      navigate("/network/table");
+    } else if (view === "map") {
+      navigate("/network/dashboard");
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -142,7 +155,7 @@ const NetworkDashboard = () => {
             Optimize your facility network and workforce distribution
           </p>
         </div>
-        <Tabs value={activeView} onValueChange={setActiveView} className="w-[400px]">
+        <Tabs value={activeView} onValueChange={handleViewChange} className="w-[400px]">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="map">
               <MapPin className="mr-2 h-4 w-4" />
