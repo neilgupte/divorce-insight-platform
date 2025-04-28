@@ -148,7 +148,7 @@ const LabourPlanningDashboard = () => {
       <div className="grid grid-cols-5 gap-6">
         {/* Map */}
         <div className="col-span-2">
-          <Card className="h-[1000px]">
+          <Card className="h-[800px]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Facility Map</CardTitle>
               <Button variant="ghost" size="icon" onClick={() => setFullscreenMapOpen(true)}>
@@ -211,7 +211,7 @@ const LabourPlanningDashboard = () => {
           </Card>
 
           {/* AI Recommendations */}
-          <Card className="h-[240px] overflow-hidden">
+          <Card className="h-[300px] overflow-hidden">
             <CardHeader className="p-4 pb-2">
               <CardTitle>Recommendations</CardTitle>
             </CardHeader>
