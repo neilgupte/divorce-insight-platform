@@ -16,6 +16,35 @@ interface Hotspot {
   type: string;
 }
 
+interface Facility {
+  id: string;
+  name: string;
+  workers?: number;
+  neededWorkers?: number;
+  marginalValue?: number;
+  utilisation?: number;
+  attrition?: number;
+  commuteTime?: number;
+  laborPoolIndex?: number;
+  type: string;
+  lat: number;
+  lng: number;
+}
+
+interface MapLayers {
+  facilities: boolean;
+  commuteRadii: boolean;
+  populationDensity: boolean;
+  laborHeatmap: boolean;
+}
+
+interface NetworkMapProps {
+  facilities?: Facility[];
+  selectedFacility?: Facility | null;
+  onSelectFacility?: (facility: Facility) => void;
+  layers?: MapLayers;
+}
+
 // Generate 20 hotspots with overlapping areas
 const mockHotspots: Hotspot[] = [
   // Cluster 1 - 3 overlapping facilities in San Francisco area
@@ -47,10 +76,18 @@ const mockHotspots: Hotspot[] = [
   { id: "20", name: "San Rafael Center", lat: 37.9735, lng: -122.5311, radius: 1800, type: "Distribution" },
 ];
 
-const NetworkMap: React.FC = () => {
+const NetworkMap: React.FC<NetworkMapProps> = ({ 
+  facilities = [], 
+  selectedFacility = null, 
+  onSelectFacility = () => {}, 
+  layers = { facilities: true, commuteRadii: true, populationDensity: false, laborHeatmap: false } 
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const { toast } = useToast();
+  
+  // Use passed facilities if available, otherwise use mockHotspots
+  const displayFacilities = facilities.length > 0 ? facilities : mockHotspots;
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -72,7 +109,7 @@ const NetworkMap: React.FC = () => {
         if (!map.current) return;
 
         // Add hotspots to the map
-        mockHotspots.forEach((hotspot) => {
+        displayFacilities.forEach((hotspot) => {
           // Add circle layer for the radius
           map.current?.addSource(`radius-${hotspot.id}`, {
             type: "geojson",
@@ -112,6 +149,7 @@ const NetworkMap: React.FC = () => {
           el.style.border = "2px solid white";
           el.style.borderRadius = "50%";
           el.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
+          el.style.cursor = "pointer";
 
           const marker = new mapboxgl.Marker(el)
             .setLngLat([hotspot.lng, hotspot.lat])
@@ -125,6 +163,13 @@ const NetworkMap: React.FC = () => {
                 `)
             )
             .addTo(map.current);
+            
+          // Add click event to marker if onSelectFacility is provided
+          if (onSelectFacility) {
+            el.addEventListener('click', () => {
+              onSelectFacility(hotspot as Facility);
+            });
+          }
         });
       });
     } catch (error) {
@@ -139,7 +184,7 @@ const NetworkMap: React.FC = () => {
     return () => {
       map.current?.remove();
     };
-  }, [toast]);
+  }, [toast, displayFacilities, onSelectFacility]);
 
   const getFacilityColor = (type: string) => {
     switch (type) {

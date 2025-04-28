@@ -96,8 +96,8 @@ const LabourFunnel: React.FC = () => {
                     onChange={(e) => setEditValue(Number(e.target.value))}
                   />
                   <div className="flex justify-end gap-2">
-                    <Button size="xs" onClick={handleSave}>Save</Button>
-                    <Button size="xs" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                    <Button size="sm" onClick={handleSave}>Save</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
                   </div>
                 </div>
               ) : (

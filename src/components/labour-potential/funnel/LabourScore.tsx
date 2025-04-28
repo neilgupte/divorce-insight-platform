@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -90,7 +91,7 @@ const LabourScore: React.FC = () => {
                     </span>
                   </div>
                   <div className="text-xs mt-1">
-                    <Button size="xs" variant="link" className="px-0 text-blue-600" onClick={() => setViewingFactor(factor)}>
+                    <Button size="sm" variant="link" className="px-0 text-blue-600" onClick={() => setViewingFactor(factor)}>
                       View more
                     </Button>
                   </div>
