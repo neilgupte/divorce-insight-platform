@@ -148,7 +148,7 @@ const LabourPlanningDashboard = () => {
       <div className="grid grid-cols-5 gap-6">
         {/* Map */}
         <div className="col-span-2">
-          <Card className="h-[500px]">
+          <Card className="h-[1000px]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Facility Map</CardTitle>
               <Button variant="ghost" size="icon" onClick={() => setFullscreenMapOpen(true)}>
