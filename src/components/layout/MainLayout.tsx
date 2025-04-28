@@ -79,11 +79,18 @@ const MainLayout = () => {
   const getCurrentMenu = () => {
     if (activeModule === "labour-planning") return labourPlanningMenuItems;
     if (activeModule === "labour-potential") return labourPotentialMenuItems;
+    if (activeModule === "realestate") return realEstateMenuItems.filter(item => hasPermission(item.permission) || user.role === "superuser");
+    if (activeModule === "network") return networkOptimizationItems;
     return realEstateMenuItems.filter(item => hasPermission(item.permission) || user.role === "superuser");
   };
 
   const currentMenuItems = getCurrentMenu();
   const filteredAdminMenuItems = adminMenuItems.filter(item => hasPermission(item.permission) || user.role === "superuser");
+
+  // Updated network optimization menu items - only dashboard
+  const networkOptimizationItems = [
+    { name: "Dashboard", icon: LayoutDashboard, path: "/network/dashboard", permission: "" }
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -222,14 +229,21 @@ const MainLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="border-b bg-card/80 backdrop-blur-sm">
           <div className="flex h-14 items-center justify-between px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={toggleSidebar}
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={toggleSidebar}
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              <img 
+                src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
+                alt="Logo" 
+                className="h-8" 
+              />
+            </div>
 
             <div className="flex items-center space-x-2 ml-auto">
               <ThemeToggle />

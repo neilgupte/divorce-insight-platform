@@ -5,7 +5,7 @@ import { Outlet, Navigate, useLocation } from "react-router-dom";
 const NetworkOptimization = () => {
   const location = useLocation();
   
-  // Redirect to dashboard if at the base /network route
+  // Only have dashboard now, redirect everything else there
   if (location.pathname === "/network") {
     return <Navigate to="/network/dashboard" replace />;
   }

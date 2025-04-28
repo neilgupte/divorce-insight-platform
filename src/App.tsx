@@ -141,9 +141,6 @@ const App = () => (
                     <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
                       <Route index element={<Navigate to="/network/dashboard" replace />} />
                       <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
-                      <Route path="table" element={<ProtectedRoute><FacilityTableView /></ProtectedRoute>} />
-                      <Route path="scenarios" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
-                      <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
                     </Route>
 
                     <Route path="multivariate" element={
