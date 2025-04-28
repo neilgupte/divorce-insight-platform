@@ -44,7 +44,7 @@ import LabourPotentialWrapper from "@/components/labour-potential/LabourPotentia
 import LabourSettings from "@/components/labour-potential/LabourSettings";
 import NetworkOptimization from "@/pages/NetworkOptimization";
 import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
-import FacilityMap from "@/components/network-optimization/FacilityMap";
+import FacilityTableView from "@/components/network-optimization/FacilityTableView";
 import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
 import NetworkSettings from "@/components/network-optimization/NetworkSettings";
 
@@ -141,7 +141,7 @@ const App = () => (
                     <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
                       <Route index element={<Navigate to="/network/dashboard" replace />} />
                       <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
-                      <Route path="facilities" element={<ProtectedRoute><FacilityMap /></ProtectedRoute>} />
+                      <Route path="table" element={<ProtectedRoute><FacilityTableView /></ProtectedRoute>} />
                       <Route path="scenarios" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
                       <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
                     </Route>
