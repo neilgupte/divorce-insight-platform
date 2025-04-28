@@ -90,6 +90,11 @@ const facilityLabourData: Facility[] = [
   { id: "B", name: "Facility B", lat: 34.0522, lng: -118.2437, desiredLabour: 150, currentLabour: 140, delta: -10, recommendedLabour: 140, mfx: "70/30" },
   { id: "C", name: "Facility C", lat: 41.8781, lng: -87.6298, desiredLabour: 200, currentLabour: 210, delta: 10, recommendedLabour: 200, mfx: "60/40" },
   { id: "D", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
+  { id: "E", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
+  { id: "F", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
+  { id: "G", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
+  { id: "H", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
+  { id: "I", name: "Facility D", lat: 42.3601, lng: -71.0589, desiredLabour: 250, currentLabour: 230, delta: 10, recommendedLabour: 260, mfx: "75/25" },
 ];
 
 const LabourPlanningDashboard = () => {
