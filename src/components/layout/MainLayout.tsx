@@ -243,7 +243,7 @@ const MainLayout = () => {
                 <Menu className="h-6 w-6" />
               </Button>
               <img 
-                src="/lovable-uploads/453b5cb9-eca8-43bf-a00e-184001b67ce3.png" 
+                src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
                 alt="Logo" 
                 className="h-8" 
               />
