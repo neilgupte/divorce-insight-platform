@@ -62,11 +62,15 @@ const Login = () => {
       
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">TBD Corp</h1>
-          <p className="mt-2 text-muted-foreground">
-            Workforce Intelligent insights platform
-          </p>
-        </div>
+  <img 
+    src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
+    alt="WorkForce AI Logo" 
+    className="mx-auto h-16" 
+  />
+  <p className="mt-4 text-muted-foreground">
+    Client Intelligent & Insights Platform
+  </p>
+</div>
 
         <Card>
           <CardHeader>
