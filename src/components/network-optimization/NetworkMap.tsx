@@ -4,8 +4,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useToast } from "@/hooks/use-toast";
 
-// Temporary token for development - in production this should come from env vars
-const MAPBOX_TOKEN = "pk.eyJ1IjoiZGVtby11c2VyIiwiYSI6ImNrbDM1YnRwNzJiejUyd3IwcWx0MTNjOGgifQ.FCIBP8DzlTIYdglmeug9cQ";
+// Updated token with the correct one
+const MAPBOX_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOXBzbXI0eTFjdHoya3IwNng1ZTI4ZHoifQ.hgWIXnSx6HdRC67U2xhdxQ";
 
 interface Hotspot {
   id: string;
@@ -98,12 +98,13 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       map.current = null;
     }
 
+    // Set the correct Mapbox token
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v11", // Changed to streets-v11 for more color
+        style: "mapbox://styles/mapbox/streets-v11",
         center: [-122.2712, 37.8044], // Center on Oakland
         zoom: 9
       });
@@ -113,6 +114,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
 
       map.current.on("load", () => {
         if (!map.current) return;
+        console.log("Map loaded successfully");
 
         // Add hotspots to the map
         displayFacilities.forEach((hotspot) => {

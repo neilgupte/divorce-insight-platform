@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -7,7 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   LogOut, Menu, X, LayoutDashboard, Map, FileText, FileBox, MessageCircle, Users, Settings,
-  Activity, HelpCircle, ChevronLeft, ChevronRight, Brain, MapPin, Clock, GitMerge, History
+  Activity, HelpCircle, ChevronLeft, ChevronRight, Brain, MapPin, Clock, GitMerge, History, 
+  Building, Network
 } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import MessagingCenter from "@/components/messaging/MessagingCenter";
@@ -35,6 +37,13 @@ const MainLayout = () => {
   }
 
   const pathname = location.pathname;
+
+  // Updated network optimization menu items - optimized for network optimization use case
+  const networkOptimizationItems = [
+    { name: "Dashboard", icon: LayoutDashboard, path: "/network/dashboard", permission: "" },
+    { name: "Facilities", icon: Building, path: "/network/table", permission: "" },
+    { name: "Network Analysis", icon: Network, path: "/network/dashboard", permission: "" }
+  ];
 
   const labourPlanningMenuItems = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/labour-planning", permission: "" },
@@ -73,10 +82,6 @@ const MainLayout = () => {
     path: "/help",
     permission: ""
   };
-
-  const networkOptimizationItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/network/dashboard", permission: "" }
-  ];
 
   const activeModule = models.find(model => pathname.startsWith(model.path))?.id;
 
@@ -238,7 +243,7 @@ const MainLayout = () => {
                 <Menu className="h-6 w-6" />
               </Button>
               <img 
-                src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
+                src="/lovable-uploads/453b5cb9-eca8-43bf-a00e-184001b67ce3.png" 
                 alt="Logo" 
                 className="h-8" 
               />
