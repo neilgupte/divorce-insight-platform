@@ -213,7 +213,7 @@ const LabourPlanningDashboard = () => {
           {/* AI Recommendations */}
           <Card className="h-[240px] overflow-hidden">
             <CardHeader className="p-4 pb-2">
-              <CardTitle>RECS</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
             </CardHeader>
             <CardContent className="p-2 h-[calc(100%-60px)]">
               <AIRecommendations selectedFacility={selectedFacility} />
