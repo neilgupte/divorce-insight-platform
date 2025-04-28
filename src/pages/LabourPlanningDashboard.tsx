@@ -169,7 +169,7 @@ const LabourPlanningDashboard = () => {
         {/* Tables */}
         <div className="col-span-3 space-y-6">
           {/* Top Opportunities Table */}
-          <Card className="h-[500px] overflow-hidden">
+          <Card className="min-h-[500px]">
             <CardHeader className="p-4 pb-2">
               <CardTitle>TOP OPPORTUNITIES</CardTitle>
             </CardHeader>
@@ -211,7 +211,7 @@ const LabourPlanningDashboard = () => {
           </Card>
 
           {/* AI Recommendations */}
-          <Card className="h-[300px] overflow-hidden">
+          <Card className="min-h-[300px]">
             <CardHeader className="p-4 pb-2">
               <CardTitle>Recommendations</CardTitle>
             </CardHeader>
