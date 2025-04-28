@@ -74,6 +74,10 @@ const MainLayout = () => {
     permission: ""
   };
 
+  const networkOptimizationItems = [
+    { name: "Dashboard", icon: LayoutDashboard, path: "/network/dashboard", permission: "" }
+  ];
+
   const activeModule = models.find(model => pathname.startsWith(model.path))?.id;
 
   const getCurrentMenu = () => {
@@ -86,11 +90,6 @@ const MainLayout = () => {
 
   const currentMenuItems = getCurrentMenu();
   const filteredAdminMenuItems = adminMenuItems.filter(item => hasPermission(item.permission) || user.role === "superuser");
-
-  // Updated network optimization menu items - only dashboard
-  const networkOptimizationItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/network/dashboard", permission: "" }
-  ];
 
   return (
     <div className="flex h-screen overflow-hidden">
