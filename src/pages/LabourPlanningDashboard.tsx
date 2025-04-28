@@ -169,7 +169,7 @@ const LabourPlanningDashboard = () => {
         {/* Tables */}
         <div className="col-span-3 space-y-6">
           {/* Top Opportunities Table */}
-          <Card className="h-[240px] overflow-hidden">
+          <Card className="h-[500px] overflow-hidden">
             <CardHeader className="p-4 pb-2">
               <CardTitle>TOP OPPORTUNITIES</CardTitle>
             </CardHeader>
