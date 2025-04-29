@@ -32,8 +32,8 @@ interface InsightsPanelProps {
 }
 
 const InsightsPanel: React.FC<InsightsPanelProps> = ({ selectedFacility, facilities }) => {
-  const [scenarioType, setScenarioType] = useState("none");
   const [insightType, setInsightType] = useState("general");
+  const [scenarioType, setScenarioType] = useState("none");
 
   const renderGlobalInsights = () => (
     <div className="space-y-4">
@@ -224,33 +224,34 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({ selectedFacility, facilit
 
   return (
     <div className="space-y-4">
-      {/* Controls for insights type and scenario selection */}
-      <div className="flex flex-wrap gap-2 justify-between items-center">
-        <div className="flex gap-2">
-          <Button
-            variant={insightType === "general" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setInsightType("general")}
-          >
-            Network Insights
-          </Button>
-          <Button
-            variant={insightType === "facility" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setInsightType("facility")}
-          >
-            Facility Analysis
-          </Button>
-          <Button
-            variant={insightType === "scenario" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setInsightType("scenario")}
-          >
-            Run Scenario
-          </Button>
-        </div>
+      {/* Buttons for Network Insights, Facility Analysis, Run Scenario */}
+      <div className="flex space-x-2">
+        <Button 
+          variant={insightType === "general" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setInsightType("general")}
+        >
+          Network Insights
+        </Button>
+        <Button
+          variant={insightType === "facility" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setInsightType("facility")}
+        >
+          Facility Analysis
+        </Button>
+        <Button
+          variant={insightType === "scenario" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setInsightType("scenario")}
+        >
+          Run Scenario
+        </Button>
+      </div>
 
-        {insightType === "scenario" && (
+      {/* Show scenario selector only when scenario tab is selected */}
+      {insightType === "scenario" && (
+        <div className="flex items-center">
           <Select value={scenarioType} onValueChange={setScenarioType}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select scenario" />
@@ -262,8 +263,8 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({ selectedFacility, facilit
               <SelectItem value="redistribution">Workload Redistribution</SelectItem>
             </SelectContent>
           </Select>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Insights content based on selected type */}
       <div className="pt-2">
