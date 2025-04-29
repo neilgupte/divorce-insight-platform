@@ -1,5 +1,4 @@
 
-// src/components/network-optimization/NetworkMap.tsx
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -213,7 +212,11 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
           // Add successful data event handler to debug loading
           map.current.on("data", (e) => {
             if (e.dataType === "source" || e.dataType === "style") {
-              console.log(`Mapbox ${e.dataType} data loaded:`, e.sourceId || e.styleId);
+              // Fix: Check for properties before accessing them
+              const sourceInfo = e.dataType === "source" ? 
+                `source: ${e.sourceId || "unknown"}` : 
+                `style: ${e.styleId || "unknown"}`;
+              console.log(`Mapbox ${e.dataType} data loaded: ${sourceInfo}`);
             }
           });
           
