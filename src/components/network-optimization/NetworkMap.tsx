@@ -27,6 +27,7 @@ interface NetworkMapProps {
   fullscreen?: boolean;
   selectedFacility?: Facility | null;
   onSelectFacility?: (f: Facility) => void;
+  showControls?: boolean;
 }
 
 const NetworkMap: React.FC<NetworkMapProps> = ({
@@ -36,6 +37,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   fullscreen = false,
   selectedFacility = null,
   onSelectFacility = () => {},
+  showControls = false,
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);

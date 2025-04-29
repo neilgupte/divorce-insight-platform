@@ -1,15 +1,15 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Map, Table, Maximize } from "lucide-react";
+import { Search, Map, Table, Maximize, SlidersHorizontal } from "lucide-react";
 import NetworkMap from "./NetworkMap";
 import InsightsPanel from "./InsightsPanel";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import FullscreenMapDialog from "./FullscreenMapDialog";
+import { Slider } from "@/components/ui/slider";
 
 // Sample data for the charts and facilities
 const networkPerformanceData = [
@@ -102,6 +102,7 @@ const NetworkDashboard = () => {
     mockFacilities.map(f => f.id)
   );
   const [isFullscreenMapOpen, setIsFullscreenMapOpen] = useState(false);
+  const [showMapFilters, setShowMapFilters] = useState(false);
   
   const totalWorkers = mockFacilities.reduce((sum, f) => sum + f.workers, 0);
   const totalNeeded = mockFacilities.reduce((sum, f) => sum + f.neededWorkers, 0);
@@ -154,10 +155,21 @@ const NetworkDashboard = () => {
         {/* Map Card */}
         <Card className="h-[500px] overflow-hidden">
           <CardHeader className="pb-2">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <CardTitle>Facility Network Map</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                {mockFacilities.length} facilities, {totalWorkers} workers total
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex items-center gap-1 text-muted-foreground"
+                  onClick={() => setShowMapFilters(!showMapFilters)}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {showMapFilters ? 'Hide Filters' : 'Show Filters'}
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  {mockFacilities.length} facilities, {totalWorkers} workers total
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -169,48 +181,69 @@ const NetworkDashboard = () => {
               selectedFacility={selectedFacility}
               onSelectFacility={setSelectedFacility}
             />
-            <div className="absolute bottom-4 left-4 w-72 bg-background/80 backdrop-blur-sm p-4 rounded-md border shadow-sm">
-              <div className="mb-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Max Radius (mi)</span>
-                  <span>{maxRadius}</span>
+
+            {showMapFilters && (
+              <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Distance Filter (mi)</span>
+                    <span>{maxRadius}</span>
+                  </div>
+                  <Slider
+                    value={[maxRadius]}
+                    min={5}
+                    max={50}
+                    step={1}
+                    onValueChange={(value) => setMaxRadius(value[0])}
+                    className="my-2"
+                  />
                 </div>
-                <div className="h-1.5 w-full bg-gray-200 rounded-full">
-                  <div
-                    className="h-1.5 bg-primary rounded-full"
-                    style={{ width: `${(maxRadius / 50) * 100}%` }}
-                  ></div>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="50"
-                  step="1"
-                  value={maxRadius}
-                  onChange={(e) => setMaxRadius(parseInt(e.target.value))}
-                  className="w-full h-2 mt-2"
-                />
-              </div>
-              <div className="mt-4">
-                <div className="font-medium text-sm mb-1">Show Facilities</div>
-                <div className="space-y-1">
-                  {mockFacilities.map((facility) => (
-                    <div key={facility.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`facility-${facility.id}`}
-                        checked={visibleFacilities.includes(facility.id)}
-                        onChange={() => toggleFacilityVisibility(facility.id)}
-                        className="mr-2 h-4 w-4 rounded border-gray-300"
-                      />
-                      <label htmlFor={`facility-${facility.id}`} className="text-sm">
-                        {facility.name}
-                      </label>
-                    </div>
-                  ))}
+                <div>
+                  <div className="font-medium text-sm mb-1">Show Facilities</div>
+                  <div className="space-y-1">
+                    {mockFacilities.map((facility) => (
+                      <div key={facility.id} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`facility-${facility.id}`}
+                          checked={visibleFacilities.includes(facility.id)}
+                          onChange={() => toggleFacilityVisibility(facility.id)}
+                          className="mr-2 h-4 w-4 rounded border-gray-300"
+                        />
+                        <label htmlFor={`facility-${facility.id}`} className="text-sm">
+                          {facility.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+            
+            {selectedFacility && (
+              <div className="absolute bottom-4 right-4 w-64 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
+                <h3 className="font-medium">{selectedFacility.name}</h3>
+                <p className="text-sm text-muted-foreground">{selectedFacility.type}</p>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Workers</p>
+                    <p className="font-medium">{selectedFacility.workers}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Utilization</p>
+                    <p className="font-medium">{Math.round(selectedFacility.utilisation * 100)}%</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="mt-2 w-full"
+                  onClick={() => setSelectedFacility(null)}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
