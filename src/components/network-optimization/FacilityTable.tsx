@@ -29,7 +29,7 @@ interface Facility {
 
 interface FacilityTableProps {
   facilities: Facility[];
-  selectedFacilityId: string | undefined;
+  selectedFacilityId?: string | null;
   onSelectFacility: (facility: Facility) => void;
 }
 

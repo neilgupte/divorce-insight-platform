@@ -10,7 +10,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import {
-  Table as TableIcon,
+  TableIcon,
   Maximize,
   ChevronLeft,
   MapPin,
@@ -99,6 +99,11 @@ export default function NetworkDashboard() {
   const [selectedFacility, setSelectedFacility] = useState<Facility|null>(null);
   const [fullscreenMapOpen, setFullscreenMapOpen] = useState(false);
 
+  // Handler for facility selection that properly handles the types
+  const handleSelectFacility = (facility: Facility) => {
+    setSelectedFacility(facility);
+  };
+
   // insight tab
   const [insightType, setInsightType] = useState<Insight["type"]>("network");
 
@@ -140,7 +145,7 @@ export default function NetworkDashboard() {
                   <NetworkMap
                     facilities={facilities}
                     selectedFacility={selectedFacility}
-                    onSelectFacility={setSelectedFacility}
+                    onSelectFacility={handleSelectFacility}
                     layers={{
                       facilities: true,
                       commuteRadii: true,
@@ -231,7 +236,7 @@ export default function NetworkDashboard() {
                 <NetworkMap
                   facilities={facilities}
                   selectedFacility={selectedFacility}
-                  onSelectFacility={setSelectedFacility}
+                  onSelectFacility={handleSelectFacility}
                   layers={{
                     facilities: true,
                     commuteRadii: true,
@@ -255,8 +260,8 @@ export default function NetworkDashboard() {
               <CardContent className="p-0 h-[calc(100%-3.5rem)]">
                 <FacilityTable
                   facilities={facilities}
-                  selectedId={selectedFacility?.id||null}
-                  onSelect={id=>setSelectedFacility(facilities.find(f=>f.id===id)||null)}
+                  selectedFacilityId={selectedFacility?.id}
+                  onSelectFacility={handleSelectFacility}
                 />
               </CardContent>
             </Card>
@@ -286,8 +291,8 @@ export default function NetworkDashboard() {
       ) : (
         <FacilityTable
           facilities={facilities}
-          selectedId={selectedFacility?.id||null}
-          onSelect={id=>setSelectedFacility(facilities.find(f=>f.id===id)||null)}
+          selectedFacilityId={selectedFacility?.id}
+          onSelectFacility={handleSelectFacility}
         />
       )}
 
