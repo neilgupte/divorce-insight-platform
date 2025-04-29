@@ -77,25 +77,25 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
         markers.current.push({ id: f.id, marker: m });
       });
 
-      // draw radius circles
+      // draw radius circles - now just showing one circle with the selected radius
       if (layers.commuteRadii) {
         facilities.forEach((f) => {
           if (!visibleIds.includes(f.id)) return;
-          [10, 20, maxRadius].forEach((mi, idx) => {
-            const sid = `circle-${f.id}-${idx}-${Math.random().toString(36).substring(2, 9)}`;
-            const geo = generateCircle([f.lng, f.lat], mi);
-            map.current!.addSource(sid, { type: "geojson", data: geo });
-            map.current!.addLayer({
-              id: sid,
-              type: "fill",
-              source: sid,
-              paint: {
-                "fill-color": "#4287f5",
-                "fill-opacity": 0.1 * (idx + 1),
-              },
-            });
-            circleLayers.current.push(sid);
+          
+          // Generate a unique ID for this circle
+          const sid = `circle-${f.id}-${Math.random().toString(36).substring(2, 9)}`;
+          const geo = generateCircle([f.lng, f.lat], maxRadius);
+          map.current!.addSource(sid, { type: "geojson", data: geo });
+          map.current!.addLayer({
+            id: sid,
+            type: "fill",
+            source: sid,
+            paint: {
+              "fill-color": "#4287f5",
+              "fill-opacity": 0.3,
+            },
           });
+          circleLayers.current.push(sid);
         });
       }
     });

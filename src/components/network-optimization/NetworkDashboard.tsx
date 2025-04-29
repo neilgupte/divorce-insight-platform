@@ -132,11 +132,6 @@ export default function NetworkDashboard() {
             <DialogContent className="mx-auto mt-8 bg-white rounded-lg shadow-lg max-w-[85vw] w-[85vw] h-[85vh] p-0 overflow-hidden">
               <DialogHeader className="flex justify-between items-center p-4 border-b">
                 <DialogTitle>Full-Screen Map</DialogTitle>
-                <DialogClose asChild>
-                  <Button variant="ghost" size="icon">
-                    <ChevronLeft className="h-5 w-5"/>
-                  </Button>
-                </DialogClose>
               </DialogHeader>
 
               <div className="relative flex h-[calc(100%-56px)]">
