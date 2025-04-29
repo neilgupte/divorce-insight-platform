@@ -212,10 +212,16 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
           // Add successful data event handler to debug loading
           map.current.on("data", (e) => {
             if (e.dataType === "source" || e.dataType === "style") {
-              // Fix: Check for properties before accessing them
-              const sourceInfo = e.dataType === "source" ? 
-                `source: ${e.sourceId || "unknown"}` : 
-                `style: ${e.styleId || "unknown"}`;
+              // Fix: TypeScript-safe way to access properties
+              let sourceInfo = "unknown";
+              
+              if (e.dataType === "source" && "sourceId" in e) {
+                sourceInfo = `source: ${e.sourceId || "unknown"}`;
+              } else if (e.dataType === "style") {
+                // For style events, we don't try to access styleId since it doesn't exist
+                sourceInfo = "style loaded";
+              }
+              
               console.log(`Mapbox ${e.dataType} data loaded: ${sourceInfo}`);
             }
           });
