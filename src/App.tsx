@@ -43,6 +43,11 @@ import { LabourPotentialProvider } from "@/components/labour-potential/LabourPot
 import LabourPotentialWrapper from "@/components/labour-potential/LabourPotentialWrapper";
 import LabourSettings from "@/components/labour-potential/LabourSettings";
 import NetworkOptimization from "@/pages/NetworkOptimization";
+import HiringOptimization from "@/pages/HiringOptimization";
+import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
+import FacilityTableView from "@/components/network-optimization/FacilityTableView";
+import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
+import NetworkSettings from "@/components/network-optimization/NetworkSettings";
 
 const queryClient = new QueryClient();
 
@@ -142,14 +147,10 @@ const App = () => (
                       <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
                     </Route>
 
-                    <Route path="multivariate" element={
-                      <ProtectedRoute>
-                        <div className="p-8">
-                          <h1 className="text-3xl font-bold">Multivariate Optimization</h1>
-                          <p className="mt-4 text-muted-foreground">Coming soon: Complex decision optimization tools.</p>
-                        </div>
-                      </ProtectedRoute>
-                    } />
+                    <Route path="hiring" element={<ProtectedRoute><HiringOptimization /></ProtectedRoute>}>
+                      <Route index element={<Navigate to="/hiring/dashboard" replace />} />
+                      <Route path="dashboard" element={<ProtectedRoute><HiringDashboard /></ProtectedRoute>} />
+                    </Route>
                   </Route>
 
                   <Route path="*" element={<NotFound />} />

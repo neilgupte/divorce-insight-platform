@@ -32,11 +32,11 @@ export const models = [
     path: "/labour-potential",
   },
   {
-    id: "multivariate",
-    name: "Multivariate Optimization",
-    description: "Complex decision optimization engine",
+    id: "hiring",
+    name: "Hiring Optimization",
+    description: "Optimize hiring strategies and talent acquisition",
     icon: GitBranch,
-    path: "/multivariate",
+    path: "/hiring",
   },
   {
     id: "network",
