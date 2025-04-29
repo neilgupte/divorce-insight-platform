@@ -1,66 +1,59 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
 const HiringDashboard = () => {
   const [selectedMarket, setSelectedMarket] = useState("Seattle Metro Area");
-  
+
   // Sample data for hiring levers
-  const hiringLevers = [
-    { 
-      lever: "Base wage increase", 
-      effectiveness: "High", 
-      cost: "High", 
-      partner: "None"
-    },
-    { 
-      lever: "Fringe benefits", 
-      effectiveness: "Low", 
-      cost: "Medium", 
-      partner: "Insurance Partners"
-    },
-    { 
-      lever: "Education/training", 
-      effectiveness: "Medium", 
-      cost: "Medium", 
-      partner: "Local Colleges"
-    },
-    { 
-      lever: "Transport support", 
-      effectiveness: "Medium", 
-      cost: "Low", 
-      partner: "Transit Authority"
-    },
-    { 
-      lever: "Referral drive", 
-      effectiveness: "High", 
-      cost: "Low", 
-      partner: "None"
-    },
-    { 
-      lever: "Marketing campaign", 
-      effectiveness: "High", 
-      cost: "Medium", 
-      partner: "Any Partner" 
-    },
-    { 
-      lever: "Carpool scheme", 
-      effectiveness: "Low", 
-      cost: "Low", 
-      partner: "Transport" 
-    },
-  ];
-  
+  const hiringLevers = [{
+    lever: "Base wage increase",
+    effectiveness: "High",
+    cost: "High",
+    partner: "None"
+  }, {
+    lever: "Fringe benefits",
+    effectiveness: "Low",
+    cost: "Medium",
+    partner: "Insurance Partners"
+  }, {
+    lever: "Education/training",
+    effectiveness: "Medium",
+    cost: "Medium",
+    partner: "Local Colleges"
+  }, {
+    lever: "Transport support",
+    effectiveness: "Medium",
+    cost: "Low",
+    partner: "Transit Authority"
+  }, {
+    lever: "Referral drive",
+    effectiveness: "High",
+    cost: "Low",
+    partner: "None"
+  }, {
+    lever: "Marketing campaign",
+    effectiveness: "High",
+    cost: "Medium",
+    partner: "Any Partner"
+  }, {
+    lever: "Carpool scheme",
+    effectiveness: "Low",
+    cost: "Low",
+    partner: "Transport"
+  }];
+
   // Sample data for CPH chart
-  const cphData = [
-    { year: "2022", cph: 4200 },
-    { year: "2023", cph: 3800 },
-    { year: "2024", cph: 3500 },
-  ];
-  
-  return (
-    <div className="p-6">
+  const cphData = [{
+    year: "2022",
+    cph: 4200
+  }, {
+    year: "2023",
+    cph: 3800
+  }, {
+    year: "2024",
+    cph: 3500
+  }];
+  return <div className="p-6">
       <h1 className="text-3xl font-bold">Hiring Optimization Dashboard</h1>
       <p className="mt-2 text-muted-foreground mb-6">
         Optimize your hiring strategies for maximum effectiveness
@@ -90,38 +83,26 @@ const HiringDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {hiringLevers.map((lever, index) => (
-                    <tr key={index} className="border-b">
+                  {hiringLevers.map((lever, index) => <tr key={index} className="border-b">
                       <td className="p-3 text-sm">{lever.lever}</td>
                       <td className="p-3 text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                          ${lever.effectiveness === "High" ? "bg-green-100 text-green-800" : 
-                            lever.effectiveness === "Medium" ? "bg-blue-100 text-blue-800" : 
-                            "bg-orange-100 text-orange-800"}`}>
+                          ${lever.effectiveness === "High" ? "bg-green-100 text-green-800" : lever.effectiveness === "Medium" ? "bg-blue-100 text-blue-800" : "bg-orange-100 text-orange-800"}`}>
                           {lever.effectiveness}
                         </span>
                       </td>
                       <td className="p-3 text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                          ${lever.cost === "High" ? "bg-red-100 text-red-800" : 
-                            lever.cost === "Medium" ? "bg-orange-100 text-orange-800" : 
-                            "bg-green-100 text-green-800"}`}>
+                          ${lever.cost === "High" ? "bg-red-100 text-red-800" : lever.cost === "Medium" ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800"}`}>
                           {lever.cost}
                         </span>
                       </td>
                       <td className="p-3 text-sm">{lever.partner}</td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </div>
-            <div className="mt-6 flex justify-center">
-              <img 
-                src="/lovable-uploads/6bbf9ea8-717d-4ca6-9baa-ffc9c164dcd5.png" 
-                alt="Company Logo" 
-                className="h-10 opacity-50" 
-              />
-            </div>
+            
           </CardContent>
         </Card>
         
@@ -179,8 +160,6 @@ const HiringDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HiringDashboard;
