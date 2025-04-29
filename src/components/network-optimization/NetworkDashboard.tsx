@@ -1,7 +1,9 @@
+
 // src/components/network-optimization/NetworkDashboard.tsx
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Link } from "react-router-dom";
 
 import {
   Card,
@@ -19,6 +21,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Zap,
   TrendingUp,
@@ -28,6 +31,8 @@ import {
   Users,
   Clock,
   Network,
+  Table as TableIcon,
+  Maximize,
 } from "lucide-react";
 
 // —————— types ——————
@@ -148,7 +153,7 @@ const InsightsPanel: React.FC<{ insights: Insight[] }> = ({ insights }) => {
     <div className="space-y-4">
       {insights.map(ins => (
         <Card key={ins.id} className="shadow-sm">
-          <CardContent className="flex items-start space-x-4">
+          <CardContent className="flex items-start space-x-4 pt-6">
             {icons[ins.type]}
             <div>
               <h3 className="font-medium">{ins.title}</h3>
@@ -188,6 +193,7 @@ const NetworkDashboard: React.FC = () => {
           data: {
             type: "Feature",
             geometry: { type: "Point", coordinates: [f.lng, f.lat] },
+            properties: {} // Add empty properties object to satisfy the GeoJSON type
           },
         });
         map.addLayer({
@@ -245,10 +251,16 @@ const NetworkDashboard: React.FC = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Facility Network Map</CardTitle>
-                {/* you can add your “expand” button here */}
-                <Button variant="outline" size="icon">
-                  <MapPin />
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" asChild>
+                    <Link to="/network/table">
+                      <TableIcon className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <MapPin className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 h-[calc(100%-3rem)]">

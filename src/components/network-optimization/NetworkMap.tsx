@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -58,6 +59,7 @@ const generateCircle = ([lng, lat]: [number, number], radiusMiles: number) => {
       type: "Polygon" as const,
       coordinates: [coords],
     },
+    properties: {} // Add empty properties object to satisfy the GeoJSON type
   };
 };
 
@@ -174,4 +176,3 @@ function getFacilityColor(type: string) {
 }
 
 export default NetworkMap;
-
