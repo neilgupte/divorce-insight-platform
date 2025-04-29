@@ -43,10 +43,6 @@ import { LabourPotentialProvider } from "@/components/labour-potential/LabourPot
 import LabourPotentialWrapper from "@/components/labour-potential/LabourPotentialWrapper";
 import LabourSettings from "@/components/labour-potential/LabourSettings";
 import NetworkOptimization from "@/pages/NetworkOptimization";
-import NetworkDashboard from "@/components/network-optimization/NetworkDashboard";
-import FacilityTableView from "@/components/network-optimization/FacilityTableView";
-import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
-import NetworkSettings from "@/components/network-optimization/NetworkSettings";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +137,9 @@ const App = () => (
                     <Route path="network" element={<ProtectedRoute><NetworkOptimization /></ProtectedRoute>}>
                       <Route index element={<Navigate to="/network/dashboard" replace />} />
                       <Route path="dashboard" element={<ProtectedRoute><NetworkDashboard /></ProtectedRoute>} />
+                      <Route path="table" element={<ProtectedRoute><FacilityTableView /></ProtectedRoute>} />
+                      <Route path="simulation" element={<ProtectedRoute><ScenarioSimulation /></ProtectedRoute>} />
+                      <Route path="settings" element={<ProtectedRoute><NetworkSettings /></ProtectedRoute>} />
                     </Route>
 
                     <Route path="multivariate" element={
