@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -138,9 +137,8 @@ const LabourFunnel: React.FC = () => {
                   height={shape.points[3].y - shape.points[0].y}
                   fill={shape.fill}
                   stroke="#fff"
-                  dataKey="value"
                   name={shape.name}
-                  payload={{
+                  data-payload={{
                     name: shape.name,
                     value: shape.value,
                     displayValue: shape.displayValue,
