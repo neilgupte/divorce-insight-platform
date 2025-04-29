@@ -218,7 +218,7 @@ const NetworkDashboard: React.FC = () => {
 
         {/* right: overview + insights */}
         <div className="w-3/5 flex flex-col gap-6">
-          <Card className="h-[500px] overflow-hidden">
+          <Card className="h-[550px] overflow-hidden">
             <CardHeader>
               <CardTitle>Facility Overview</CardTitle>
               <CardDescription>
