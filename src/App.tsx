@@ -48,6 +48,7 @@ import NetworkDashboard from "@/components/network-optimization/NetworkDashboard
 import FacilityTableView from "@/components/network-optimization/FacilityTableView";
 import ScenarioSimulation from "@/components/network-optimization/ScenarioSimulation";
 import NetworkSettings from "@/components/network-optimization/NetworkSettings";
+import HiringDashboard from "@/components/hiring-optimization/HiringDashboard";
 
 const queryClient = new QueryClient();
 
