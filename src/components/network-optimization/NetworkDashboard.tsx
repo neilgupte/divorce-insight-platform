@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
@@ -8,6 +9,7 @@ import NetworkMap from "./NetworkMap";
 import InsightsPanel from "./InsightsPanel";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import FullscreenMapDialog from "./FullscreenMapDialog";
 
 // Sample data for the charts and facilities
 const networkPerformanceData = [
@@ -99,6 +101,7 @@ const NetworkDashboard = () => {
   const [visibleFacilities, setVisibleFacilities] = useState(
     mockFacilities.map(f => f.id)
   );
+  const [isFullscreenMapOpen, setIsFullscreenMapOpen] = useState(false);
   
   const totalWorkers = mockFacilities.reduce((sum, f) => sum + f.workers, 0);
   const totalNeeded = mockFacilities.reduce((sum, f) => sum + f.neededWorkers, 0);
@@ -135,7 +138,12 @@ const NetworkDashboard = () => {
               Table View
             </Button>
           </Link>
-          <Button variant="outline" className="flex items-center gap-1" size="sm">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-1" 
+            size="sm"
+            onClick={() => setIsFullscreenMapOpen(true)}
+          >
             <Maximize className="h-4 w-4" />
             Expand Map
           </Button>
@@ -155,7 +163,7 @@ const NetworkDashboard = () => {
           </CardHeader>
           <CardContent className="p-0 relative">
             <NetworkMap 
-              facilities={mockFacilities}
+              facilities={mockFacilities.filter(f => visibleFacilities.includes(f.id))}
               layers={{ commuteRadii: true }}
               maxRadius={maxRadius}
               selectedFacility={selectedFacility}
@@ -336,6 +344,15 @@ const NetworkDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Fullscreen Map Dialog */}
+      <FullscreenMapDialog 
+        open={isFullscreenMapOpen} 
+        onOpenChange={setIsFullscreenMapOpen}
+        facilities={mockFacilities}
+        selectedFacility={selectedFacility}
+        onSelectFacility={setSelectedFacility}
+      />
     </div>
   );
 };

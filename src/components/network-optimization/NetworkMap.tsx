@@ -13,6 +13,11 @@ interface Facility {
   type: string;
   lat: number;
   lng: number;
+  utilisation?: number;
+  workers?: number;
+  neededWorkers?: number;
+  marginalValue?: number;
+  laborPoolIndex?: number;
 }
 
 interface NetworkMapProps {
@@ -43,6 +48,11 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     facilities.map((f) => f.id)
   );
 
+  // Update visible IDs when facilities change
+  useEffect(() => {
+    setVisibleIds(facilities.map((f) => f.id));
+  }, [facilities]);
+
   // draw map + markers + circles
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -62,15 +72,35 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       facilities.forEach((f) => {
         const el = document.createElement("div");
         el.className = "facility-marker";
-        el.style.width = "12px";
-        el.style.height = "12px";
+        el.style.width = fullscreen ? "16px" : "12px";
+        el.style.height = fullscreen ? "16px" : "12px";
         el.style.borderRadius = "50%";
-        el.style.backgroundColor = "#4a90e2";
+        el.style.backgroundColor = getFacilityColor(f.type);
         el.style.cursor = "pointer";
+        el.style.border = "2px solid white";
+        el.style.boxShadow = "0 0 4px rgba(0,0,0,0.4)";
+        
+        // If this is the selected facility, make it larger
+        if (selectedFacility && f.id === selectedFacility.id) {
+          el.style.width = fullscreen ? "20px" : "16px";
+          el.style.height = fullscreen ? "20px" : "16px";
+          el.style.backgroundColor = "#4a90e2";
+          el.style.zIndex = "10";
+        }
+
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`
+            <div class="p-2">
+              <strong>${f.name}</strong><br/>
+              <span class="text-sm">${f.type}</span><br/>
+              ${f.workers ? `<span class="text-sm">Workers: ${f.workers}</span><br/>` : ''}
+              ${f.utilisation ? `<span class="text-sm">Utilization: ${Math.round(f.utilisation * 100)}%</span>` : ''}
+            </div>
+          `);
 
         const m = new mapboxgl.Marker(el)
           .setLngLat([f.lng, f.lat])
-          .setPopup(new mapboxgl.Popup().setText(f.name))
+          .setPopup(popup)
           .addTo(map.current!);
 
         el.addEventListener("click", () => onSelectFacility(f));
@@ -80,8 +110,6 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       // draw radius circles - now just showing one circle with the selected radius
       if (layers.commuteRadii) {
         facilities.forEach((f) => {
-          if (!visibleIds.includes(f.id)) return;
-          
           // Generate a unique ID for this circle
           const sid = `circle-${f.id}-${Math.random().toString(36).substring(2, 9)}`;
           const geo = generateCircle([f.lng, f.lat], maxRadius);
@@ -91,8 +119,8 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
             type: "fill",
             source: sid,
             paint: {
-              "fill-color": "#4287f5",
-              "fill-opacity": 0.3,
+              "fill-color": getFacilityColor(f.type, true),
+              "fill-opacity": 0.25,
             },
           });
           circleLayers.current.push(sid);
@@ -104,12 +132,16 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       markers.current.forEach(({ marker }) => marker.remove());
       markers.current = [];
       circleLayers.current.forEach((id) => {
-        map.current?.removeLayer(id);
-        map.current?.removeSource(id);
+        if (map.current?.getLayer(id)) {
+          map.current?.removeLayer(id);
+        }
+        if (map.current?.getSource(id)) {
+          map.current?.removeSource(id);
+        }
       });
       circleLayers.current = [];
     };
-  }, [facilities, layers.commuteRadii, maxRadius, visibleIds]);
+  }, [facilities, layers.commuteRadii, maxRadius, fullscreen, selectedFacility, onSelectFacility]);
 
   return (
     <div className="relative h-full w-full">
@@ -117,6 +149,26 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     </div>
   );
 };
+
+// Get color based on facility type
+function getFacilityColor(type: string, forCircle: boolean = false): string {
+  const baseColors: Record<string, string> = {
+    "Distribution": "#4a90e2", // Blue
+    "Fulfillment": "#50c878", // Green
+    "Storage": "#f5a623",     // Orange
+    "Logistics": "#9b59b6",   // Purple
+    "default": "#95a5a6"      // Gray
+  };
+  
+  const color = baseColors[type] || baseColors.default;
+  
+  // For circles, return a lighter version of the color
+  if (forCircle) {
+    return color;
+  }
+  
+  return color;
+}
 
 // simple circle generator
 function generateCircle(
