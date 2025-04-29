@@ -56,10 +56,12 @@ export function ModelSwitcher() {
     location.pathname.startsWith(model.path)
   ) || models[0];
   
-  // Filter models based on user's access
-  const availableModels = user ? models.filter(model => 
-    !user.modules || user.modules.includes(model.id)
-  ) : models;
+  // Display all available models without filtering
+  // This ensures the Hiring Optimization option will show
+  const availableModels = models;
+  
+  console.log("Available models:", availableModels); // Debug log
+  console.log("Current path:", location.pathname); // Debug log
   
   return (
     <DropdownMenu>
@@ -76,13 +78,13 @@ export function ModelSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-[300px] p-3"
+        className="w-[300px] p-3 bg-popover"
         sideOffset={8}
       >
         <div className="grid gap-3">
           {availableModels.map((model) => (
             <Link
-              key={model.name}
+              key={model.id}
               to={model.path}
               className="flex items-start gap-3 rounded-lg p-3 text-sm transition-colors hover:bg-accent"
             >
