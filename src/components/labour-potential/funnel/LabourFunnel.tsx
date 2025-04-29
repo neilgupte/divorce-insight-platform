@@ -10,9 +10,8 @@ import {
   Tooltip
 } from "recharts";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 
-// Editable stage interface
+// Define a funnel stage
 interface FunnelStage {
   name: string;
   value: number;
@@ -41,14 +40,6 @@ const LabourFunnel: React.FC = () => {
     setStages(updated);
   };
 
-  const getDropPercentage = (i: number): string => {
-    const current = stages[i - 1]?.value;
-    const next = stages[i]?.value;
-    if (!current || !next) return "";
-    const drop = ((current - next) / current) * 100;
-    return `↓ ${drop.toFixed(1)}%`;
-  };
-
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -58,34 +49,42 @@ const LabourFunnel: React.FC = () => {
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <FunnelChart>
-              <Tooltip formatter={(value: number, name: string) => [`${value.toLocaleString()}`, name]} />
+              <Tooltip
+                formatter={(value: number, name: string) => [`${value.toLocaleString()}`, name]}
+              />
               <Funnel
                 dataKey="value"
                 data={stages}
                 isAnimationActive
                 nameKey="name"
               >
+                {/* Funnel segment labels: names and % drop (SVG-safe) */}
                 <LabelList
                   dataKey="name"
                   position="right"
-                  content={({ index }) => (
-                    <div className="text-black text-sm font-medium">
-                      <div>{stages[index].name}</div>
-                      {index > 0 && (
-                        <div className="text-xs text-gray-500">
-                          {getDropPercentage(index)}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  formatter={(name, entry, index) => {
+                    if (index === 0) return name;
+                    const prev = stages[index - 1].value;
+                    const curr = entry.value;
+                    const drop = ((prev - curr) / prev) * 100;
+                    return `${name}\n↓ ${drop.toFixed(1)}%`;
+                  }}
+                  style={{ fill: "#000", fontSize: 12 }}
+                />
+                {/* Funnel segment values inside each shape */}
+                <LabelList
+                  dataKey="value"
+                  position="inside"
+                  formatter={(val) => val.toLocaleString()}
+                  style={{ fill: "#fff", fontSize: 12, fontWeight: 600 }}
                 />
               </Funnel>
             </FunnelChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Editable Inputs */}
-        <div className="grid grid-cols-2 gap-4 mt-6">
+        {/* Editable stage inputs */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           {stages.map((stage, index) => (
             <div key={index} className="flex flex-col gap-1">
               <Input
