@@ -1,238 +1,378 @@
+
 // src/components/network-optimization/NetworkDashboard.tsx
-import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useRef, useState } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { Link } from "react-router-dom";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
-  Building,
-  Clock,
-  Users,
+  Zap,
+  TrendingUp,
+  SlidersHorizontal,
   MapPin,
-  Expand,
-  ChevronLeft,
+  Building,
+  Users,
+  Clock,
+  Network,
+  Table as TableIcon,
+  Maximize,
+  Brain,
+  Info,
 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+
 import NetworkMap from "./NetworkMap";
-import FacilityTable from "./FacilityTable";
 import InsightsPanel from "./InsightsPanel";
 
-export interface Facility {
+// —————— types ——————
+interface Facility {
   id: string;
   name: string;
+  type: string;
   workers: number;
   neededWorkers: number;
-  marginalValue: number;
-  utilisation: number;
-  attrition: number;
-  commuteTime: number;
-  laborPoolIndex: number;
-  type: string;
+  utilisation: number;  // 0-1
+  attrition: number;    // 0-1
+  commuteTime: number;  // mins
   lat: number;
   lng: number;
+  laborPoolIndex: number;
+  marginalValue: number;
 }
 
-// TODO: replace this mock with your real data fetch
+interface Insight {
+  id: string;
+  type: "network" | "facility" | "scenario";
+  title: string;
+  description: string;
+}
+
+interface MapLayers {
+  facilities: boolean;
+  commuteRadii: boolean;
+  populationDensity: boolean;
+  laborHeatmap: boolean;
+}
+
+// —————— mock data ——————
 const mockFacilities: Facility[] = [
-  { id: "1", name: "Downtown Distribution Center", workers: 145, neededWorkers: 15, marginalValue: 0.87, utilisation: 0.91, attrition: 0.12, commuteTime: 28, laborPoolIndex: 0.76, type: "Distribution", lat: 37.7749, lng: -122.4194 },
-  { id: "2", name: "Eastside Fulfillment",             workers: 78,  neededWorkers: 23, marginalValue: 0.65, utilisation: 0.77, attrition: 0.18, commuteTime: 35, laborPoolIndex: 0.62, type: "Fulfillment",   lat: 37.8044, lng: -122.2712 },
-  { id: "3", name: "South Bay Storage",                workers: 92,  neededWorkers: 8,  marginalValue: 0.92, utilisation: 0.89, attrition: 0.08, commuteTime: 22, laborPoolIndex: 0.88, type: "Storage",       lat: 37.3382, lng: -121.8863 },
-  { id: "4", name: "North County Logistics",           workers: 112, neededWorkers: 0,  marginalValue: 0.79, utilisation: 1.00, attrition: 0.15, commuteTime: 31, laborPoolIndex: 0.71, type: "Logistics",     lat: 38.1499, lng: -122.4569 },
-  { id: "5", name: "Central Valley Distribution",      workers: 65,  neededWorkers: 30, marginalValue: 0.58, utilisation: 0.68, attrition: 0.22, commuteTime: 42, laborPoolIndex: 0.55, type: "Distribution", lat: 37.9577, lng: -121.2908 },
+  { id:"1", name:"Downtown Distribution Center", type:"Distribution", workers:145, neededWorkers:15, utilisation:0.91, attrition:0.12, commuteTime:28, lat:37.7749, lng:-122.4194, laborPoolIndex: 0.76, marginalValue: 0.87 },
+  { id:"2", name:"Eastside Fulfillment",         type:"Fulfillment",  workers:78,  neededWorkers:23, utilisation:0.77, attrition:0.18, commuteTime:35, lat:37.8044, lng:-122.2712, laborPoolIndex: 0.62, marginalValue: 0.65 },
+  { id:"3", name:"South Bay Storage",            type:"Storage",      workers:92,  neededWorkers:8,  utilisation:0.89, attrition:0.08, commuteTime:22, lat:37.3382, lng:-121.8863, laborPoolIndex: 0.88, marginalValue: 0.92 },
+  { id:"4", name:"North County Logistics",       type:"Logistics",    workers:112, neededWorkers:0,  utilisation:1.00, attrition:0.15, commuteTime:31, lat:38.1499, lng:-122.4569, laborPoolIndex: 0.71, marginalValue: 0.79 },
+  { id:"5", name:"Central Valley Distribution",  type:"Distribution", workers:65,  neededWorkers:30, utilisation:0.68, attrition:0.22, commuteTime:42, lat:37.9577, lng:-121.2908, laborPoolIndex: 0.55, marginalValue: 0.58 },
 ];
 
-export default function NetworkDashboard() {
-  const navigate = useNavigate();
+const mockInsights: Insight[] = [
+  { id:"i1", type:"network",  title:"High Attrition in Urban Facilities", description:"Urban facilities show 18% higher attrition rates compared to suburban locations. Consider offering enhanced transportation benefits or flexible scheduling options." },
+  { id:"i2", type:"facility", title:"Workforce Gaps Analysis",          description:"Your network has a total shortage of 76 workers. Central Valley Distribution has the largest gap with 30 open positions to fill." },
+  { id:"i3", type:"scenario", title:"Optimization Opportunity",         description:"Shifting 15% of workload from Central Valley to South Bay Storage could reduce overall commute times by 12% and increase network utilization efficiency by 7%." },
+];
 
-  // full-screen dialog state
-  const [showFull, setShowFull] = useState(false);
+// —————— Mapbox token ——————
+mapboxgl.accessToken = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOXBzbXI0eTFjdHoya3IwNng1ZTI4ZHoifQ.hgWIXnSx6HdRC67U2xhdxQ";
 
-  // view: "map" or "table"
-  const [activeView, setActiveView] = useState<"map" | "table">("map");
-  const onView = (v: "map" | "table") => {
-    setActiveView(v);
-    navigate(v === "map" ? "/network/dashboard" : "/network/table");
-  };
-
-  // filters
-  const [maxRadius, setMaxRadius] = useState(30);
-  const [utilThreshold, setUtilThreshold] = useState(0);
-  const [openThreshold, setOpenThreshold] = useState(100);
-  const types = useMemo(() => Array.from(new Set(mockFacilities.map(f => f.type))), []);
-  const [typeFilter, setTypeFilter] = useState<string[]>(types);
-  const toggleType = (t: string) =>
-    setTypeFilter(prev =>
-      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
-    );
-
-  // apply filters
-  const facilities = useMemo(() => {
-    return mockFacilities.filter(f =>
-      typeFilter.includes(f.type) &&
-      f.utilisation * 100 >= utilThreshold &&
-      f.neededWorkers <= openThreshold
-    );
-  }, [utilThreshold, openThreshold, typeFilter]);
-
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
+// —————— subcomponents ——————
+const FacilityTable: React.FC<{
+  facilities: Facility[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}> = ({ facilities, selectedId, onSelect }) => {
+  const [filter, setFilter] = useState("");
+  const filtered = facilities.filter(f =>
+    f.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
-    <div className="p-6 space-y-6">
-      {/* header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Network Optimization</h1>
-          <p className="text-muted-foreground">Optimize your facility network & workforce</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant={activeView==="map"?"default":"outline"} onClick={()=>onView("map")}>
-            <MapPin className="mr-2 h-4 w-4"/>Map View
-          </Button>
-          <Button variant={activeView==="table"?"default":"outline"} onClick={()=>onView("table")}>
-            <Building className="mr-2 h-4 w-4"/>Table View
-          </Button>
-          <Dialog open={showFull} onOpenChange={setShowFull}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="ml-4 flex items-center">
-                <Expand className="mr-2 h-4 w-4"/>Expand Map
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-full max-w-none h-screen">
-              <DialogHeader>
-                <DialogTitle>Full-Screen Map</DialogTitle>
-                <DialogClose asChild>
-                  <Button variant="ghost" size="icon">
-                    <ChevronLeft className="h-5 w-5"/>
-                  </Button>
-                </DialogClose>
-              </DialogHeader>
-              <div className="relative h-[calc(100%-4rem)] mt-4">
-                <NetworkMap
-                  facilities={facilities}
-                  selectedFacility={selectedFacility}
-                  onSelectFacility={setSelectedFacility}
-                  layers={{ facilities: true, commuteRadii: true, populationDensity: false, laborHeatmap: false }}
-                  fullscreen={true}
-                  maxRadius={maxRadius}
-                />
-                {/* full-screen filters */}
-                <div className="absolute bottom-5 left-5 bg-white/90 p-4 rounded shadow z-20 w-64 space-y-4">
-                  {/* Radius */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Max Radius (mi)</span><span>{maxRadius}</span>
-                    </div>
-                    <Slider value={[maxRadius]} min={5} max={50} step={5} onValueChange={v=>setMaxRadius(v[0])}/>
-                  </div>
-                  {/* Util */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Util ≥</span><span>{utilThreshold}%</span>
-                    </div>
-                    <Slider value={[utilThreshold]} min={0} max={100} step={10} onValueChange={v=>setUtilThreshold(v[0])}/>
-                  </div>
-                  {/* Open */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Open ≤</span><span>{openThreshold}</span>
-                    </div>
-                    <Slider value={[openThreshold]} min={0} max={100} step={5} onValueChange={v=>setOpenThreshold(v[0])}/>
-                  </div>
-                  {/* Types */}
-                  <div>
-                    <div className="text-sm font-medium mb-1">Facility Types</div>
-                    <div className="flex flex-wrap gap-2">
-                      {types.map(t=>(
-                        <button key={t} onClick={()=>toggleType(t)}
-                          className={`px-2 py-1 text-xs rounded ${
-                            typeFilter.includes(t) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                          }`}>
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* main */}
-      {activeView==="map" ? (
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="lg:w-[60%] w-full h-[500px]">
-            <NetworkMap
-              facilities={facilities}
-              selectedFacility={selectedFacility}
-              onSelectFacility={setSelectedFacility}
-              layers={{ facilities: true, commuteRadii: true, populationDensity: false, laborHeatmap: false }}
-              maxRadius={maxRadius}
-            />
-          </div>
-          <div className="lg:w-[40%] w-full">
-            <FacilityTable
-              facilities={facilities}
-              selectedFacilityId={selectedFacility?.id}
-              onSelectFacility={setSelectedFacility}
-            />
-          </div>
-        </div>
-      ) : (
-        <FacilityTable
-          facilities={facilities}
-          selectedFacilityId={selectedFacility?.id}
-          onSelectFacility={setSelectedFacility}
+    <div className="flex flex-col h-full">
+      <div className="p-4">
+        <Input
+          placeholder="Search facilities…"
+          value={filter}
+          onChange={e => setFilter(e.currentTarget.value)}
         />
-      )}
-
-      {/* insights */}
-      <InsightsPanel selectedFacility={selectedFacility} facilities={facilities} />
-
-      {/* bottom KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 bg-white rounded shadow">
-          <div className="flex justify-between"><Building className="text-muted-foreground"/>Total Facilities</div>
-          <div className="mt-2 text-2xl font-bold">{facilities.length}</div>
-          <div className="text-xs text-muted-foreground">
-            {facilities.filter(f=>f.utilisation>=0.9).length} high utilization
-          </div>
-        </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="flex justify-between"><Users className="text-muted-foreground"/>Workforce</div>
-          <div className="mt-2 text-2xl font-bold">
-            {facilities.reduce((sum,f)=>sum+f.workers,0)}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {facilities.reduce((sum,f)=>sum+f.neededWorkers,0)} needed
-          </div>
-        </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="flex justify-between"><Clock className="text-muted-foreground"/>Avg Commute</div>
-          <div className="mt-2 text-2xl font-bold">
-            {Math.round(facilities.reduce((s,f)=>s+f.commuteTime,0)/facilities.length)} mins
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {Math.round(facilities.reduce((s,f)=>s+f.attrition,0)/facilities.length*100)}% attrition
-          </div>
-        </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="flex justify-between"><MapPin className="text-muted-foreground"/>Efficiency</div>
-          <div className="mt-2 text-2xl font-bold">
-            {Math.round(facilities.reduce((s,f)=>s+f.marginalValue,0)/facilities.length*100)}%
-          </div>
-          <div className="text-xs text-muted-foreground">
-            +2.5% last quarter
-          </div>
-        </div>
+      </div>
+      <div className="flex-1 overflow-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Facility</TableHead>
+              <TableHead className="text-right">Workers</TableHead>
+              <TableHead className="text-right">Needed</TableHead>
+              <TableHead className="text-right">Util.</TableHead>
+              <TableHead className="text-right">Attr.</TableHead>
+              <TableHead className="text-right">Commute</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map(f => (
+              <TableRow
+                key={f.id}
+                className={`cursor-pointer ${f.id === selectedId ? "bg-accent/20" : ""}`}
+                onClick={() => onSelect(f.id)}
+              >
+                <TableCell>
+                  <div className="font-medium">{f.name}</div>
+                  <div className="text-xs text-muted-foreground">{f.type}</div>
+                </TableCell>
+                <TableCell className="text-right">{f.workers}</TableCell>
+                <TableCell className="text-right">{f.neededWorkers}</TableCell>
+                <TableCell className={`text-right ${f.utilisation >= 0.9 ? "text-green-600" : "text-gray-600"}`}>
+                  {(f.utilisation * 100).toFixed(0)}%
+                </TableCell>
+                <TableCell className={`text-right ${f.attrition >= 0.15 ? "text-red-600" : "text-gray-600"}`}>
+                  {(f.attrition * 100).toFixed(0)}%
+                </TableCell>
+                <TableCell className="text-right">{f.commuteTime}m</TableCell>
+              </TableRow>
+            ))}
+            {!filtered.length && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-4 text-center text-sm text-muted-foreground">
+                  No facilities found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
-}
+};
+
+// —————— main component ——————
+const NetworkDashboard: React.FC = () => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mapLayers, setMapLayers] = useState<MapLayers>({
+    facilities: true,
+    commuteRadii: true,
+    populationDensity: false,
+    laborHeatmap: false
+  });
+  const [insightType, setInsightType] = useState<"network" | "facility" | "scenario">("network");
+  const [fullscreenMapOpen, setFullscreenMapOpen] = useState(false);
+
+  // Get the selected facility
+  const selectedFacility = selectedId ? mockFacilities.find(f => f.id === selectedId) || null : null;
+
+  return (
+    <div className="flex flex-col h-screen p-6 space-y-6">
+      {/* header */}
+      <div>
+        <h1 className="text-3xl font-bold">Network Optimization</h1>
+        <p className="text-muted-foreground">
+          Optimize your facility network & workforce distribution
+        </p>
+      </div>
+
+      {/* two-column split */}
+      <div className="flex gap-6 flex-1">
+        {/* left: map */}
+        <div className="w-2/5 h-[900px]">
+          <Card className="h-full overflow-hidden">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Facility Network Map</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" asChild>
+                    <Link to="/network/table">
+                      <TableIcon className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={() => setFullscreenMapOpen(true)}>
+                    <Maximize className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[calc(100%-3rem)]">
+              <NetworkMap 
+                facilities={mockFacilities}
+                selectedFacility={selectedFacility}
+                onSelectFacility={(facility) => setSelectedId(facility.id)}
+                layers={mapLayers}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* right: overview + insights */}
+        <div className="w-3/5 flex flex-col gap-6">
+          <Card className="h-[550px] overflow-hidden">
+            <CardHeader>
+              <CardTitle>Facility Overview</CardTitle>
+              <CardDescription>
+                {mockFacilities.length} facilities,{" "}
+                {mockFacilities.reduce((a, f) => a + f.workers, 0)} workers total
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 h-[calc(100%-3.5rem)]">
+              <FacilityTable
+                facilities={mockFacilities}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Insights & Recommendations</CardTitle>
+              <div className="flex space-x-2 sm:hidden">
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("network")}>
+                  <Zap className={`h-5 w-5 ${insightType === 'network' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("facility")}>
+                  <TrendingUp className={`h-5 w-5 ${insightType === 'facility' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("scenario")}>
+                  <SlidersHorizontal className={`h-5 w-5 ${insightType === 'scenario' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+              </div>
+              <div className="hidden sm:flex space-x-2">
+                <Button 
+                  variant={insightType === "network" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("network")}
+                >
+                  Network Insights
+                </Button>
+                <Button
+                  variant={insightType === "facility" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("facility")}
+                >
+                  Facility Analysis
+                </Button>
+                <Button
+                  variant={insightType === "scenario" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("scenario")}
+                >
+                  Run Scenario
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <InsightsPanel 
+                selectedFacility={selectedFacility} 
+                facilities={mockFacilities}
+                initialInsightType={insightType}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* KPI summary pinned at bottom */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex justify-between items-center pb-2">
+            <CardTitle className="text-sm">Total Facilities</CardTitle>
+            <Building className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold">{mockFacilities.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {mockFacilities.filter((f) => f.utilisation >= 0.9).length} at high utilization
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex justify-between items-center pb-2">
+            <CardTitle className="text-sm">Workforce</CardTitle>
+            <Users className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold">
+              {mockFacilities.reduce((sum, f) => sum + f.workers, 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {mockFacilities.reduce((sum, f) => sum + f.neededWorkers, 0)} additional needed
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex justify-between items-center pb-2">
+            <CardTitle className="text-sm">Avg Commute Time</CardTitle>
+            <Clock className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold">
+              {Math.round(
+                mockFacilities.reduce((sum, f) => sum + f.commuteTime, 0) /
+                  mockFacilities.length
+              )}{" "}
+              mins
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {Math.round(
+                (mockFacilities.reduce((sum, f) => sum + f.attrition, 0) /
+                  mockFacilities.length) *
+                  100
+              )}
+              % avg attrition
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex justify-between items-center pb-2">
+            <CardTitle className="text-sm">Network Efficiency</CardTitle>
+            <Network className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold">
+              {Math.round(
+                (mockFacilities.reduce((sum, f) => sum + f.workers * f.utilisation, 0) /
+                  mockFacilities.reduce((sum, f) => sum + f.workers, 0)) *
+                  100
+              )}
+              %
+            </div>
+            <p className="text-xs text-muted-foreground">+2.5% from last quarter</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Fullscreen Map Dialog */}
+      <Dialog open={fullscreenMapOpen} onOpenChange={setFullscreenMapOpen}>
+        <DialogContent className="max-w-screen-lg w-[90vw] h-[80vh] p-0">
+          <div className="h-full">
+            <NetworkMap 
+              facilities={mockFacilities}
+              selectedFacility={selectedFacility}
+              onSelectFacility={(facility) => setSelectedId(facility.id)}
+              layers={mapLayers}
+              fullscreen={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default NetworkDashboard;
