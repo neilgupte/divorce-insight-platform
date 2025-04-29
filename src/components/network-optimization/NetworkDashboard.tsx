@@ -174,14 +174,18 @@ const NetworkDashboard = () => {
             </div>
           </CardHeader>
           <CardContent className="p-0 relative">
-            <NetworkMap 
-              facilities={mockFacilities.filter(f => visibleFacilities.includes(f.id))}
-              layers={{ commuteRadii: true }}
-              maxRadius={maxRadius}
-              selectedFacility={selectedFacility}
-              onSelectFacility={setSelectedFacility}
-            />
+            {/* Ensure map container has proper height */}
+            <div className="h-full w-full">
+              <NetworkMap 
+                facilities={mockFacilities.filter(f => visibleFacilities.includes(f.id))}
+                layers={{ commuteRadii: true }}
+                maxRadius={maxRadius}
+                selectedFacility={selectedFacility}
+                onSelectFacility={setSelectedFacility}
+              />
+            </div>
 
+            {/* Map filters */}
             {showMapFilters && (
               <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
                 <div className="mb-4">
@@ -220,6 +224,7 @@ const NetworkDashboard = () => {
               </div>
             )}
             
+            {/* Selected facility panel */}
             {selectedFacility && (
               <div className="absolute bottom-4 right-4 w-64 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
                 <h3 className="font-medium">{selectedFacility.name}</h3>
