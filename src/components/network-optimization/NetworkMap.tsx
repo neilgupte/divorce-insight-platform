@@ -92,7 +92,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v11",
+        style: "mapbox://styles/mapbox/streets-v12",
         center: [-122.4194, 37.7749],
         zoom: 9,
       });
