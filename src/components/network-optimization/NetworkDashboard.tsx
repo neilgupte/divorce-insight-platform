@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Map, Table, Maximize, SlidersHorizontal } from "lucide-react";
+import { Search, Map, Table, Maximize, SlidersHorizontal, X } from "lucide-react";
 import NetworkMap from "./NetworkMap";
 import InsightsPanel from "./InsightsPanel";
 import { Link } from "react-router-dom";
@@ -134,6 +135,10 @@ const NetworkDashboard = () => {
     setShowMapFilters(prev => !prev);
   };
 
+  const closeMapFilters = () => {
+    setShowMapFilters(false);
+  };
+
   const toggleMapLayer = (layer: keyof typeof mapLayers) => {
     setMapLayers(prev => ({
       ...prev,
@@ -212,6 +217,17 @@ const NetworkDashboard = () => {
             {/* Map filters - Positioned as an overlay within the map area */}
             {showMapFilters && (
               <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm z-10">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-sm font-medium">Map Filters</h4>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0" 
+                    onClick={closeMapFilters}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Distance Filter (mi)</span>
