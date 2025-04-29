@@ -246,7 +246,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     if (!layers.commuteRadii) return null;
 
     return (
-      <div className={`absolute bottom-5 left-5 p-3 bg-white/90 rounded-md shadow-md z-10 ${fullscreen ? 'w-64' : 'w-48'}`}>
+      <div className={`absolute bottom-12 left-5 p-3 bg-white/90 rounded-md shadow-md z-10 ${fullscreen ? 'w-64' : 'w-48'}`}>
         <div className="mb-1 flex justify-between">
           <span className="text-sm font-medium">Max Radius (miles)</span>
           <span className="text-sm font-medium">{maxRadius}</span>
