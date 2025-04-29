@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
@@ -10,6 +11,8 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import FullscreenMapDialog from "./FullscreenMapDialog";
 import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
 
 // Sample data for the charts and facilities
 const networkPerformanceData = [
@@ -103,6 +106,11 @@ const NetworkDashboard = () => {
   );
   const [isFullscreenMapOpen, setIsFullscreenMapOpen] = useState(false);
   const [showMapFilters, setShowMapFilters] = useState(false);
+  const [mapLayers, setMapLayers] = useState({
+    commuteRadii: true,
+    populationDensity: false,
+    laborHeatmap: false
+  });
   
   const totalWorkers = mockFacilities.reduce((sum, f) => sum + f.workers, 0);
   const totalNeeded = mockFacilities.reduce((sum, f) => sum + f.neededWorkers, 0);
@@ -115,6 +123,18 @@ const NetworkDashboard = () => {
     setVisibleFacilities(prev => 
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
     );
+  };
+
+  const handleToggleMapFilter = () => {
+    // Ensure we properly toggle the state instead of causing a reset
+    setShowMapFilters(prev => !prev);
+  };
+
+  const toggleMapLayer = (layer: keyof typeof mapLayers) => {
+    setMapLayers(prev => ({
+      ...prev,
+      [layer]: !prev[layer]
+    }));
   };
 
   return (
@@ -162,7 +182,7 @@ const NetworkDashboard = () => {
                   variant="ghost" 
                   size="sm"
                   className="flex items-center gap-1 text-muted-foreground"
-                  onClick={() => setShowMapFilters(!showMapFilters)}
+                  onClick={handleToggleMapFilter}
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   {showMapFilters ? 'Hide Filters' : 'Show Filters'}
@@ -178,16 +198,16 @@ const NetworkDashboard = () => {
             <div className="h-full w-full">
               <NetworkMap 
                 facilities={mockFacilities.filter(f => visibleFacilities.includes(f.id))}
-                layers={{ commuteRadii: true }}
+                layers={mapLayers}
                 maxRadius={maxRadius}
                 selectedFacility={selectedFacility}
                 onSelectFacility={setSelectedFacility}
               />
             </div>
 
-            {/* Map filters */}
+            {/* Map filters - Now positioned as an overlay within the map area */}
             {showMapFilters && (
-              <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
+              <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm z-10">
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Distance Filter (mi)</span>
@@ -202,9 +222,38 @@ const NetworkDashboard = () => {
                     className="my-2"
                   />
                 </div>
+                <div className="mb-4">
+                  <div className="font-medium text-sm mb-2">Map Layers</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="commute-radii" className="text-sm">Commute Radii</label>
+                      <Switch 
+                        id="commute-radii" 
+                        checked={mapLayers.commuteRadii}
+                        onCheckedChange={() => toggleMapLayer('commuteRadii')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="population-density" className="text-sm">Population Density</label>
+                      <Switch 
+                        id="population-density" 
+                        checked={mapLayers.populationDensity}
+                        onCheckedChange={() => toggleMapLayer('populationDensity')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="labor-heatmap" className="text-sm">Labor Heatmap</label>
+                      <Switch 
+                        id="labor-heatmap" 
+                        checked={mapLayers.laborHeatmap}
+                        onCheckedChange={() => toggleMapLayer('laborHeatmap')}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div>
                   <div className="font-medium text-sm mb-1">Show Facilities</div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
                     {mockFacilities.map((facility) => (
                       <div key={facility.id} className="flex items-center">
                         <input
@@ -226,7 +275,7 @@ const NetworkDashboard = () => {
             
             {/* Selected facility panel */}
             {selectedFacility && (
-              <div className="absolute bottom-4 right-4 w-64 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm">
+              <div className="absolute bottom-4 right-4 w-64 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm z-10">
                 <h3 className="font-medium">{selectedFacility.name}</h3>
                 <p className="text-sm text-muted-foreground">{selectedFacility.type}</p>
                 <div className="grid grid-cols-2 gap-2 mt-2">
