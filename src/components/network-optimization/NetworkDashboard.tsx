@@ -1,5 +1,4 @@
 // src/components/network-optimization/NetworkDashboard.tsx
-
 import React, { useState, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -12,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  LightningBolt,
+  Zap,
   TrendingUp,
   SlidersHorizontal,
   MapPin,
@@ -127,7 +126,7 @@ const FacilityTable: React.FC<{
 // —————— Subcomponent: InsightsPanel ——————
 
 const iconForType: Record<Insight["type"], JSX.Element> = {
-  network: <LightningBolt className="h-5 w-5 text-yellow-500" />,
+  network: <Zap className="h-5 w-5 text-yellow-500" />,
   facility: <TrendingUp className="h-5 w-5 text-blue-500" />,
   scenario: <SlidersHorizontal className="h-5 w-5 text-green-500" />,
 };
@@ -264,11 +263,8 @@ const NetworkDashboard: React.FC = () => {
   // Add markers & circles whenever map or data changes
   useEffect(() => {
     if (!map) return;
-    // clear old layers & markers
     map.on("load", () => {
-      // facility circles & markers
       mockFacilities.forEach((f) => {
-        // circle
         const src = `circle-${f.id}`;
         if (!map.getSource(src)) {
           map.addSource(src, {
@@ -290,7 +286,6 @@ const NetworkDashboard: React.FC = () => {
             },
           });
         }
-        // marker
         const el = document.createElement("div");
         el.className = "facility-marker";
         el.style.width = "12px";
@@ -301,33 +296,26 @@ const NetworkDashboard: React.FC = () => {
         el.style.cursor = "pointer";
         new mapboxgl.Marker(el)
           .setLngLat([f.lng, f.lat])
-          .setPopup(
-            new mapboxgl.Popup({ offset: 25 }).setHTML(
-              `<strong>${f.name}</strong>`
-            )
-          )
+          .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${f.name}</strong>`))
           .addTo(map);
         el.onclick = () => setSelectedId(f.id);
       });
     });
   }, [map]);
 
-  const selected = mockFacilities.find((f) => f.id === selectedId) || null;
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Network Optimization</h1>
-          <p className="text-muted-foreground">
-            Optimize your facility network & workforce distribution
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold">Network Optimization</h1>
+        <p className="text-muted-foreground">
+          Optimize your facility network & workforce distribution
+        </p>
       </div>
 
-      {/* Main columns: map (40%) + table/insights (60%) */}
+      {/* Main columns */}
       <div className="flex gap-6">
+        {/* Map (40%, 900px tall) */}
         <div className="w-2/5 h-[900px]">
           <Card className="h-full overflow-hidden">
             <CardHeader>
@@ -339,8 +327,9 @@ const NetworkDashboard: React.FC = () => {
           </Card>
         </div>
 
+        {/* Right column */}
         <div className="w-3/5 flex flex-col gap-6">
-          {/* Facilities table */}
+          {/* Facility Overview Table */}
           <Card className="h-[400px] overflow-hidden">
             <CardHeader>
               <CardTitle>Facility Overview</CardTitle>
@@ -358,7 +347,7 @@ const NetworkDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Insights */}
+          {/* Insights & Recommendations */}
           <Card>
             <CardHeader>
               <CardTitle>Insights & Recommendations</CardTitle>
