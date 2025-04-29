@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
@@ -13,6 +12,7 @@ import FullscreenMapDialog from "./FullscreenMapDialog";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Sample data for the charts and facilities
 const networkPerformanceData = [
@@ -125,8 +125,12 @@ const NetworkDashboard = () => {
     );
   };
 
-  const handleToggleMapFilter = () => {
-    // Ensure we properly toggle the state instead of causing a reset
+  const handleToggleMapFilter = (e: React.MouseEvent) => {
+    // Prevent any navigation or default behavior
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Toggle the filter state
     setShowMapFilters(prev => !prev);
   };
 
@@ -205,7 +209,7 @@ const NetworkDashboard = () => {
               />
             </div>
 
-            {/* Map filters - Now positioned as an overlay within the map area */}
+            {/* Map filters - Positioned as an overlay within the map area */}
             {showMapFilters && (
               <div className="absolute bottom-4 left-4 w-72 bg-background/90 backdrop-blur-sm p-4 rounded-md border shadow-sm z-10">
                 <div className="mb-4">
