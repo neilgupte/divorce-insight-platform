@@ -1,4 +1,3 @@
-
 // src/components/network-optimization/NetworkMap.tsx
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
@@ -14,36 +13,20 @@ interface Facility {
   type: string;
   lat: number;
   lng: number;
-  workers?: number;
-  neededWorkers?: number;
-  marginalValue?: number;
-  utilisation?: number;
-  attrition?: number;
-  commuteTime?: number;
-  laborPoolIndex?: number;
 }
 
 interface NetworkMapProps {
-  facilities: Facility[];
-  selectedFacility: Facility | null;
-  onSelectFacility: (facility: Facility) => void;
-  layers: { 
-    facilities?: boolean; 
-    commuteRadii?: boolean;
-    populationDensity?: boolean;
-    laborHeatmap?: boolean;
-  };
+  facilities?: Facility[];
+  layers?: { commuteRadii: boolean; /*…*/ };
   fullscreen?: boolean;
-  maxRadius?: number;
+  onSelectFacility?: (f: Facility) => void;
 }
 
 export const NetworkMap: React.FC<NetworkMapProps> = ({
   facilities = [],
-  selectedFacility = null,
   layers = { commuteRadii: true },
   fullscreen = false,
-  onSelectFacility,
-  maxRadius = 30,
+  onSelectFacility = () => {},
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -60,6 +43,9 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
 
+  // radius slider
+  const [maxRadius, setMaxRadius] = useState(30);
+
   // draw map + markers + circles
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -74,7 +60,6 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
     });
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // Wait for map to load style before adding sources and layers
     map.current.on("load", () => {
       // add all facility markers
       facilities.forEach((f) => {
@@ -95,51 +80,13 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
         markers.current.push({ id: f.id, marker: m });
       });
 
-      updateCircles();
-    });
-
-    return () => {
-      // Clean up markers and layers
-      markers.current.forEach(({ marker }) => marker.remove());
-      markers.current = [];
-      
-      if (map.current) {
-        circleLayers.current.forEach((id) => {
-          if (map.current!.getLayer(id)) map.current!.removeLayer(id);
-          if (map.current!.getSource(id)) map.current!.removeSource(id);
-        });
-        map.current.remove();
-        map.current = null;
-      }
-      circleLayers.current = [];
-    };
-  }, [facilities, onSelectFacility]);
-
-  // Update circles when layers or visibility changes
-  const updateCircles = () => {
-    if (!map.current || !map.current.loaded() || !map.current.isStyleLoaded()) {
-      // If the map isn't ready yet, try again in a moment
-      setTimeout(updateCircles, 100);
-      return;
-    }
-    
-    // Remove existing circle layers and sources first
-    circleLayers.current.forEach(id => {
-      if (map.current!.getLayer(id)) map.current!.removeLayer(id);
-      if (map.current!.getSource(id)) map.current!.removeSource(id);
-    });
-    circleLayers.current = [];
-    
-    // Add new circles if commuteRadii layer is enabled
-    if (layers.commuteRadii) {
-      facilities.forEach((f) => {
-        if (!visibleIds.includes(f.id)) return;
-        
-        [10, 20, maxRadius].forEach((mi, idx) => {
-          const sid = `circle-${f.id}-${idx}-${Date.now()}`;  // Ensure unique ID
-          const geo = generateCircle([f.lng, f.lat], mi);
-          
-          try {
+      // draw radius circles
+      if (layers.commuteRadii) {
+        facilities.forEach((f) => {
+          if (!visibleIds.includes(f.id)) return;
+          [10, 20, maxRadius].forEach((mi, idx) => {
+            const sid = `circle-${f.id}-${idx}`;
+            const geo = generateCircle([f.lng, f.lat], mi);
             map.current!.addSource(sid, { type: "geojson", data: geo });
             map.current!.addLayer({
               id: sid,
@@ -151,38 +98,21 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
               },
             });
             circleLayers.current.push(sid);
-          } catch (error) {
-            console.error("Error adding circle:", error);
-          }
+          });
         });
-      });
-    }
-  };
-
-  // Update circles when relevant props change
-  useEffect(() => {
-    if (map.current && map.current.loaded()) {
-      updateCircles();
-    }
-  }, [layers.commuteRadii, maxRadius, visibleIds]);
-
-  // Update marker appearance when selection changes
-  useEffect(() => {
-    markers.current.forEach(({ id, marker }) => {
-      const el = marker.getElement();
-      if (selectedFacility && id === selectedFacility.id) {
-        el.style.width = "16px";
-        el.style.height = "16px";
-        el.style.backgroundColor = "#1a56db";
-        el.style.zIndex = "10";
-      } else {
-        el.style.width = "12px";
-        el.style.height = "12px";
-        el.style.backgroundColor = "#4a90e2";
-        el.style.zIndex = "1";
       }
     });
-  }, [selectedFacility]);
+
+    return () => {
+      markers.current.forEach(({ marker }) => marker.remove());
+      markers.current = [];
+      circleLayers.current.forEach((id) => {
+        map.current?.removeLayer(id);
+        map.current?.removeSource(id);
+      });
+      circleLayers.current = [];
+    };
+  }, [facilities, layers.commuteRadii, maxRadius, visibleIds]);
 
   // **2. Render slider + filter panel together**
   const ControlPanel = () => (
@@ -202,8 +132,7 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
           min={5}
           max={50}
           step={5}
-          onValueChange={(v) => console.log("Radius changed to", v[0])}
-          disabled={true}
+          onValueChange={(v) => setMaxRadius(v[0])}
         />
       </div>
 

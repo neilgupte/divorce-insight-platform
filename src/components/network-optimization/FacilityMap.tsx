@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import NetworkMap from "./NetworkMap";
 
@@ -92,8 +92,8 @@ const mockFacilities: Facility[] = [
 ];
 
 const FacilityMap = () => {
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
-  const [mapLayers, setMapLayers] = useState({
+  const [selectedFacility, setSelectedFacility] = React.useState<Facility | null>(null);
+  const [mapLayers, setMapLayers] = React.useState({
     facilities: true,
     commuteRadii: true,
     populationDensity: true,
