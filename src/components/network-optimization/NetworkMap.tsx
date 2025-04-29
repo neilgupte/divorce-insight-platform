@@ -22,7 +22,7 @@ interface NetworkMapProps {
   onSelectFacility?: (f: Facility) => void;
 }
 
-export const NetworkMap: React.FC<NetworkMapProps> = ({
+const NetworkMap: React.FC<NetworkMapProps> = ({
   facilities = [],
   layers = { commuteRadii: true },
   fullscreen = false,
@@ -33,7 +33,7 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
   const markers = useRef<{ id: string; marker: mapboxgl.Marker }[]>([]);
   const circleLayers = useRef<string[]>([]);
   const { toast } = useToast();
-
+  
   // **1. Visible‐facilities state**
   const [visibleIds, setVisibleIds] = useState<string[]>(
     facilities.map((f) => f.id)
