@@ -99,6 +99,11 @@ export default function NetworkDashboard() {
   const [selectedFacility, setSelectedFacility] = useState<Facility|null>(null);
   const [fullscreenMapOpen, setFullscreenMapOpen] = useState(false);
 
+  // Create a properly typed handler function
+  const handleSelectFacility = (facility: Facility) => {
+    setSelectedFacility(facility);
+  };
+
   // insight tab
   const [insightType, setInsightType] = useState<Insight["type"]>("network");
 
@@ -140,7 +145,7 @@ export default function NetworkDashboard() {
                   <NetworkMap
                     facilities={facilities}
                     selectedFacility={selectedFacility}
-                    onSelectFacility={setSelectedFacility}
+                    onSelectFacility={handleSelectFacility}
                     layers={{
                       commuteRadii: true,
                     }}
@@ -228,7 +233,7 @@ export default function NetworkDashboard() {
                 <NetworkMap
                   facilities={facilities}
                   selectedFacility={selectedFacility}
-                  onSelectFacility={setSelectedFacility}
+                  onSelectFacility={handleSelectFacility}
                   layers={{
                     commuteRadii: true,
                   }}
