@@ -1,9 +1,9 @@
+
 // src/components/network-optimization/NetworkMap.tsx
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useToast } from "@/hooks/use-toast";
-import { Slider } from "@/components/ui/slider";
 
 const MAPBOX_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOXBzbXI0eTFjdHoya3IwNng1ZTI4ZHoifQ.hgWIXnSx6HdRC67U2xhdxQ";
 
@@ -17,15 +17,19 @@ interface Facility {
 
 interface NetworkMapProps {
   facilities?: Facility[];
-  layers?: { commuteRadii: boolean; /*…*/ };
+  layers?: { commuteRadii?: boolean; populationDensity?: boolean; laborHeatmap?: boolean };
+  maxRadius?: number;
   fullscreen?: boolean;
+  selectedFacility?: Facility | null;
   onSelectFacility?: (f: Facility) => void;
 }
 
 const NetworkMap: React.FC<NetworkMapProps> = ({
   facilities = [],
   layers = { commuteRadii: true },
+  maxRadius = 30,
   fullscreen = false,
+  selectedFacility = null,
   onSelectFacility = () => {},
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -38,13 +42,6 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   const [visibleIds, setVisibleIds] = useState<string[]>(
     facilities.map((f) => f.id)
   );
-  const toggleFacility = (id: string) =>
-    setVisibleIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-
-  // radius slider
-  const [maxRadius, setMaxRadius] = useState(30);
 
   // draw map + markers + circles
   useEffect(() => {
@@ -85,7 +82,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
         facilities.forEach((f) => {
           if (!visibleIds.includes(f.id)) return;
           [10, 20, maxRadius].forEach((mi, idx) => {
-            const sid = `circle-${f.id}-${idx}`;
+            const sid = `circle-${f.id}-${idx}-${Math.random().toString(36).substring(2, 9)}`;
             const geo = generateCircle([f.lng, f.lat], mi);
             map.current!.addSource(sid, { type: "geojson", data: geo });
             map.current!.addLayer({
@@ -114,55 +111,9 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     };
   }, [facilities, layers.commuteRadii, maxRadius, visibleIds]);
 
-  // **2. Render slider + filter panel together**
-  const ControlPanel = () => (
-    <div
-      className={`absolute ${
-        fullscreen ? "bottom-12 left-12" : "bottom-12 left-5"
-      } p-4 bg-white/90 rounded shadow-lg z-10 w-64`}
-    >
-      {/* radius slider */}
-      <div className="mb-4">
-        <div className="flex justify-between text-sm font-medium">
-          <span>Max Radius (mi)</span>
-          <span>{maxRadius}</span>
-        </div>
-        <Slider
-          value={[maxRadius]}
-          min={5}
-          max={50}
-          step={5}
-          onValueChange={(v) => setMaxRadius(v[0])}
-        />
-      </div>
-
-      {/* facility filter */}
-      <div>
-        <div className="text-sm font-medium mb-2">Show Facilities</div>
-        <div className="max-h-32 overflow-y-auto space-y-1">
-          {facilities.map((f) => (
-            <label
-              key={f.id}
-              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
-            >
-              <input
-                type="checkbox"
-                checked={visibleIds.includes(f.id)}
-                onChange={() => toggleFacility(f.id)}
-                className="form-checkbox h-4 w-4"
-              />
-              <span className="ml-2">{f.name}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="relative h-full w-full">
       <div ref={mapContainer} className="h-full w-full rounded" />
-      <ControlPanel />
     </div>
   );
 };

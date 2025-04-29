@@ -135,24 +135,21 @@ export default function NetworkDashboard() {
               </DialogHeader>
 
               <div className="relative flex h-[calc(100%-56px)]">
-                {/* big map */}
-                <div className="flex-1">
+                {/* big map - now takes full height */}
+                <div className="flex-1 h-full">
                   <NetworkMap
                     facilities={facilities}
                     selectedFacility={selectedFacility}
                     onSelectFacility={setSelectedFacility}
                     layers={{
-                      facilities: true,
                       commuteRadii: true,
-                      populationDensity: false,
-                      laborHeatmap: false
                     }}
                     fullscreen={true}
                     maxRadius={maxRadius}
                   />
                 </div>
 
-                {/* filter sidebar */}
+                {/* filter sidebar moved completely to right column */}
                 <div className="w-64 bg-white p-4 overflow-auto shadow-inner">
                   {/* Radius */}
                   <div className="mb-4">
@@ -180,15 +177,15 @@ export default function NetworkDashboard() {
                     <div className="text-sm font-medium mb-2">Show Facilities</div>
                     <div className="space-y-2">
                       {facilities.map(f=>(
-                        <label key={f.id} className="flex items-center text-sm">
+                        <div key={f.id} className="flex items-center text-sm">
                           <input
                             type="checkbox"
-                            checked={typeFilter.includes(f.type)}
-                            onChange={()=>toggleType(f.type)}
+                            checked={true}
+                            readOnly
                             className="mr-2"
                           />
                           {f.name}
-                        </label>
+                        </div>
                       ))}
                       {facilities.length===0 && <div className="text-xs text-muted-foreground">No facilities to show</div>}
                     </div>
@@ -233,10 +230,7 @@ export default function NetworkDashboard() {
                   selectedFacility={selectedFacility}
                   onSelectFacility={setSelectedFacility}
                   layers={{
-                    facilities: true,
                     commuteRadii: true,
-                    populationDensity: false,
-                    laborHeatmap: false
                   }}
                   maxRadius={maxRadius}
                 />
@@ -255,8 +249,8 @@ export default function NetworkDashboard() {
               <CardContent className="p-0 h-[calc(100%-3.5rem)]">
                 <FacilityTable
                   facilities={facilities}
-                  selectedId={selectedFacility?.id||null}
-                  onSelect={id=>setSelectedFacility(facilities.find(f=>f.id===id)||null)}
+                  selectedFacilityId={selectedFacility?.id}
+                  onSelectFacility={(facility) => setSelectedFacility(facility)}
                 />
               </CardContent>
             </Card>
@@ -286,8 +280,8 @@ export default function NetworkDashboard() {
       ) : (
         <FacilityTable
           facilities={facilities}
-          selectedId={selectedFacility?.id||null}
-          onSelect={id=>setSelectedFacility(facilities.find(f=>f.id===id)||null)}
+          selectedFacilityId={selectedFacility?.id}
+          onSelectFacility={(facility) => setSelectedFacility(facility)}
         />
       )}
 

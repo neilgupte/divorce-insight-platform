@@ -94,7 +94,6 @@ const mockFacilities: Facility[] = [
 const FacilityMap = () => {
   const [selectedFacility, setSelectedFacility] = React.useState<Facility | null>(null);
   const [mapLayers, setMapLayers] = React.useState({
-    facilities: true,
     commuteRadii: true,
     populationDensity: true,
     laborHeatmap: true
@@ -121,12 +120,6 @@ const FacilityMap = () => {
       </div>
 
       <div className="flex gap-2">
-        <button
-          onClick={() => toggleMapLayer('facilities')}
-          className={`px-3 py-1.5 rounded-md text-sm ${mapLayers.facilities ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-        >
-          Facilities
-        </button>
         <button
           onClick={() => toggleMapLayer('commuteRadii')}
           className={`px-3 py-1.5 rounded-md text-sm ${mapLayers.commuteRadii ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
