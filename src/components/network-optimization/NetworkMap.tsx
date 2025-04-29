@@ -80,15 +80,25 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const circleLayerRefs = useRef<{[key: string]: boolean}>({});
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const mapLoaded = useRef<boolean>(false);
   const { toast } = useToast();
   const [maxRadius, setMaxRadius] = useState<number>(30);
+  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
 
   // Use real data if provided, else fallback to mock
   const displayFacilities = facilities.length > 0 ? facilities : mockFacilities;
 
+  // Handle facility selection
+  const handleFacilitySelect = (facility: Facility) => {
+    setSelectedFacility(facility);
+    if (onSelectFacility) {
+      onSelectFacility(facility);
+    }
+  };
+
   // Function to add or update circles on the map
-  const updateCircles = (selectedFacility?: Facility | null) => {
+  const updateCircles = (facility?: Facility | null) => {
     if (!map.current || !mapLoaded.current || !layers.commuteRadii) return;
 
     // Clear existing circle layers first
@@ -105,47 +115,64 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     // Reset the refs
     circleLayerRefs.current = {};
 
-    const facilitiesToShow = selectedFacility ? [selectedFacility] : displayFacilities;
+    const facilitiesToShow = facility ? [facility] : displayFacilities;
 
     // Add circles for facilities
     facilitiesToShow.forEach((fac) => {
       // Add three concentric circles
       [10, 20, maxRadius].forEach((miles, idx) => {
-        const layerId = `circle-${fac.id}-${miles}`;
+        const layerId = `circle-${fac.id}-${miles}-${idx}`; // Make IDs truly unique
         const sourceId = `src-${layerId}`;
 
-        map.current!.addSource(sourceId, {
-          type: "geojson",
-          data: generateCircle([fac.lng, fac.lat], miles),
-        });
+        // Safety check to avoid duplicate sources
+        if (map.current?.getSource(sourceId)) {
+          return;
+        }
 
-        map.current!.addLayer({
-          id: layerId,
-          type: "fill",
-          source: sourceId,
-          paint: {
-            "fill-color": "#4287f5",
-            "fill-opacity": 0.1 * (idx + 1),
-            "fill-outline-color": "#4287f5",
-          },
-        });
+        try {
+          map.current!.addSource(sourceId, {
+            type: "geojson",
+            data: generateCircle([fac.lng, fac.lat], miles),
+          });
 
-        // Track which layers we've added
-        circleLayerRefs.current[layerId] = true;
+          map.current!.addLayer({
+            id: layerId,
+            type: "fill",
+            source: sourceId,
+            paint: {
+              "fill-color": "#4287f5",
+              "fill-opacity": 0.1 * (idx + 1),
+              "fill-outline-color": "#4287f5",
+            },
+          });
+
+          // Track which layers we've added
+          circleLayerRefs.current[layerId] = true;
+        } catch (error) {
+          console.error(`Error adding layer ${layerId}:`, error);
+        }
       });
     });
   };
 
+  // Setup map
   useEffect(() => {
     if (!mapContainer.current) return;
+    
+    // Clean up previous map instance
     if (map.current) {
       map.current.remove();
       map.current = null;
       mapLoaded.current = false;
     }
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-
+    
+    // Clean up markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+    
     try {
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v12",
@@ -159,12 +186,8 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       map.current.on('style.load', () => {
         mapLoaded.current = true;
         
-        // Now it's safe to add facilities and circles
-        if (!map.current) return;
-        
-        // Add markers for facilities
+        // Now it's safe to add facilities as markers
         displayFacilities.forEach((fac) => {
-          // Add facility marker
           const el = document.createElement("div");
           el.className = "facility-marker";
           el.style.width = "14px";
@@ -182,35 +205,42 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
               )
             )
             .addTo(map.current!);
-
-          el.addEventListener("click", () => onSelectFacility(fac));
+            
+          markersRef.current.push(marker);
+          
+          el.addEventListener("click", () => handleFacilitySelect(fac));
         });
 
         // Add circles if enabled
-        updateCircles();
+        if (layers.commuteRadii) {
+          updateCircles();
+        }
       });
     } catch (e: any) {
       console.error(e);
       toast({ title: "Error loading map", description: e.message, variant: "destructive" });
     }
 
+    // Cleanup function
     return () => {
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
+      
       if (map.current) {
         map.current.remove();
         map.current = null;
         mapLoaded.current = false;
       }
     };
-  }, [displayFacilities]);
+  }, [displayFacilities, toast]); // Only re-create map when facilities change
 
-  // Update circles when commuteRadii layer setting changes or maxRadius changes
+  // Update circles when specific dependencies change
   useEffect(() => {
-    // Only update circles if map is loaded and commuteRadii is enabled
-    if (mapLoaded.current && layers.commuteRadii) {
-      updateCircles();
+    if (mapLoaded.current && map.current && layers.commuteRadii) {
+      updateCircles(selectedFacility);
     }
-  }, [layers.commuteRadii, maxRadius]);
-
+  }, [layers.commuteRadii, maxRadius, selectedFacility]);
+  
   // Render radius control slider if in fullscreen mode and commuteRadii is enabled
   const renderRadiusControl = () => {
     if (!layers.commuteRadii) return null;
