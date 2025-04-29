@@ -20,6 +20,10 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +37,12 @@ import {
   Network,
   Table as TableIcon,
   Maximize,
+  Brain,
+  Info,
 } from "lucide-react";
+
+import NetworkMap from "./NetworkMap";
+import InsightsPanel from "./InsightsPanel";
 
 // —————— types ——————
 interface Facility {
@@ -47,6 +56,8 @@ interface Facility {
   commuteTime: number;  // mins
   lat: number;
   lng: number;
+  laborPoolIndex?: number; // Added for compatibility with InsightsPanel
+  marginalValue?: number;  // Added for compatibility with InsightsPanel
 }
 
 interface Insight {
@@ -56,13 +67,20 @@ interface Insight {
   description: string;
 }
 
+interface MapLayers {
+  facilities: boolean;
+  commuteRadii: boolean;
+  populationDensity: boolean;
+  laborHeatmap: boolean;
+}
+
 // —————— mock data ——————
 const mockFacilities: Facility[] = [
-  { id:"1", name:"Downtown Distribution Center", type:"Distribution", workers:145, neededWorkers:15, utilisation:0.91, attrition:0.12, commuteTime:28, lat:37.7749, lng:-122.4194 },
-  { id:"2", name:"Eastside Fulfillment",         type:"Fulfillment",  workers:78,  neededWorkers:23, utilisation:0.77, attrition:0.18, commuteTime:35, lat:37.8044, lng:-122.2712 },
-  { id:"3", name:"South Bay Storage",            type:"Storage",      workers:92,  neededWorkers:8,  utilisation:0.89, attrition:0.08, commuteTime:22, lat:37.3382, lng:-121.8863 },
-  { id:"4", name:"North County Logistics",       type:"Logistics",    workers:112, neededWorkers:0,  utilisation:1.00, attrition:0.15, commuteTime:31, lat:38.1499, lng:-122.4569 },
-  { id:"5", name:"Central Valley Distribution",  type:"Distribution", workers:65,  neededWorkers:30, utilisation:0.68, attrition:0.22, commuteTime:42, lat:37.9577, lng:-121.2908 },
+  { id:"1", name:"Downtown Distribution Center", type:"Distribution", workers:145, neededWorkers:15, utilisation:0.91, attrition:0.12, commuteTime:28, lat:37.7749, lng:-122.4194, laborPoolIndex: 0.76, marginalValue: 0.87 },
+  { id:"2", name:"Eastside Fulfillment",         type:"Fulfillment",  workers:78,  neededWorkers:23, utilisation:0.77, attrition:0.18, commuteTime:35, lat:37.8044, lng:-122.2712, laborPoolIndex: 0.62, marginalValue: 0.65 },
+  { id:"3", name:"South Bay Storage",            type:"Storage",      workers:92,  neededWorkers:8,  utilisation:0.89, attrition:0.08, commuteTime:22, lat:37.3382, lng:-121.8863, laborPoolIndex: 0.88, marginalValue: 0.92 },
+  { id:"4", name:"North County Logistics",       type:"Logistics",    workers:112, neededWorkers:0,  utilisation:1.00, attrition:0.15, commuteTime:31, lat:38.1499, lng:-122.4569, laborPoolIndex: 0.71, marginalValue: 0.79 },
+  { id:"5", name:"Central Valley Distribution",  type:"Distribution", workers:65,  neededWorkers:30, utilisation:0.68, attrition:0.22, commuteTime:42, lat:37.9577, lng:-121.2908, laborPoolIndex: 0.55, marginalValue: 0.58 },
 ];
 
 const mockInsights: Insight[] = [
@@ -142,96 +160,20 @@ const FacilityTable: React.FC<{
   );
 };
 
-const InsightsPanel: React.FC<{ insights: Insight[] }> = ({ insights }) => {
-  const icons: Record<Insight["type"], JSX.Element> = {
-    network: <Zap className="h-5 w-5 text-yellow-500" />,
-    facility: <TrendingUp className="h-5 w-5 text-blue-500" />,
-    scenario: <SlidersHorizontal className="h-5 w-5 text-green-500" />,
-  };
-
-  return (
-    <div className="space-y-4">
-      {insights.map(ins => (
-        <Card key={ins.id} className="shadow-sm">
-          <CardContent className="flex items-start space-x-4 pt-6">
-            {icons[ins.type]}
-            <div>
-              <h3 className="font-medium">{ins.title}</h3>
-              <p className="text-sm text-muted-foreground">{ins.description}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
 // —————— main component ——————
 const NetworkDashboard: React.FC = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mapLayers, setMapLayers] = useState<MapLayers>({
+    facilities: true,
+    commuteRadii: true,
+    populationDensity: false,
+    laborHeatmap: false
+  });
+  const [insightType, setInsightType] = useState<"network" | "facility" | "scenario">("network");
+  const [fullscreenMapOpen, setFullscreenMapOpen] = useState(false);
 
-  // initialize map once
-  useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: [-122.2712, 37.8044],
-      zoom: 9,
-    });
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
-    mapRef.current = map;
-
-    map.on("load", () => {
-      // add circle layer for each facility
-      mockFacilities.forEach(f => {
-        const src = `circle-${f.id}`;
-        map.addSource(src, {
-          type: "geojson",
-          data: {
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [f.lng, f.lat] },
-            properties: {} // Add empty properties object to satisfy the GeoJSON type
-          },
-        });
-        map.addLayer({
-          id: src,
-          type: "circle",
-          source: src,
-          paint: {
-            "circle-radius": 200,
-            "circle-color": "rgba(66,135,245,0.2)",
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "rgba(66,135,245,0.5)",
-          },
-        });
-
-        // marker
-        const el = document.createElement("div");
-        el.className = "facility-marker";
-        el.style.width = "12px";
-        el.style.height = "12px";
-        el.style.backgroundColor = "#4a90e2";
-        el.style.border = "2px solid white";
-        el.style.borderRadius = "50%";
-        el.style.cursor = "pointer";
-
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([f.lng, f.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${f.name}</strong>`))
-          .addTo(map);
-
-        el.onclick = () => setSelectedId(f.id);
-      });
-    });
-
-    return () => {
-      map.remove();
-      mapRef.current = undefined;
-    };
-  }, []);
+  // Get the selected facility
+  const selectedFacility = selectedId ? mockFacilities.find(f => f.id === selectedId) || null : null;
 
   return (
     <div className="flex flex-col h-screen p-6 space-y-6">
@@ -257,14 +199,19 @@ const NetworkDashboard: React.FC = () => {
                       <TableIcon className="h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button variant="outline" size="icon">
-                    <MapPin className="h-4 w-4" />
+                  <Button variant="outline" size="icon" onClick={() => setFullscreenMapOpen(true)}>
+                    <Maximize className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 h-[calc(100%-3rem)]">
-              <div ref={mapContainer} className="h-full w-full" />
+              <NetworkMap 
+                facilities={mockFacilities}
+                selectedFacility={selectedFacility}
+                onSelectFacility={(facility) => setSelectedId(facility.id)}
+                layers={mapLayers}
+              />
             </CardContent>
           </Card>
         </div>
@@ -289,11 +236,49 @@ const NetworkDashboard: React.FC = () => {
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle>Insights & Recommendations</CardTitle>
+              <div className="flex space-x-2 sm:hidden">
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("network")}>
+                  <Zap className={`h-5 w-5 ${insightType === 'network' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("facility")}>
+                  <TrendingUp className={`h-5 w-5 ${insightType === 'facility' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setInsightType("scenario")}>
+                  <SlidersHorizontal className={`h-5 w-5 ${insightType === 'scenario' ? 'text-primary' : 'text-muted-foreground'}`} />
+                </Button>
+              </div>
+              <div className="hidden sm:flex space-x-2">
+                <Button 
+                  variant={insightType === "network" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("network")}
+                >
+                  Network Insights
+                </Button>
+                <Button
+                  variant={insightType === "facility" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("facility")}
+                >
+                  Facility Analysis
+                </Button>
+                <Button
+                  variant={insightType === "scenario" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInsightType("scenario")}
+                >
+                  Run Scenario
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <InsightsPanel insights={mockInsights} />
+              <InsightsPanel 
+                selectedFacility={selectedFacility} 
+                facilities={mockFacilities}
+                initialInsightType={insightType}
+              />
             </CardContent>
           </Card>
         </div>
@@ -371,6 +356,21 @@ const NetworkDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Fullscreen Map Dialog */}
+      <Dialog open={fullscreenMapOpen} onOpenChange={setFullscreenMapOpen}>
+        <DialogContent className="max-w-screen-lg w-[90vw] h-[80vh] p-0">
+          <div className="h-full">
+            <NetworkMap 
+              facilities={mockFacilities}
+              selectedFacility={selectedFacility}
+              onSelectFacility={(facility) => setSelectedId(facility.id)}
+              layers={mapLayers}
+              fullscreen={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
