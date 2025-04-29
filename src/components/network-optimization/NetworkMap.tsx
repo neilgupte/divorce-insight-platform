@@ -1,11 +1,10 @@
-
+// src/components/network-optimization/NetworkMap.tsx
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 
-// Mapbox API token
 const MAPBOX_TOKEN = "pk.eyJ1Ijoic3BpcmF0ZWNoIiwiYSI6ImNtOXBzbXI0eTFjdHoya3IwNng1ZTI4ZHoifQ.hgWIXnSx6HdRC67U2xhdxQ";
 
 interface Facility {
@@ -16,268 +15,183 @@ interface Facility {
   lng: number;
 }
 
-interface MapLayers {
-  facilities: boolean;
-  commuteRadii: boolean;
-  populationDensity: boolean;
-  laborHeatmap: boolean;
-}
-
 interface NetworkMapProps {
   facilities?: Facility[];
-  selectedFacility?: Facility | null;
-  onSelectFacility?: (facility: Facility) => void;
-  layers?: MapLayers;
+  layers?: { commuteRadii: boolean; /*…*/ };
   fullscreen?: boolean;
+  onSelectFacility?: (f: Facility) => void;
 }
 
-/**
- * Generate a GeoJSON polygon approximating a circle
- * @param center [lng, lat]
- * @param radiusMiles radius in miles
- */
-const generateCircle = ([lng, lat]: [number, number], radiusMiles: number) => {
-  const radiusMeters = radiusMiles * 1609.34;
-  const points = 64;
-  const coords: [number, number][] = [];
-  const earth = 6378137;
-
-  for (let i = 0; i <= points; i++) {
-    const angle = (i * 360) / points;
-    const dx = radiusMeters * Math.cos((angle * Math.PI) / 180);
-    const dy = radiusMeters * Math.sin((angle * Math.PI) / 180);
-    const deltaLat = dy / earth;
-    const deltaLng = dx / (earth * Math.cos((Math.PI * lat) / 180));
-
-    coords.push([
-      lng + (deltaLng * 180) / Math.PI,
-      lat + (deltaLat * 180) / Math.PI,
-    ]);
-  }
-
-  return {
-    type: "Feature" as const,
-    geometry: {
-      type: "Polygon" as const,
-      coordinates: [coords],
-    },
-    properties: {} // Add empty properties object to satisfy the GeoJSON type
-  };
-};
-
-const mockFacilities: Facility[] = [
-  { id: "1", name: "Hub A", type: "Distribution", lat: 37.7749, lng: -122.4194 },
-  { id: "2", name: "Hub B", type: "Fulfillment", lat: 37.8044, lng: -122.2712 },
-  // ... more mocks as needed
-];
-
-const NetworkMap: React.FC<NetworkMapProps> = ({ 
+export const NetworkMap: React.FC<NetworkMapProps> = ({
   facilities = [],
+  layers = { commuteRadii: true },
+  fullscreen = false,
   onSelectFacility = () => {},
-  layers = { facilities: true, commuteRadii: true, populationDensity: false, laborHeatmap: false },
-  fullscreen = false
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const circleLayerRefs = useRef<{[key: string]: boolean}>({});
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const mapLoaded = useRef<boolean>(false);
+  const markers = useRef<{ id: string; marker: mapboxgl.Marker }[]>([]);
+  const circleLayers = useRef<string[]>([]);
   const { toast } = useToast();
-  const [maxRadius, setMaxRadius] = useState<number>(30);
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
 
-  // Use real data if provided, else fallback to mock
-  const displayFacilities = facilities.length > 0 ? facilities : mockFacilities;
+  // **1. Visible‐facilities state**
+  const [visibleIds, setVisibleIds] = useState<string[]>(
+    facilities.map((f) => f.id)
+  );
+  const toggleFacility = (id: string) =>
+    setVisibleIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
 
-  // Handle facility selection
-  const handleFacilitySelect = (facility: Facility) => {
-    setSelectedFacility(facility);
-    if (onSelectFacility) {
-      onSelectFacility(facility);
-    }
-  };
+  // radius slider
+  const [maxRadius, setMaxRadius] = useState(30);
 
-  // Function to add or update circles on the map
-  const updateCircles = (facility?: Facility | null) => {
-    if (!map.current || !mapLoaded.current || !layers.commuteRadii) return;
-
-    // Clear existing circle layers first
-    Object.keys(circleLayerRefs.current).forEach(layerId => {
-      if (map.current?.getLayer(layerId)) {
-        map.current.removeLayer(layerId);
-      }
-      const sourceId = `src-${layerId}`;
-      if (map.current?.getSource(sourceId)) {
-        map.current.removeSource(sourceId);
-      }
-    });
-    
-    // Reset the refs
-    circleLayerRefs.current = {};
-
-    const facilitiesToShow = facility ? [facility] : displayFacilities;
-
-    // Add circles for facilities
-    facilitiesToShow.forEach((fac) => {
-      // Add three concentric circles
-      [10, 20, maxRadius].forEach((miles, idx) => {
-        const layerId = `circle-${fac.id}-${miles}-${idx}`; // Make IDs truly unique
-        const sourceId = `src-${layerId}`;
-
-        // Safety check to avoid duplicate sources
-        if (map.current?.getSource(sourceId)) {
-          return;
-        }
-
-        try {
-          map.current!.addSource(sourceId, {
-            type: "geojson",
-            data: generateCircle([fac.lng, fac.lat], miles),
-          });
-
-          map.current!.addLayer({
-            id: layerId,
-            type: "fill",
-            source: sourceId,
-            paint: {
-              "fill-color": "#4287f5",
-              "fill-opacity": 0.1 * (idx + 1),
-              "fill-outline-color": "#4287f5",
-            },
-          });
-
-          // Track which layers we've added
-          circleLayerRefs.current[layerId] = true;
-        } catch (error) {
-          console.error(`Error adding layer ${layerId}:`, error);
-        }
-      });
-    });
-  };
-
-  // Setup map
+  // draw map + markers + circles
   useEffect(() => {
     if (!mapContainer.current) return;
-    
-    // Clean up previous map instance
-    if (map.current) {
-      map.current.remove();
-      map.current = null;
-      mapLoaded.current = false;
-    }
-    
-    // Clean up markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-    
-    try {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [-122.4194, 37.7749],
-        zoom: 9,
+    if (map.current) map.current.remove();
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: [-122.4194, 37.7749],
+      zoom: 9,
+    });
+    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    map.current.on("load", () => {
+      // add all facility markers
+      facilities.forEach((f) => {
+        const el = document.createElement("div");
+        el.className = "facility-marker";
+        el.style.width = "12px";
+        el.style.height = "12px";
+        el.style.borderRadius = "50%";
+        el.style.backgroundColor = "#4a90e2";
+        el.style.cursor = "pointer";
+
+        const m = new mapboxgl.Marker(el)
+          .setLngLat([f.lng, f.lat])
+          .setPopup(new mapboxgl.Popup().setText(f.name))
+          .addTo(map.current!);
+
+        el.addEventListener("click", () => onSelectFacility(f));
+        markers.current.push({ id: f.id, marker: m });
       });
 
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-      // Set loaded flag when map style is fully loaded
-      map.current.on('style.load', () => {
-        mapLoaded.current = true;
-        
-        // Now it's safe to add facilities as markers
-        displayFacilities.forEach((fac) => {
-          const el = document.createElement("div");
-          el.className = "facility-marker";
-          el.style.width = "14px";
-          el.style.height = "14px";
-          el.style.borderRadius = "50%";
-          el.style.backgroundColor = getFacilityColor(fac.type);
-          el.style.border = "2px solid white";
-          el.style.cursor = "pointer";
-
-          const marker = new mapboxgl.Marker(el)
-            .setLngLat([fac.lng, fac.lat])
-            .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<h3>${fac.name}</h3><p>Type: ${fac.type}</p>`
-              )
-            )
-            .addTo(map.current!);
-            
-          markersRef.current.push(marker);
-          
-          el.addEventListener("click", () => handleFacilitySelect(fac));
+      // draw radius circles
+      if (layers.commuteRadii) {
+        facilities.forEach((f) => {
+          if (!visibleIds.includes(f.id)) return;
+          [10, 20, maxRadius].forEach((mi, idx) => {
+            const sid = `circle-${f.id}-${idx}`;
+            const geo = generateCircle([f.lng, f.lat], mi);
+            map.current!.addSource(sid, { type: "geojson", data: geo });
+            map.current!.addLayer({
+              id: sid,
+              type: "fill",
+              source: sid,
+              paint: {
+                "fill-color": "#4287f5",
+                "fill-opacity": 0.1 * (idx + 1),
+              },
+            });
+            circleLayers.current.push(sid);
+          });
         });
-
-        // Add circles if enabled
-        if (layers.commuteRadii) {
-          updateCircles();
-        }
-      });
-    } catch (e: any) {
-      console.error(e);
-      toast({ title: "Error loading map", description: e.message, variant: "destructive" });
-    }
-
-    // Cleanup function
-    return () => {
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current = [];
-      
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-        mapLoaded.current = false;
       }
+    });
+
+    return () => {
+      markers.current.forEach(({ marker }) => marker.remove());
+      markers.current = [];
+      circleLayers.current.forEach((id) => {
+        map.current?.removeLayer(id);
+        map.current?.removeSource(id);
+      });
+      circleLayers.current = [];
     };
-  }, [displayFacilities, toast]); // Only re-create map when facilities change
+  }, [facilities, layers.commuteRadii, maxRadius, visibleIds]);
 
-  // Update circles when specific dependencies change
-  useEffect(() => {
-    if (mapLoaded.current && map.current && layers.commuteRadii) {
-      updateCircles(selectedFacility);
-    }
-  }, [layers.commuteRadii, maxRadius, selectedFacility]);
-  
-  // Render radius control slider if in fullscreen mode and commuteRadii is enabled
-  const renderRadiusControl = () => {
-    if (!layers.commuteRadii) return null;
-
-    return (
-      <div className={`absolute bottom-12 left-5 p-3 bg-white/90 rounded-md shadow-md z-10 ${fullscreen ? 'w-64' : 'w-48'}`}>
-        <div className="mb-1 flex justify-between">
-          <span className="text-sm font-medium">Max Radius (miles)</span>
-          <span className="text-sm font-medium">{maxRadius}</span>
+  // **2. Render slider + filter panel together**
+  const ControlPanel = () => (
+    <div
+      className={`absolute ${
+        fullscreen ? "bottom-12 left-12" : "bottom-12 left-5"
+      } p-4 bg-white/90 rounded shadow-lg z-10 w-64`}
+    >
+      {/* radius slider */}
+      <div className="mb-4">
+        <div className="flex justify-between text-sm font-medium">
+          <span>Max Radius (mi)</span>
+          <span>{maxRadius}</span>
         </div>
         <Slider
           value={[maxRadius]}
           min={5}
           max={50}
           step={5}
-          onValueChange={(value) => setMaxRadius(value[0])}
+          onValueChange={(v) => setMaxRadius(v[0])}
         />
       </div>
-    );
-  };
+
+      {/* facility filter */}
+      <div>
+        <div className="text-sm font-medium mb-2">Show Facilities</div>
+        <div className="max-h-32 overflow-y-auto space-y-1">
+          {facilities.map((f) => (
+            <label
+              key={f.id}
+              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
+            >
+              <input
+                type="checkbox"
+                checked={visibleIds.includes(f.id)}
+                onChange={() => toggleFacility(f.id)}
+                className="form-checkbox h-4 w-4"
+              />
+              <span className="ml-2">{f.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="relative h-full w-full">
-      <div ref={mapContainer} className="h-full w-full rounded-md overflow-hidden" />
-      {renderRadiusControl()}
+      <div ref={mapContainer} className="h-full w-full rounded" />
+      <ControlPanel />
     </div>
   );
 };
 
-function getFacilityColor(type: string) {
-  switch (type) {
-    case "Distribution": return "#4a90e2";
-    case "Fulfillment":  return "#50e3c2";
-    case "Storage":      return "#f5a623";
-    case "Logistics":    return "#bd10e0";
-    default:              return "#7ed321";
+// simple circle generator
+function generateCircle(
+  [lng, lat]: [number, number],
+  miles: number
+): GeoJSON.Feature<GeoJSON.Polygon> {
+  const R = 6378137;
+  const pts = 64;
+  const coords: [number, number][] = [];
+  const d = miles * 1609.34;
+  for (let i = 0; i <= pts; i++) {
+    const a = (i * 2 * Math.PI) / pts;
+    const dx = d * Math.cos(a);
+    const dy = d * Math.sin(a);
+    const dLat = dy / R;
+    const dLng = dx / (R * Math.cos((Math.PI * lat) / 180));
+    coords.push([
+      lng + (dLng * 180) / Math.PI,
+      lat + (dLat * 180) / Math.PI,
+    ]);
   }
+  return {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: [coords] },
+    properties: {},
+  };
 }
 
 export default NetworkMap;
