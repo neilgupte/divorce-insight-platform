@@ -1,146 +1,188 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Move, Trash, Pencil } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Trapezoid,
+  Text,
+  Rectangle,
+  Line,
+  Tooltip,
+  TooltipProps,
+} from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
-interface FunnelStage {
-  id: string;
+interface FunnelStageData {
   name: string;
   value: number;
-  isPercentage: boolean;
+  displayValue: string;
   color: string;
+  percentage: number;
 }
 
 const LabourFunnel: React.FC = () => {
-  const [stages, setStages] = useState<FunnelStage[]>([
-    { id: uuidv4(), name: "Total Hireable Market", value: 100000, isPercentage: false, color: "#6366F1" },
-    { id: uuidv4(), name: "Experience/Wage Cut", value: 30, isPercentage: true, color: "#8B5CF6" },
-    { id: uuidv4(), name: "Skill & Availability Cut", value: 10, isPercentage: true, color: "#C084FC" },
-    { id: uuidv4(), name: "Final Readiness Pool", value: 10, isPercentage: true, color: "#E879F9" }
+  const { toast } = useToast();
+
+  // Initial data for the funnel
+  const [stages] = useState<FunnelStageData[]>([
+    {
+      name: "Total Hireable Market",
+      value: 100000,
+      displayValue: "100,000",
+      color: "#6366F1",
+      percentage: 100
+    },
+    {
+      name: "Experience/Wage Cut",
+      value: 70000,
+      displayValue: "70,000",
+      color: "#8B5CF6",
+      percentage: 70
+    },
+    {
+      name: "Skill & Availability Cut",
+      value: 63000,
+      displayValue: "63,000",
+      color: "#C084FC",
+      percentage: 63
+    },
+    {
+      name: "Final Readiness Pool",
+      value: 56700,
+      displayValue: "56,700",
+      color: "#E879F9",
+      percentage: 56.7
+    }
   ]);
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editValue, setEditValue] = useState<number>(0);
-  const [editIsPercentage, setEditIsPercentage] = useState(true);
-
-  const handleEdit = (stage: FunnelStage) => {
-    setEditingId(stage.id);
-    setEditName(stage.name);
-    setEditValue(stage.value);
-    setEditIsPercentage(stage.isPercentage);
-  };
-
-  const handleSave = () => {
-    setStages(stages.map(s => s.id === editingId ? { ...s, name: editName, value: editValue, isPercentage: editIsPercentage } : s));
-    setEditingId(null);
-  };
-
-  const handleDelete = (id: string) => {
-    setStages(stages.filter(s => s.id !== id));
-  };
-
-  const handleAdd = () => {
-    const newStage: FunnelStage = {
-      id: uuidv4(),
-      name: "New Stage",
-      value: 10,
-      isPercentage: true,
-      color: "#D8B4FE"
-    };
-    setStages([...stages, newStage]);
-  };
-
-  const getFinalValues = () => {
-    const values = [stages[0].value];
-    for (let i = 1; i < stages.length; i++) {
-      const prevValue = values[i - 1];
-      const stage = stages[i];
-      const reduced = stage.isPercentage ? prevValue * (1 - stage.value / 100) : prevValue - stage.value;
-      values.push(Math.round(reduced));
+  // Calculate the heights and positions for the funnel segments
+  const calculateFunnelShapes = () => {
+    const height = 300; // Total height of the funnel
+    const width = 400;  // Width of the funnel at the top
+    const minWidth = 200; // Width of the funnel at the bottom
+    
+    const shapes = [];
+    const stageHeight = height / stages.length;
+    
+    for (let i = 0; i < stages.length; i++) {
+      const topWidth = width - ((width - minWidth) * (i / stages.length));
+      const bottomWidth = width - ((width - minWidth) * ((i + 1) / stages.length));
+      const y = i * stageHeight;
+      
+      // Calculate trapezoid points
+      const points = [
+        { x: (width - topWidth) / 2, y: y },
+        { x: (width - topWidth) / 2 + topWidth, y: y },
+        { x: (width - bottomWidth) / 2 + bottomWidth, y: y + stageHeight },
+        { x: (width - bottomWidth) / 2, y: y + stageHeight }
+      ];
+      
+      shapes.push({
+        points,
+        fill: stages[i].color,
+        stroke: "#fff",
+        name: stages[i].name,
+        value: stages[i].value,
+        displayValue: stages[i].displayValue,
+        y: y + stageHeight / 2,
+        labelX: width + 20,
+        valueX: (width - bottomWidth) / 2 + bottomWidth / 2
+      });
     }
-    return values;
+    
+    return shapes;
   };
-
-  const finalValues = getFinalValues();
+  
+  const funnelShapes = calculateFunnelShapes();
+  
+  // Custom tooltip for the funnel chart
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-2 border rounded shadow-md text-sm">
+          <p className="font-medium">{data.name}</p>
+          <p>{data.displayValue} ({data.percentage}%)</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
-      <CardHeader className="pb-2 flex justify-between items-center">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold">Labour Potential Funnel</CardTitle>
-        <Button size="sm" variant="outline" onClick={handleAdd}>
-          <Plus className="w-4 h-4 mr-1" /> Add Stage
-        </Button>
       </CardHeader>
-      <CardContent className="grid grid-cols-[1fr_1fr] gap-x-2 text-xs">
-        <div className="space-y-1">
-          {stages.map((stage, index) => (
-            <div
-              key={stage.id}
-              className="flex items-center justify-between bg-gray-50 px-3 py-1 border-b"
-            >
-              {editingId === stage.id ? (
-                <div className="flex flex-col gap-1 w-full">
-                  <Input
-                    className="text-xs"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                  />
-                  <Input
-                    className="text-xs"
-                    type="number"
-                    value={editValue}
-                    onChange={(e) => setEditValue(Number(e.target.value))}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" onClick={handleSave}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span>{stage.name}</span>
-                  <div className="flex gap-2">
-                    <Pencil
-                      className="w-4 h-4 cursor-pointer text-muted-foreground"
-                      onClick={() => handleEdit(stage)}
-                    />
-                    {index !== 0 && (
-                      <Trash
-                        className="w-4 h-4 cursor-pointer text-muted-foreground"
-                        onClick={() => handleDelete(stage.id)}
-                      />
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-          <div className="bg-gray-300 text-xs font-semibold px-3 py-2 border-t">
-            Total Hireable Market Population
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end space-y-1">
-          {stages.map((stage, index) => (
-            <div
-              key={stage.id}
-              className="w-full px-3 py-1 text-white text-right font-semibold"
-              style={{
-                background: stage.color,
-                clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0% 100%)"
+      <CardContent>
+        <div className="h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              width={500}
+              height={350}
+              margin={{
+                top: 20,
+                right: 150, // Extra space for labels
+                bottom: 20,
+                left: 20,
               }}
             >
-              {finalValues[index].toLocaleString()}{" "}
-              {stage.isPercentage ? `(${stage.value}%)` : ""}
-            </div>
-          ))}
-          <div className="bg-black text-white text-right w-full px-3 py-2 font-semibold text-sm">
-            {finalValues[finalValues.length - 1].toLocaleString()}
-          </div>
+              {funnelShapes.map((shape, index) => (
+                <Trapezoid
+                  key={`trap-${index}`}
+                  x={shape.points[0].x}
+                  y={shape.points[0].y}
+                  upperWidth={shape.points[1].x - shape.points[0].x}
+                  lowerWidth={shape.points[2].x - shape.points[3].x}
+                  height={shape.points[3].y - shape.points[0].y}
+                  fill={shape.fill}
+                  stroke="#fff"
+                  dataKey="value"
+                  name={shape.name}
+                  payload={{
+                    name: shape.name,
+                    value: shape.value,
+                    displayValue: shape.displayValue,
+                    percentage: stages[index].percentage
+                  }}
+                />
+              ))}
+              
+              {/* Labels on the right side */}
+              {funnelShapes.map((shape, index) => (
+                <Text
+                  key={`label-${index}`}
+                  x={shape.labelX}
+                  y={shape.y}
+                  textAnchor="start"
+                  verticalAnchor="middle"
+                  fontSize={12}
+                  fontWeight={500}
+                >
+                  {shape.name}
+                </Text>
+              ))}
+              
+              {/* Value labels in the center of each segment */}
+              {funnelShapes.map((shape, index) => (
+                <Text
+                  key={`value-${index}`}
+                  x={shape.valueX}
+                  y={shape.y}
+                  textAnchor="middle"
+                  verticalAnchor="middle"
+                  fontSize={12}
+                  fontWeight={600}
+                  fill="#fff"
+                >
+                  {shape.displayValue}
+                </Text>
+              ))}
+              
+              <Tooltip content={<CustomTooltip />} />
+            </ComposedChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
