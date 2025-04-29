@@ -56,8 +56,8 @@ interface Facility {
   commuteTime: number;  // mins
   lat: number;
   lng: number;
-  laborPoolIndex?: number; // Added for compatibility with InsightsPanel
-  marginalValue?: number;  // Added for compatibility with InsightsPanel
+  laborPoolIndex: number;
+  marginalValue: number;
 }
 
 interface Insight {

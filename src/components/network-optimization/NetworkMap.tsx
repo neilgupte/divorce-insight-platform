@@ -80,6 +80,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const circleLayerRefs = useRef<{[key: string]: boolean}>({});
+  const mapLoaded = useRef<boolean>(false);
   const { toast } = useToast();
   const [maxRadius, setMaxRadius] = useState<number>(30);
 
@@ -88,7 +89,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
 
   // Function to add or update circles on the map
   const updateCircles = (selectedFacility?: Facility | null) => {
-    if (!map.current || !layers.commuteRadii) return;
+    if (!map.current || !mapLoaded.current || !layers.commuteRadii) return;
 
     // Clear existing circle layers first
     Object.keys(circleLayerRefs.current).forEach(layerId => {
@@ -140,6 +141,7 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
     if (map.current) {
       map.current.remove();
       map.current = null;
+      mapLoaded.current = false;
     }
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -153,9 +155,13 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
 
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-      map.current.on("load", () => {
+      // Set loaded flag when map style is fully loaded
+      map.current.on('style.load', () => {
+        mapLoaded.current = true;
+        
+        // Now it's safe to add facilities and circles
         if (!map.current) return;
-
+        
         // Add markers for facilities
         displayFacilities.forEach((fac) => {
           // Add facility marker
@@ -192,13 +198,17 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
       if (map.current) {
         map.current.remove();
         map.current = null;
+        mapLoaded.current = false;
       }
     };
   }, [displayFacilities]);
 
-  // Update circles when commuteRadii layer setting changes
+  // Update circles when commuteRadii layer setting changes or maxRadius changes
   useEffect(() => {
-    updateCircles();
+    // Only update circles if map is loaded and commuteRadii is enabled
+    if (mapLoaded.current && layers.commuteRadii) {
+      updateCircles();
+    }
   }, [layers.commuteRadii, maxRadius]);
 
   // Render radius control slider if in fullscreen mode and commuteRadii is enabled
