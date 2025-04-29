@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
@@ -31,7 +30,9 @@ const mockFacilities = [
     attrition: 0.12,
     commuteTime: 28,
     lat: 37.7749,
-    lng: -122.4194
+    lng: -122.4194,
+    marginalValue: 0.87,
+    laborPoolIndex: 0.76
   },
   {
     id: "2",
@@ -43,7 +44,9 @@ const mockFacilities = [
     attrition: 0.18,
     commuteTime: 35,
     lat: 37.8044,
-    lng: -122.2712
+    lng: -122.2712,
+    marginalValue: 0.65,
+    laborPoolIndex: 0.62
   },
   {
     id: "3",
@@ -55,7 +58,9 @@ const mockFacilities = [
     attrition: 0.08,
     commuteTime: 22,
     lat: 37.3382,
-    lng: -121.8863
+    lng: -121.8863,
+    marginalValue: 0.92,
+    laborPoolIndex: 0.88
   },
   {
     id: "4",
@@ -67,7 +72,9 @@ const mockFacilities = [
     attrition: 0.15,
     commuteTime: 31,
     lat: 38.1499,
-    lng: -122.4569
+    lng: -122.4569,
+    marginalValue: 0.79,
+    laborPoolIndex: 0.71
   },
   {
     id: "5",
@@ -79,7 +86,9 @@ const mockFacilities = [
     attrition: 0.22,
     commuteTime: 42,
     lat: 37.9577,
-    lng: -121.2908
+    lng: -121.2908,
+    marginalValue: 0.58,
+    laborPoolIndex: 0.55
   }
 ];
 
