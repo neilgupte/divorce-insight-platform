@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Map,
-  Tool,
+  Wrench,
   Layers,
   DollarSign,
   TrendingUp,
@@ -23,7 +23,7 @@ interface HiringSidebarProps {
 const menuItems = [
   { name: "Dashboard", path: "/hiring/dashboard", icon: LayoutDashboard },
   { name: "Location Analyzer", path: "/hiring/location-analyzer", icon: Map },
-  { name: "Hiring Lever Tool", path: "/hiring/hiring-lever-tool", icon: Tool },
+  { name: "Hiring Lever Tool", path: "/hiring/hiring-lever-tool", icon: Wrench },
   { name: "Scenario Builder", path: "/hiring/scenario-builder", icon: Layers },
   { name: "Cost Analysis", path: "/hiring/cost-analysis", icon: DollarSign },
   { name: "Impact Reports", path: "/hiring/impact-reports", icon: TrendingUp },
